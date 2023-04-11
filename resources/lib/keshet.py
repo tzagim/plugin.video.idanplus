@@ -33,7 +33,7 @@ def GetCategoriesList(iconimage):
 	resultJSON = json.loads(match[0])
 	if resultJSON is None or len(resultJSON) < 1:
 		return
-	for menuItem in resultJSON.get("props", {}).get("pageProps", {}).get("menuPrograms", {}).get("menuItems", []):
+	for menuItem in resultJSON.get("props", {}).get("pageProps", {}).get("menu", {}).get("menuItems", []):
 		name = common.GetLabelColor(menuItem["title"], bold=True, color="none")
 		common.addDir(name, "{0}{1}".format(baseUrl, menuItem["url"]), 1, iconimage, infos={"Title": name}, module=module)
 
