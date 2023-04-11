@@ -1,0 +1,580 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: strings.xml conversion\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-07-14 15:55+0300\n"
+"PO-Revision-Date: 2019-07-14 15:55+0300\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz\n"
+"X-Loco-Source-Locale: en\n"
+"X-Loco-Api-Version: 1.0.23 20190612-1"
+
+msgctxt "#30000"
+msgid "מראה"
+msgstr ""
+
+msgctxt "#30001"
+msgid "שיטת מיון רשימות"
+msgstr ""
+
+msgctxt "#30002"
+msgid "כמו באתר"
+msgstr ""
+
+msgctxt "#30003"
+msgid "לפי א-ב"
+msgstr ""
+
+msgctxt "#30004"
+msgid "לחץ לשינוי השיטה:"
+msgstr ""
+
+msgctxt "#30005"
+msgid "בחירת איכות ניגון"
+msgstr ""
+
+msgctxt "#30006"
+msgid "ViewMode - episodes"
+msgstr ""
+
+msgctxt "#30007"
+msgid "ViewMode - videos"
+msgstr ""
+
+msgctxt "#30008"
+msgid "צבע טקסט ערוצים"
+msgstr ""
+
+msgctxt "#30009"
+msgid "צבע טקסט תכניות"
+msgstr ""
+
+msgctxt "#30010"
+msgid "צבע טקסט זמנים"
+msgstr ""
+
+msgctxt "#30011"
+msgid "מעבר לדף הקודם"
+msgstr ""
+
+msgctxt "#30012"
+msgid "מעבר לדף הבא"
+msgstr ""
+
+msgctxt "#30013"
+msgid "מעבר לדף ע\"פ בחירה"
+msgstr ""
+
+msgctxt "#30014"
+msgid "הורדת מדריך שידורים ידנית"
+msgstr ""
+
+msgctxt "#30015"
+msgid "מבנה שם ערוץ"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Channel name - Program name [Times]"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Channel name  [Times]  Program name"
+msgstr ""
+
+msgctxt "#30018"
+msgid "[Times] Program name - Channel name"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Program name  [Times]  Channel name"
+msgstr ""
+
+msgctxt "#30020"
+msgid "מבנה שם תכנית"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Program name - Title"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Title - Program name"
+msgstr ""
+
+msgctxt "#30023"
+msgid "קביעת איכות ניגון"
+msgstr ""
+
+msgctxt "#30024"
+msgid "אוטומטי"
+msgstr ""
+
+msgctxt "#30025"
+msgid "שימוש בכותרות בולטות"
+msgstr ""
+
+msgctxt "#30026"
+msgid "הוספה למועדפי עידן פלוס"
+msgstr ""
+
+msgctxt "#30027"
+msgid "הסרה ממועדפי עידן פלוס"
+msgstr ""
+
+msgctxt "#30028"
+msgid "הפריט נוסף למועדפי עידן פלוס"
+msgstr ""
+
+msgctxt "#30029"
+msgid "הפריט הוסר ממועדפי עידן פלוס"
+msgstr ""
+
+msgctxt "#30030"
+msgid "מדריך שידורים"
+msgstr ""
+
+msgctxt "#30031"
+msgid "הזזה למעלה"
+msgstr ""
+
+msgctxt "#30032"
+msgid "הזזה למטה"
+msgstr ""
+
+msgctxt "#30033"
+msgid "הזזה למיקום"
+msgstr ""
+
+msgctxt "#30034"
+msgid "בחירת מיקום חדש"
+msgstr ""
+
+msgctxt "#30035"
+msgid "הצגת כותרת משנה"
+msgstr ""
+
+msgctxt "#30036"
+msgid "לפי סידור אישי"
+msgstr ""
+
+msgctxt "#30037"
+msgid "שיטת מיון מועדפים"
+msgstr ""
+
+msgctxt "#30038"
+msgid "הצגת בחירת שיטת מיון"
+msgstr ""
+
+msgctxt "#30100"
+msgid "מאקו"
+msgstr ""
+
+msgctxt "#30101"
+msgid "שם משתמש"
+msgstr ""
+
+msgctxt "#30102"
+msgid "סיסמה"
+msgstr ""
+
+msgctxt "#30103"
+msgid "מזהה מכשיר"
+msgstr ""
+
+msgctxt "#30200"
+msgid "רשת"
+msgstr ""
+
+msgctxt "#30400"
+msgid "כאן"
+msgstr ""
+
+msgctxt "#30401"
+msgid "העדפת מקורות יוטיוב"
+msgstr ""
+
+msgctxt "#30403"
+msgid "מספר דפים ברשימה"
+msgstr ""
+
+msgctxt "#30500"
+msgid "14"
+msgstr ""
+
+msgctxt "#30600"
+msgid "טלויזיה"
+msgstr ""
+
+msgctxt "#30601"
+msgid "מיקום ערוצים (0 להסתרה)"
+msgstr ""
+
+msgctxt "#30602"
+msgid "כאן 11"
+msgstr ""
+
+msgctxt "#30603"
+msgid "קשת 12"
+msgstr ""
+
+msgctxt "#30626"
+msgid "קשת 12 - לקויי שמיעה"
+msgstr ""
+
+msgctxt "#30604"
+msgid "רשת 13"
+msgstr ""
+
+msgctxt "#30606"
+msgid "עכשיו 14"
+msgstr ""
+
+msgctxt "#30607"
+msgid "כאן חינוכית 23"
+msgstr ""
+
+msgctxt "#30608"
+msgid "ערוץ 24 החדש"
+msgstr ""
+
+msgctxt "#30609"
+msgid "מכאן 33"
+msgstr ""
+
+msgctxt "#30610"
+msgid "קבלה 66"
+msgstr ""
+
+msgctxt "#30612"
+msgid "הידברות 97"
+msgstr ""
+
+msgctxt "#30613"
+msgid "כנסת 99"
+msgstr ""
+
+msgctxt "#30618"
+msgid "רענון רשימה"
+msgstr ""
+
+msgctxt "#30619"
+msgid "ערוץ הקניות 21"
+msgstr ""
+
+msgctxt "#30621"
+msgid "האח הגדול 26"
+msgstr ""
+
+msgctxt "#30625"
+msgid "האח הגדול 26 - גיבוי"
+msgstr ""
+
+msgctxt "#30622"
+msgid "Ynet Live"
+msgstr ""
+
+msgctxt "#30623"
+msgid "כאן 4K"
+msgstr ""
+
+msgctxt "#30624"
+msgid "וואלה!NEWS"
+msgstr ""
+
+msgctxt "#30629"
+msgid "קבלה - רוסית"
+msgstr ""
+
+msgctxt "#30630"
+msgid "ערוץ 9"
+msgstr ""
+
+msgctxt "#30631"
+msgid "רשת 13 - לקויי שמיעה"
+msgstr ""
+
+msgctxt "#30632"
+msgid "ספורט 5 אתר"
+msgstr ""
+
+msgctxt "#30633"
+msgid "כאן 11 - גיבוי"
+msgstr ""
+
+msgctxt "#30634"
+msgid "רשת 13 - גיבוי"
+msgstr ""
+
+msgctxt "#30635"
+msgid "מוסיוף"
+msgstr ""
+
+msgctxt "#30636"
+msgid "חדשות N12"
+msgstr ""
+
+msgctxt "#30637"
+msgid "כאן 11 - לקויי שמיעה"
+msgstr ""
+
+msgctxt "#30638"
+msgid "כאן 11 - דיילימושן"
+msgstr ""
+
+msgctxt "#30639"
+msgid "כאן חינוכית 23 - גיבוי"
+msgstr ""
+
+msgctxt "#30640"
+msgid "כאן חינוכית 23 - דיילימושן"
+msgstr ""
+
+msgctxt "#30641"
+msgid "מכאן 33 - גיבוי"
+msgstr ""
+
+msgctxt "#30642"
+msgid "מכאן 33 - דיילימושן"
+msgstr ""
+
+msgctxt "#30651"
+msgid "איכות שידור (ריק לאיכות מירבית)"
+msgstr ""
+
+msgctxt "#30652"
+msgid "טלויזיה בלקוח טלויזיה חיה"
+msgstr ""
+
+msgctxt "#30700"
+msgid "רדיו"
+msgstr ""
+
+msgctxt "#30701"
+msgid "מיקום תחנות (0 להסתרה)"
+msgstr ""
+
+msgctxt "#30702"
+msgid "גלגל\"צ"
+msgstr ""
+
+msgctxt "#30703"
+msgid "כאן 88"
+msgstr ""
+
+msgctxt "#30704"
+msgid "ECO 99FM"
+msgstr ""
+
+msgctxt "#30705"
+msgid "102FM רדיו תל אביב"
+msgstr ""
+
+msgctxt "#30706"
+msgid "103FM רדיו ללא הפסקה"
+msgstr ""
+
+msgctxt "#30707"
+msgid "גלי צה\"ל"
+msgstr ""
+
+msgctxt "#30708"
+msgid "כאן ב"
+msgstr ""
+
+msgctxt "#30709"
+msgid "כאן גימל"
+msgstr ""
+
+msgctxt "#30710"
+msgid "כאן תרבות"
+msgstr ""
+
+msgctxt "#30711"
+msgid "כאן קול המוסיקה"
+msgstr ""
+
+msgctxt "#30712"
+msgid "כאן מורשת"
+msgstr ""
+
+msgctxt "#30738"
+msgid "כאן ילדים"
+msgstr ""
+
+msgctxt "#30713"
+msgid "כאן Reka"
+msgstr ""
+
+msgctxt "#30714"
+msgid "כאן مكان"
+msgstr ""
+
+msgctxt "#30715"
+msgid "כאן فارسی"
+msgstr ""
+
+msgctxt "#30720"
+msgid "כאן נוסטלגי"
+msgstr ""
+
+msgctxt "#30722"
+msgid "כאן ים תיכוני"
+msgstr ""
+
+msgctxt "#30716"
+msgid "כאן תל אביב 2019"
+msgstr ""
+
+msgctxt "#30723"
+msgid "רענון רשימה"
+msgstr ""
+
+msgctxt "#30724"
+msgid "90FM רדיו תשעים"
+msgstr ""
+
+msgctxt "#30725"
+msgid "97FM רדיו דרום"
+msgstr ""
+
+msgctxt "#30726"
+msgid "100FM רדיוס"
+msgstr ""
+
+msgctxt "#30727"
+msgid "101FM רדיו ירושלים"
+msgstr ""
+
+msgctxt "#30728"
+msgid "101.5FM רדיו דרום"
+msgstr ""
+
+msgctxt "#30729"
+msgid "102FM רדיו קול הים האדום"
+msgstr ""
+
+msgctxt "#30730"
+msgid "104.5FM רדיו צפון"
+msgstr ""
+
+msgctxt "#30731"
+msgid "107.5FM רדיו חיפה"
+msgstr ""
+
+msgctxt "#30732"
+msgid "רדיו בלקוח טלויזיה חיה"
+msgstr ""
+
+msgctxt "#30733"
+msgid "קול הים התיכון"
+msgstr ""
+
+msgctxt "#30734"
+msgid "Первое Радио 89.1FM"
+msgstr ""
+
+msgctxt "#30737"
+msgid "Лучшее Радио 106.4FM"
+msgstr ""
+
+msgctxt "#30735"
+msgid "ספורט 5 אתר"
+msgstr ""
+
+msgctxt "#30736"
+msgid "91FM רדיו לב המדינה"
+msgstr ""
+
+msgctxt "#30739"
+msgid "93FM קול חי"
+msgstr ""
+
+msgctxt "#30740"
+msgid "קול חי מיוזיק"
+msgstr ""
+
+msgctxt "#30741"
+msgid "קול ברמה"
+msgstr ""
+
+msgctxt "#30742"
+msgid "קול Play"
+msgstr ""
+
+msgctxt "#30743"
+msgid "גלי ישראל"
+msgstr ""
+
+msgctxt "#30744"
+msgid "Ynet Radio"
+msgstr ""
+
+msgctxt "#30800"
+msgid "טלויזיה חיה"
+msgstr ""
+
+msgctxt "#30801"
+msgid "שימוש בטלויזיה חיה"
+msgstr ""
+
+msgctxt "#30802"
+msgid "יצירת קבצים לטלויזיה חיה"
+msgstr ""
+
+msgctxt "#30803"
+msgid "Timeshift"
+msgstr ""
+
+msgctxt "#30804"
+msgid "פתיחת הגדרות טלויזיה חיה"
+msgstr ""
+
+msgctxt "#30805"
+msgid "פתיחת הגדרות IPTV Simple Client"
+msgstr ""
+
+msgctxt "#30806"
+msgid "איזור זמן (ריק למציאה אוטומטית)"
+msgstr ""
+
+msgctxt "#30807"
+msgid "הגדרת IPTV Simple Client לשימוש בקבצי עידן פלוס"
+msgstr ""
+
+msgctxt "#30808"
+msgid "הצגת קיצור לטלויזיה בלקוח טלויזיה חיה"
+msgstr ""
+
+msgctxt "#30809"
+msgid "הצגת קיצור לרדיו בלקוח טלויזיה חיה"
+msgstr ""
+
+msgctxt "#30900"
+msgid "ספורט 5"
+msgstr ""
+
+msgctxt "#31000"
+msgid "ספורט 1"
+msgstr ""
+
+msgctxt "#32000"
+msgid "כללי"
+msgstr ""
+
+msgctxt "#32001"
+msgid "ניגון דרך הרחבת YouTube"
+msgstr ""
+
+msgctxt "#32002"
+msgid "plugin.video.youtube"
+msgstr ""
+
+msgctxt "#32003"
+msgid "plugin.video.MyYoutube"
+msgstr ""
