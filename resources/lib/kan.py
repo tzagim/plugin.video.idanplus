@@ -32,9 +32,6 @@ def GetCategoriesList(iconimage):
 
 def GetSeriesList(url, catName):
 	text = common.GetCF(url, userAgent)
-	#cookies = common.GetCF(url, userAgent)
-	#xbmc.log(cookies, 5)
-	#headers['Cookie'] = cookies
 	#text = common.OpenURL(url, headers=headers)
 	matches = re.compile('<div class="component_sm_item news">(.*?)</a>', re.S).findall(text)
 	for match in matches:
