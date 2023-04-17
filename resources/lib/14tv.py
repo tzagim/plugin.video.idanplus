@@ -17,16 +17,13 @@ def GetCategoriesList(iconimage):
 def GetSeriesList(iconimage):
 	#text = common.OpenURL(baseUrl)
 	text = common.OpenURL('{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl))
-	match = re.compile 	('<main class="content vod-content">(.*?)<!-- End Up Section -->', re.S).findall(text)
-	match = re.compile('<a href="(.*?)" data-id.*?src="(.*?)".*?"tochnit_name">(.*?)</div>', re.S).findall(match[0])
+	match = re.compile 	('<ul class="navbar2">(.*?)</ul>', re.S).findall(text)
+	match = re.compile('<a href=(.*?)>(.*?)</a>', re.S).findall(match[0])
 	grids_arr = []
-	for link, iconimage, name in match[1:]:
-		iconimage = GetQuoteUrl(iconimage)
+	for link, name in match[1:]:
 		#name = common.unquote(common.encode(link[link.rfind('/')+1:], 'utf-8'))
-		name = common.GetLabelColor(common.UnEscapeXML(name.replace('-', ' ')), keyColor="prColor", bold=True)
-		if iconimage.startswith('http') == False:
-			iconimage = '{0}{1}'.format(baseUrl, iconimage)
-		grids_arr.append((name, '{0}{1}'.format(baseUrl, link), iconimage, {"Title": name}))
+		name = common.GetLabelColor(common.UnEscapeXML(name.replace('-', ' ')), keyColor="prColor", bold=True)	
+		grids_arr.append((name, link, iconimage, {"Title": name}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, image, infos in grids_sorted:
 		common.addDir(name, link, 1, common.encode(image, 'utf-8'), infos=infos, module=module)
