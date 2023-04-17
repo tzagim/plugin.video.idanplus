@@ -643,11 +643,21 @@ def GetYouTube(url):
 		video_id = video_id[:video_id.find('?')]
 	return '{0}/play/?video_id={1}'.format(youtubePlugin, video_id)
 
+class TLSAdapter(requests.adapters.HTTPAdapter):
+	def init_poolmanager(self, connections, maxsize, block=False):
+		import ssl, urllib3
+		ctx = ssl.create_default_context()
+		ctx.set_ciphers('DEFAULT@SECLEVEL=1')
+		ctx.check_hostname = False
+		self.poolmanager = urllib3.poolmanager.PoolManager(num_pools=connections, maxsize=maxsize, block=block, ssl_version=ssl.PROTOCOL_TLSv1_2, ssl_context=ctx)	
+														   
 def GetCF(url, ua=None, retries=10, responseMethod='text'):
 	if ua is None:
 		ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
 	scraper = cloudscraper.create_scraper(delay=10)
+	scraper.mount('https://', TLSAdapter())
 	scraper.headers.update({'User-Agent': ua})
+	
 	
 	for i in range(retries):
 		try:
@@ -669,17 +679,3 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 			xbmc.log(str(ex), 3)
 			return None
 	return ''
-	
-	#c = scraper.get(url).cookies
-	#cookies = ";".join(['{0}'.format('{0}={1}'.format(_cookie.name, _cookie.value)) for _cookie in c])
-	#return cookies
-	
-	#headers = {'User-Agent': ua}
-	#headers['Cookie'] = cookies
-	#response = requests.get(url, headers=headers)
-	#text = response.text
-
-	#if responseMethod == 'json':
-	#	j = json.loads(text)
-	#	return j
-	#return text
