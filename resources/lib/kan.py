@@ -29,15 +29,13 @@ def GetCategoriesList(iconimage):
 	common.addDir(name, '', 31, iconimage, infos={"Title": name}, module=module)
 	name = common.GetLabelColor("פודקאסטים לילדים", bold=True, color="none")
 	common.addDir(name, '', 33, iconimage, infos={"Title": name}, module=module)
-	#name = common.GetLabelColor("YT", bold=True, color="none")
-	#common.addDir(name, '', 51, iconimage, infos={"Title": name}, module=module, isFolder=False)
 
 def GetSeriesList(url, catName):
-	text = common.OpenURL(url)
-	#matches = re.compile('class="component_sm_item news w-clearfix.+?href=\'.+?\?list=(.+?)\'.+?url\(\'(.+?)\'.+?<h3.+?>(.*?)</h3>.+?<p.+?>(.*?)</p>', re.S|re.I).findall(text)
-	#for id, iconimage, name, description in matches:
-	#	name = common.GetLabelColor(name.strip(), keyColor="prColor", bold=True)
-	#	common.addDir(name, id, 2, iconimage, infos={"Title": name, "Plot": description}, module=module, moreData='youtube|||{0}'.format(catName), isFolder=False, urlParamsData={'catName': catName})
+	text = common.GetCF(url, userAgent)
+	#cookies = common.GetCF(url, userAgent)
+	#xbmc.log(cookies, 5)
+	#headers['Cookie'] = cookies
+	#text = common.OpenURL(url, headers=headers)
 	matches = re.compile('<div class="component_sm_item news">(.*?)</a>', re.S).findall(text)
 	for match in matches:
 		m = re.compile('<a.*?href="(.+?)".+?"background-image: url\(\'(.+?)\'\);.*?"\s*title="(.*?)">.*?"news_up_txt">(.*?)</div>', re.S).findall(match)
@@ -55,7 +53,8 @@ def GetSeriesList(url, catName):
 		common.addDir(name, id, 2, iconimage, infos={"Title": name, "Plot": description.strip(),'mediatype': 'movie'}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
 
 def GetSubCategoriesList(url, catName):
-	text = common.OpenURL(url)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url)
 	matches = re.compile('class="gallery_sec\s*w-clearfix(.+?)<script>', re.S).findall(text)
 	for match in matches:
 		m = re.compile('img src="(.*?)".*?<h2.*?>(.*?)</h2>.*?<a href=\'(.*?)\'.*?/a>', re.S).findall(match)
@@ -72,7 +71,8 @@ def AddSeries(matches, catName):
 			link = link[i+6:]
 		elif 'page.aspx' in link.lower():
 			try:
-				t = common.OpenURL(link)
+				t = common.GetCF(link, userAgent)
+				#t = common.OpenURL(link)
 				m = re.compile('magazine_info_link w-inline-block\s*"\s*href=\'.*?catid=(.*?)&').findall(t)
 				link = m[0]
 			except:
@@ -90,7 +90,8 @@ def GetEpisodesList(data, iconimage, moreData=''):
 		xbmc.executebuiltin('container.Update({0}/playlist/{1}/)'.format(common.youtubePlugin, catId))
 		return
 	url = '{0}/AppKan/itemJson.ashx?catType=1&catId={1}'.format(baseUrl, catId)
-	episodes = common.OpenURL(url, responseMethod='json')["entry"]
+	episodes = common.GetCF(url, userAgent, responseMethod='json')["entry"]
+	#episodes = common.OpenURL(url, responseMethod='json')["entry"]
 	#episodes = sorted(episodes, key=lambda k: k['published'], reverse=True) 
 	for episode in episodes:
 		if episode["type"]["value"] != "video":
@@ -127,7 +128,8 @@ def GetRadioCategoriesList(iconimage):
 	common.addDir(name, '{0}/live/radio.aspx?stationid=10'.format(baseUrl), 22, common.GetIconFullPath("reka.png"), infos={"Title": name}, module=module)
 
 def GetRadioSeriesList(url, catName):
-	text = common.OpenURL(url)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url)
 	match = re.compile('radio_online_group(.*?)footer_section_1', re.S).findall(text)
 	matches = re.compile('class="radio_online_block.*?<a href=".*?progId=(.+?)" class="radio_online_pict.*?url\(\'(.*?)\'\);".*?title=["\'](.*?)["\']>.*?station_future_name.*?">(.*?)</div>', re.S).findall(match[0])
 	for id, iconimage, name, description in matches:
@@ -142,7 +144,8 @@ def GetRadioEpisodesList(data, iconimage, catName):
 	prevPage = page - pagesPerList if page > pagesPerList else 0
 	while True:
 		url = '{0}/Radio/getMoreItems.aspx?index={1}&progId={2}&subcatid=0&isEng=False'.format(baseUrl, page, progId)
-		text = common.OpenURL(url)
+		text = common.GetCF(url, userAgent)
+		#text = common.OpenURL(url)
 		matches = re.compile('class="radio_program_partgroup">.*?class="radio_program_toggle top_plus.*?<div>(.*?)</div>.*?onclick="playItem\(\'(.*?)\'\)"', re.S).findall(text)
 		for name, itemId in matches:
 			name = common.GetLabelColor(name.strip(), keyColor="chColor")
@@ -162,7 +165,8 @@ def GetRadioEpisodesList(data, iconimage, catName):
 		page += 1
 
 def PlayRadioProgram(url, name='', iconimage='', quality='best'):
-	text = common.OpenURL(url, headers=headers)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url, headers=headers)
 	match = re.compile('iframe src="(.*?)"').findall(text)
 	match = re.compile('(.+)embed').findall(match[0])
 	Play(match[0], name, iconimage, quality)
@@ -171,7 +175,8 @@ def Play(url, name='', iconimage='', quality='best'):
 	u = url.split('|||')
 	url = u[0]
 	if (common.GetAddonSetting("kanPreferYoutube") != "true") and (len(u) > 1) and ('youtube' in url or 'youtu.be' in url):
-		text = common.OpenURL('{0}/Item/?itemId={1}'.format(baseUrl, u[1]))
+		text = common.GetCF('{0}/Item/?itemId={1}'.format(baseUrl, u[1]), userAgent)
+		#text = common.OpenURL('{0}/Item/?itemId={1}'.format(baseUrl, u[1]))
 		match = re.compile('<script class="w-json" type="application/json">(.*?)</script>').findall(text)
 		match = re.compile('src=\\\\"(.*?)\\\\"').findall(match[0])
 		if len(match) == 1:
@@ -201,7 +206,8 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
 	if i > 0:
 		url = url[i:]
 	url = url.replace('HLS/HLS', 'HLS')
-	text = common.OpenURL(url, headers=headers)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url, headers=headers)
 	if 'kanPlayers' in url:
 		match = re.compile("dailymotion.*?video:\s*?'(.*?)'", re.S).findall(text)
 		return 'dailymotion-video/{0}|'.format(match[0])
@@ -214,14 +220,16 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
 		match = re.compile('hls:\s*?"(.*?)"').findall(text)
 		link = match[0]
 	elif 'kaltura' in url:
-		text = common.OpenURL(url, headers=headers)
+		text = common.GetCF(url, userAgent)
+		#text = common.OpenURL(url, headers=headers)
 		match = re.compile('window\.kalturaIframePackageData\s*=\s*{(.*?)};').findall(text)
 		result = json.loads('{'+match[0]+'}')
 		link = result['entryResult']['meta']['hlsStreamUrl']
 		link = common.GetStreams(link, headers=headers, quality=quality)
 	else:
 		match = re.compile("var\s*metadataURL\s*?=\s*?'(.+?)'").findall(text)
-		text = common.OpenURL(match[0].replace('https_streaming=true', 'https_streaming=false'), headers=headers)
+		text = common.GetCF(match[0].replace('https_streaming=true', 'https_streaming=false'), userAgent)
+		#text = common.OpenURL(match[0].replace('https_streaming=true', 'https_streaming=false'), headers=headers)
 		match = re.compile("<SmilURL.*>(.+)</SmilURL>").findall(text)
 		smil = match[0].replace('amp;', '')
 		match = re.compile("<Server priority=['\"]1['\"]>(.+)</Server>").findall(text)
@@ -233,29 +241,44 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
 
 def WatchLive(url, name='', iconimage='', quality='best', type='video'):
 	channels = {
-		'11': '{0}/live/tv.aspx?stationid=2'.format(baseUrl),
-		'11c': '{0}/live/tv.aspx?stationid=23'.format(baseUrl),
-		'23': '{0}/live/tv.aspx?stationid=20'.format(baseUrl),
-		'33': 'https://www.makan.org.il/live/tv.aspx?stationid=25',
-		'kan4K': '{0}/live/tv.aspx?stationid=18'.format(baseUrl),
-		'wfb2019': '{0}/Item/?itemId=53195'.format(baseUrl),
-		'yfb2019': '{0}/Item/?itemId=52450'.format(baseUrl),
-		'bet': '{0}/radio/player.aspx?stationId=3'.format(baseUrl),
-		'gimel': '{0}/radio/player.aspx?stationid=9'.format(baseUrl),
-		'culture': '{0}/radio/player.aspx?stationid=5'.format(baseUrl),
-		'88': '{0}/radio/player.aspx?stationid=4'.format(baseUrl),
-		'moreshet':'{0}/radio/player.aspx?stationid=6'.format(baseUrl),
-		'music': '{0}/radio/player.aspx?stationid=7'.format(baseUrl),
-		'kankids': 'https://www.kankids.org.il/radio/radio-kids.aspx',
-		'reka': '{0}/radio/player.aspx?stationid=10'.format(baseUrl),
-		'makan': '{0}/radio/player.aspx?stationId=13'.format(baseUrl)
+		#'11': '{0}/live/tv.aspx?stationid=2'.format(baseUrl),
+		'11': 'https://kan11.media.kan.org.il/hls/live/2024514/2024514/master.m3u8',
+		#'11c': '{0}/live/tv.aspx?stationid=23'.format(baseUrl),
+		'11c': 'https://kan11sub.media.kan.org.il/hls/live/2024678/2024678/master.m3u8',
+		#'23': '{0}/live/tv.aspx?stationid=20'.format(baseUrl),
+		'23': 'https://kan23.media.kan.org.il/hls/live/2024691/2024691/master.m3u8',
+		#'33': 'https://www.makan.org.il/live/tv.aspx?stationid=25',
+		'33': 'https://makan.media.kan.org.il/hls/live/2024680/2024680/master.m3u8',
+		#'kan4K': '{0}/live/tv.aspx?stationid=18'.format(baseUrl),
+		#'wfb2019': '{0}/Item/?itemId=53195'.format(baseUrl),
+		#'yfb2019': '{0}/Item/?itemId=52450'.format(baseUrl),
+		#'bet': '{0}/radio/player.aspx?stationId=3'.format(baseUrl),
+		'bet': 'https://kanbet.media.kan.org.il/hls/live/2024811/2024811/playlist.m3u8',
+		#'gimel': '{0}/radio/player.aspx?stationid=9'.format(baseUrl),
+		'gimel': 'https://kangimmel.media.kan.org.il/hls/live/2024813/2024813/playlist.m3u8',
+		#'culture': '{0}/radio/player.aspx?stationid=5'.format(baseUrl),
+		'culture': 'https://kantarbut.media.kan.org.il/hls/live/2024816/2024816/playlist.m3u8',
+		#'88': '{0}/radio/player.aspx?stationid=4'.format(baseUrl),
+		'88': 'https://kan88.media.kan.org.il/hls/live/2024812/2024812/playlist.m3u8',
+		#'moreshet':'{0}/radio/player.aspx?stationid=6'.format(baseUrl),
+		'moreshet':'https://kanmoreshet.media.kan.org.il/hls/live/2024814/2024814/playlist.m3u8',
+		#'music': '{0}/radio/player.aspx?stationid=7'.format(baseUrl),
+		'music': 'https://kankolhamusica.media.kan.org.il/hls/live/2024817/2024817/playlist.m3u8',
+		#'kankids': 'https://www.kankids.org.il/radio/radio-kids.aspx',
+		'kankids': '',
+		#'reka': '{0}/radio/player.aspx?stationid=10'.format(baseUrl),
+		'reka': 'https://kanreka.media.kan.org.il/hls/live/2024815/2024815/playlist.m3u8',
+		#'makan': '{0}/radio/player.aspx?stationId=13'.format(baseUrl)
+		'makan': 'https://makanradio.media.kan.org.il/hls/live/2024818/2024818/playlist.m3u8'
 		#'persian': 'http://farsi.kan.org.il/',
 		#'nos': '{0}/radio/radio-nos.aspx'.format(baseUrl),
 		#'oriental': '{0}/radio/oriental.aspx'.format(baseUrl),
 		#'international': '{0}/radio/radio-international.aspx'.format(baseUrl)
 	}
 	channelUrl = channels[url]
-	text = common.OpenURL(channelUrl, headers=headers)
+	#text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(channelUrl, headers=headers)
+	'''
 	if text is None:
 		return
 	if url == 'persian':
@@ -276,6 +299,10 @@ def WatchLive(url, name='', iconimage='', quality='best', type='video'):
 		link = match[0]
 	else:
 		link = GetPlayerKanUrl(match[0], headers=headers, quality=quality)
+	'''
+	#Play(channelUrl, name, iconimage, quality)
+	#link = common.GetKaltura(channelUrl, 2717431, baseUrl, userAgent)
+	link = common.GetStreams(channelUrl, quality=quality)
 	common.PlayStream(link, quality, name, iconimage)
 
 def GetPodcastsList(page, iconimage):
@@ -285,7 +312,8 @@ def GetPodcastsList(page, iconimage):
 	while True:
 		page += 1
 		url = '{0}/podcast/morePrograms.aspx?index={1}'.format(baseUrl, page)
-		text = common.OpenURL(url)
+		text = common.GetCF(url, userAgent)
+		#text = common.OpenURL(url)
 		matches = re.compile('title="(.+?)".+?url\(\'(.+?)\'.+?href=".+?\?progId=(.+?)".+?<p.+?>(.*?)</p>', re.S).findall(text)
 		for name, image, id, description in matches:
 			name = common.GetLabelColor(name.strip(), keyColor="prColor", bold=True)
@@ -304,7 +332,8 @@ def GetPodcastsList(page, iconimage):
 			break
 
 def GetKidsPodcastsList():
-	text = common.OpenURL('https://kankids.azurewebsites.net/page.aspx?landingPageId=1275')
+	text = common.GetCF('https://kankids.azurewebsites.net/page.aspx?landingPageId=1275', userAgent)
+	#text = common.OpenURL('https://kankids.azurewebsites.net/page.aspx?landingPageId=1275')
 	matches = re.compile('class="video_it_full.*?url\(\'(.*?)\'\).+?href=\'.+?\?progId=(.+?)\'.*?sm_il_videotitle">(.*?)<.*?sm_it_videotxt">(.*?)<', re.S|re.I).findall(text)
 	for image, id, name, description in matches:
 		name = common.GetLabelColor(name.strip(), keyColor="prColor", bold=True)
@@ -319,7 +348,8 @@ def GetPodcastEpisodesList(data, iconimage):
 	while True:
 		page += 1
 		url = '{0}/Podcast/getMorePodcasts.aspx?index={1}&leftToRight=0&progId={2}'.format(baseUrl, page, progId)
-		text = common.OpenURL(url)
+		text = common.GetCF(url, userAgent)
+		#text = common.OpenURL(url)
 		matches = re.compile('<iframe src="(.+?)embed.+?<h2.+?>(.+?)</h2>.+?<p.+?>(.*?)</p>', re.S).findall(text)
 		for link, name, description in matches:
 			name = common.GetLabelColor(name.strip(), keyColor="chColor")
@@ -338,7 +368,8 @@ def GetPodcastEpisodesList(data, iconimage):
 			break
 
 def GetArchiveCategoriesList(url, iconimage, catName):
-	text = common.OpenURL(url)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url)
 	matches = re.compile('id="mainNav">(.*?)</ul>', re.S).findall(text)
 	matches = re.compile('<a class="nav-link" href="(.*?)".*?>\s*?(.*?)</a>', re.S).findall(matches[0])
 	for url, name in matches:
@@ -348,7 +379,8 @@ def GetArchiveCategoriesList(url, iconimage, catName):
 		common.addDir(name, 'https://archive.kan.org.il{0}'.format(url), 42, iconimage, infos={"Title": name}, module=module, urlParamsData={'catName': catName})
 
 def GetArchiveSeriesList(url, iconimage, catName):
-	text = common.OpenURL(url)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url)
 	series = re.compile('<div class="archiveItem topImg articlePage">\s*<div class="embed-responsive embed-responsive-16by9">.*?"background-image:url\((.*?)\);".*?<a href="(.*?)" title="(.*?)".*?<p class="spoiler">(.*?)</p>', re.S).findall(text)
 	
 	matches = re.compile('<div role="main"(.*?)</section>', re.S).findall(text)
@@ -381,7 +413,8 @@ def GetArchiveSeriesList(url, iconimage, catName):
 		common.addDir(name, 'https://archive.kan.org.il/{0}'.format(url), 43, icon, infos={"Title": name, "Plot": description}, module=module, urlParamsData={'catName': catName})
 
 def GetArchiveEpisodesList(url, iconimage, catName):
-	text = common.OpenURL(url)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url)
 	GetArchiveEpisodes(url, iconimage, text, catName)
 
 def GetArchiveEpisodes(url, iconimage, text, catName):
@@ -474,8 +507,6 @@ def Run(name, url, mode, iconimage='', moreData=''):
 			page = int(prms['p'][0])
 		url = '{0}?page={1}'.format(urlp.path, page)
 		GetArchiveEpisodesList(url)
-	#elif mode == 51:	#------------- Archive-Categories: ----------
-	#	xbmc.executebuiltin('container.Update(plugin://plugin.video.youtube/channel/{0}/)'.format('UCDJ6HHS5wkNaSREumdJRYhg')) #https://www.youtube.com/channel/UCDJ6HHS5wkNaSREumdJRYhg
 		
 	if mode != 0:
 		common.SetViewMode('episodes')
