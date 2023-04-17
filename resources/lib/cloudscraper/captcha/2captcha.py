@@ -16,9 +16,12 @@ from ..exceptions import (
 )
 
 try:
-    import polling2
+    import polling
 except ImportError:
-    raise ImportError("Please install the python module 'polling2' via pip")
+    raise ImportError(
+        "Please install the python module 'polling' via pip or download it from "
+        "https://github.com/justiniso/polling/"
+    )
 
 from . import Captcha
 
@@ -29,18 +32,13 @@ class captchaSolver(Captcha):
         super(captchaSolver, self).__init__('2captcha')
         self.host = 'https://2captcha.com'
         self.session = requests.Session()
-        self.captchaType = {
-            'reCaptcha': 'userrecaptcha',
-            'hCaptcha': 'hcaptcha',
-            'turnstile': 'turnstile'
-        }
 
     # ------------------------------------------------------------------------------- #
 
     @staticmethod
     def checkErrorStatus(response, request_type):
         if response.status_code in [500, 502]:
-            raise CaptchaServiceUnavailable(f'2Captcha: Server Side Error {response.status_code}')
+            raise CaptchaServiceUnavailable('2Captcha: Server Side Error {}'.format(response.status_code))
 
         errors = {
             'in.php': {
@@ -86,10 +84,12 @@ class captchaSolver(Captcha):
             }
         }
 
-        rPayload = response.json()
-        if rPayload.get('status') == 0 and rPayload.get('request') in errors.get(request_type):
+        if response.json().get('status') == 0 and response.json().get('request') in errors.get(request_type):
             raise CaptchaAPIError(
-                f"{rPayload['request']} {errors.get(request_type).get(rPayload['request'])}"
+                '{} {}'.format(
+                    response.json().get('request'),
+                    errors.get(request_type).get(response.json().get('request'))
+                )
             )
 
     # ------------------------------------------------------------------------------- #
@@ -101,14 +101,16 @@ class captchaSolver(Captcha):
             )
 
         def _checkRequest(response):
-            self.checkErrorStatus(response, 'res.php')
             if response.ok and response.json().get('status') == 1:
                 return response
+
+            self.checkErrorStatus(response, 'res.php')
+
             return None
 
-        response = polling2.poll(
+        response = polling.poll(
             lambda: self.session.get(
-                f'{self.host}/res.php',
+                '{}/res.php'.format(self.host),
                 params={
                     'key': self.api_key,
                     'action': 'reportbad',
@@ -136,14 +138,16 @@ class captchaSolver(Captcha):
             raise CaptchaBadJobID("2Captcha: Error bad job id to request Captcha.")
 
         def _checkRequest(response):
-            self.checkErrorStatus(response, 'res.php')
             if response.ok and response.json().get('status') == 1:
                 return response
+
+            self.checkErrorStatus(response, 'res.php')
+
             return None
 
-        response = polling2.poll(
+        response = polling.poll(
             lambda: self.session.get(
-                f'{self.host}/res.php',
+                '{}/res.php'.format(self.host),
                 params={
                     'key': self.api_key,
                     'action': 'get',
@@ -168,32 +172,41 @@ class captchaSolver(Captcha):
 
     def requestSolve(self, captchaType, url, siteKey):
         def _checkRequest(response):
-            self.checkErrorStatus(response, 'in.php')
             if response.ok and response.json().get("status") == 1 and response.json().get('request'):
                 return response
+
+            self.checkErrorStatus(response, 'in.php')
+
             return None
 
         data = {
             'key': self.api_key,
             'pageurl': url,
             'json': 1,
-            'soft_id': 2905
+            'soft_id': 5507698
         }
 
-        data.update({
-            'method': self.captchaType[captchaType],
-            'googlekey' if captchaType == 'reCaptcha' else 'sitekey': siteKey
-        })
+        data.update(
+            {
+                'method': 'userrcaptcha',
+                'googlekey': siteKey
+            } if captchaType == 'reCaptcha' else {
+                'method': 'hcaptcha',
+                'sitekey': siteKey
+            }
+        )
 
         if self.proxy:
-            data.update({
-                'proxy': self.proxy,
-                'proxytype': self.proxyType
-            })
+            data.update(
+                {
+                    'proxy': self.proxy,
+                    'proxytype': self.proxyType
+                }
+            )
 
-        response = polling2.poll(
+        response = polling.poll(
             lambda: self.session.post(
-                f'{self.host}/in.php',
+                '{}/in.php'.format(self.host),
                 data=data,
                 allow_redirects=False,
                 timeout=30
@@ -239,17 +252,17 @@ class captchaSolver(Captcha):
         try:
             jobID = self.requestSolve(captchaType, url, siteKey)
             return self.requestJob(jobID)
-        except polling2.TimeoutException:
+        except polling.TimeoutException:
             try:
                 if jobID:
                     self.reportJob(jobID)
-            except polling2.TimeoutException:
+            except polling.TimeoutException:
                 raise CaptchaTimeout(
-                    f"2Captcha: Captcha solve took to long and also failed reporting the job the job id {jobID}."
+                    "2Captcha: Captcha solve took to long and also failed reporting the job the job id {}.".format(jobID)
                 )
 
             raise CaptchaTimeout(
-                f"2Captcha: Captcha solve took to long to execute job id {jobID}, aborting."
+                "2Captcha: Captcha solve took to long to execute job id {}, aborting.".format(jobID)
             )
 
 

@@ -58,7 +58,7 @@ from .user_agent import User_Agent
 
 # ------------------------------------------------------------------------------- #
 
-__version__ = '1.2.58'
+__version__ = '1.2.46'
 
 # ------------------------------------------------------------------------------- #
 
@@ -197,9 +197,9 @@ class CloudScraper(Session):
     @staticmethod
     def debugRequest(req):
         try:
-            print(dump.dump_all(req).decode('utf-8', errors='backslashreplace'))
+            print(dump.dump_all(req).decode('utf-8'))
         except ValueError as e:
-            print(f"Debug Error: {getattr(e, 'message', e)}")
+            print("Debug Error: {}".format(getattr(e, 'message', e)))
 
     # ------------------------------------------------------------------------------- #
     # Unescape / decode html entities
@@ -225,10 +225,10 @@ class CloudScraper(Session):
                 resp._content = brotli.decompress(resp.content)
             else:
                 logging.warning(
-                    f'You\'re running urllib3 {requests.packages.urllib3.__version__}, Brotli content detected, '
+                    'You\'re running urllib3 {}, Brotli content detected, '
                     'Which requires manual decompression, '
                     'But option allow_brotli is set to False, '
-                    'We will not continue to decompress.'
+                    'We will not continue to decompress.'.format(requests.packages.urllib3.__version__)
                 )
 
         return resp
@@ -290,7 +290,7 @@ class CloudScraper(Session):
                 _ = self._solveDepthCnt
                 self.simpleException(
                     CloudflareLoopProtection,
-                    f"!!Loop Protection!! We have tried to solve {_} time(s) in a row."
+                    "!!Loop Protection!! We have tried to solve {} time(s) in a row.".format(_)
                 )
 
             self._solveDepthCnt += 1
@@ -301,27 +301,6 @@ class CloudScraper(Session):
                 self._solveDepthCnt = 0
 
         return response
-
-    # ------------------------------------------------------------------------------- #
-    # check if the response contains a valid Cloudflare Bot Fight Mode challenge
-    # ------------------------------------------------------------------------------- #
-
-    @staticmethod
-    def is_BFM_Challenge(resp):
-        try:
-            return (
-                resp.headers.get('Server', '').startswith('cloudflare')
-                and re.search(
-                    r"\/cdn-cgi\/bm\/cv\/\d+\/api\.js.*?"
-                    r"window\['__CF\$cv\$params'\]\s*=\s*{",
-                    resp.text,
-                    re.M | re.S
-                )
-            )
-        except AttributeError:
-            pass
-
-        return False
 
     # ------------------------------------------------------------------------------- #
     # check if the response contains a valid Cloudflare challenge
@@ -355,11 +334,11 @@ class CloudScraper(Session):
                 resp.headers.get('Server', '').startswith('cloudflare')
                 and resp.status_code in [429, 503]
                 and re.search(
-                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/\S+orchestrate/jsch/v1',
+                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/orchestrate/jsch/v1"',
                     resp.text,
                     re.M | re.S
                 )
-                and re.search(r'window._cf_chl_enter\s*[\(=]', resp.text, re.M | re.S)
+                and re.search(r'window._cf_chl_enter\(', resp.text, re.M | re.S)
             )
         except AttributeError:
             pass
@@ -376,11 +355,11 @@ class CloudScraper(Session):
             return (
                 CloudScraper.is_Captcha_Challenge(resp)
                 and re.search(
-                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/\S+orchestrate/captcha/v1',
+                    r'cpo.src\s*=\s*"/cdn-cgi/challenge-platform/orchestrate/captcha/v1"',
                     resp.text,
                     re.M | re.S
                 )
-                and re.search(r'\s*id="trk_captcha_js"', resp.text, re.M | re.S)
+                and re.search(r'window._cf_chl_enter\(', resp.text, re.M | re.S)
             )
         except AttributeError:
             pass
@@ -443,13 +422,13 @@ class CloudScraper(Session):
         if self.is_New_Captcha_Challenge(resp):
             self.simpleException(
                 CloudflareChallengeError,
-                'Detected a Cloudflare version 2 Captcha challenge, This feature is not available in the opensource (free) version.'
+                'Detected a Cloudflare version 2 challenge, This feature is not available in the opensource (free) version.'
             )
 
         if self.is_New_IUAM_Challenge(resp):
             self.simpleException(
                 CloudflareChallengeError,
-                'Detected a Cloudflare version 2 challenge, This feature is not available in the opensource (free) version.'
+                'Detected a Cloudflare version 2 Captcha challenge, This feature is not available in the opensource (free) version.'
             )
 
         if self.is_Captcha_Challenge(resp) or self.is_IUAM_Challenge(resp):
@@ -500,11 +479,17 @@ class CloudScraper(Session):
         except Exception as e:
             self.simpleException(
                 CloudflareIUAMError,
-                f"Unable to parse Cloudflare anti-bots page: {getattr(e, 'message', e)}"
+                'Unable to parse Cloudflare anti-bots page: {}'.format(
+                    getattr(e, 'message', e)
+                )
             )
 
         return {
-            'url': f"{hostParsed.scheme}://{hostParsed.netloc}{self.unescape(formPayload['challengeUUID'])}",
+            'url': '{}://{}{}'.format(
+                hostParsed.scheme,
+                hostParsed.netloc,
+                self.unescape(formPayload['challengeUUID'])
+            ),
             'data': payload
         }
 
@@ -585,7 +570,11 @@ class CloudScraper(Session):
         hostParsed = urlparse(url)
 
         return {
-            'url': f"{hostParsed.scheme}://{hostParsed.netloc}{self.unescape(formPayload['challengeUUID'])}",
+            'url': '{}://{}{}'.format(
+                hostParsed.scheme,
+                hostParsed.netloc,
+                self.unescape(formPayload['challengeUUID'])
+            ),
             'data': dataPayload
         }
 
@@ -695,7 +684,7 @@ class CloudScraper(Session):
                 cloudflare_kwargs,
                 'headers',
                 {
-                    'Origin': f'{urlParsed.scheme}://{urlParsed.netloc}',
+                    'Origin': '{}://{}'.format(urlParsed.scheme, urlParsed.netloc),
                     'Referer': resp.url
                 }
             )
@@ -779,12 +768,11 @@ class CloudScraper(Session):
                     'browser',
                     'debug',
                     'delay',
-                    'doubleDown',
-                    'captcha',
                     'interpreter',
-                    'source_address'
+                    'captcha',
                     'requestPreHook',
-                    'requestPostHook'
+                    'requestPostHook',
+                    'source_address'
                 ] if field in kwargs
             }
         )
@@ -793,7 +781,7 @@ class CloudScraper(Session):
             resp = scraper.get(url, **kwargs)
             resp.raise_for_status()
         except Exception:
-            logging.error(f'"{url}" returned an error. Could not collect tokens.')
+            logging.error('"{}" returned an error. Could not collect tokens.'.format(url))
             raise
 
         domain = urlparse(resp.url).netloc
@@ -801,7 +789,7 @@ class CloudScraper(Session):
         cookie_domain = None
 
         for d in scraper.cookies.list_domains():
-            if d.startswith('.') and d in (f'.{domain}'):
+            if d.startswith('.') and d in ('.{}'.format(domain)):
                 cookie_domain = d
                 break
         else:
@@ -834,9 +822,11 @@ class CloudScraper(Session):
 
 if ssl.OPENSSL_VERSION_INFO < (1, 1, 1):
     print(
-        f"DEPRECATION: The OpenSSL being used by this python install ({ssl.OPENSSL_VERSION}) does not meet the minimum supported "
+        "DEPRECATION: The OpenSSL being used by this python install ({}) does not meet the minimum supported "
         "version (>= OpenSSL 1.1.1) in order to support TLS 1.3 required by Cloudflare, "
-        "You may encounter an unexpected Captcha or cloudflare 1020 blocks."
+        "You may encounter an unexpected Captcha or cloudflare 1020 blocks.".format(
+            ssl.OPENSSL_VERSION
+        )
     )
 
 # ------------------------------------------------------------------------------- #
