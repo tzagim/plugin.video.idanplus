@@ -62,7 +62,7 @@ def GetSeriesList(url, iconimage):
 def GetProgramUrl(url):
 	#urlParts = url[len(baseUrl)+1:].split("/")
 	i = url[8:].find("/")
-	urlParts = url[9+i:].split("/")
+	urlParts = url.lower()[9+i:].split("/")
 	return programUrl.format(urlParts[0], urlParts[1])
 
 def GetSeasonsList(url, iconimage):
