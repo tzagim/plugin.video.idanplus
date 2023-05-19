@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
-import sys, gzip, os, io, random, re, json, urllib, requests, time, collections, xml.parsers.expat as expat
+import sys, gzip, os, io, random, re, json, urllib, requests, xmltodict, time, collections, xml.parsers.expat as expat
 import resources.lib.cloudscraper as cloudscraper
 #import zipfile
 
@@ -414,6 +414,9 @@ def UnEscapeXML(st):
 		es = u""
 	return es.join(list)
 
+def XmlToDict(text):
+	return xmltodict.parse(text)
+
 def GetLabelColor(text, keyColor=None, bold=False, color=None):
 	if not color:
 		color = Addon.getSetting(keyColor)
@@ -588,9 +591,7 @@ def GetKaltura(entryId, partnerId, baseUrl, userAgent, quality='best'):
 			if s["format"] == "applehttp":
 				link = s["url"]
 				break
-		xbmc.log(link, 5)
 		link = GetStreams(link, quality=quality)
-		xbmc.log(link, 5)
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
 	return link
