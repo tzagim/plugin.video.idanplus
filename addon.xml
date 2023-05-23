@@ -19,7 +19,7 @@
 			<platform>all</platform>
 			<summary lang="en">צפיה בערוצי עידן פלוס ובתכניות מהאתרים הרשמיים.</summary>
 			<description lang="en">צפיה בערוצי עידן פלוס ובתכניות מהאתרים הרשמיים.[CR]אפשרויות שונות בהגדרות ההרחבה ובקליק ימני על פריט ברשימה.</description>
-			<news>- Fix for Kan VODs.</news>
+			<news>- Fix for Kan23 old site VODs.</news>
 			<supportedcontent>
 				<content>tvshows</content>
 			</supportedcontent>
