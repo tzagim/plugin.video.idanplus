@@ -32,7 +32,7 @@
 		<!--<setting id="ch_n12" type="labelenum" label="30636" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20|100" default="13" />-->
 		<setting id="ch_ynet" type="labelenum" label="30622" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20|100" default="13" />
 		<!--<setting id="ch_walla" type="labelenum" label="30624" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20|100" default="14" />-->
-		<!--<setting id="ch_sport5" type="labelenum" label="30632" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="15" />-->
+		<setting id="ch_sport5" type="labelenum" label="30632" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="15" />
 		<setting id="ch_100" type="labelenum" label="30726" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="16" />
 		<setting id="ch_891" type="labelenum" label="30734" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="17" />
 		<setting id="ch_kabru" type="labelenum" label="30629" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="18" />
