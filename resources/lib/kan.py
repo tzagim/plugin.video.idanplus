@@ -401,31 +401,14 @@ def WatchLive(url, name='', iconimage='', quality='best', type='video'):
 	link = common.GetStreams(channelUrl, quality=quality)
 	common.PlayStream(link, quality, name, iconimage)
 
-def GetPodcastsList(page, iconimage):
-	page = 0 if page == '' else int(page)
-	stopPage = page + pagesPerList
-	prevPage = page - pagesPerList if page  >= pagesPerList else 1
-	while True:
-		page += 1
-		url = '{0}/lobby/aod/?currentPage={1}'.format(baseUrl, page)
-		text = common.GetCF(url, userAgent)
-		#text = common.OpenURL(url)
-		matches = re.compile('class="podcast-item".*?<a href="(.*?)".*?title="(.*?)".*?src="(.*?)".*?"text">(.*?)</div>', re.S).findall(text)
-		for link, name, image, description in matches:
-			name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
-			common.addDir(name, '{0}/{1}'.format(baseUrl, link), 32, common.UnEscapeXML(image), infos={"Title": name, "Plot": common.UnEscapeXML(description.strip())}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
-		if len(matches) < 1:
-			if page > pagesPerList:
-				name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
-				common.addDir(name, str(prevPage), 31, iconimage, infos={"Title": name, "Plot": name}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
-			break
-		if page == stopPage:
-			if page >= pagesPerList:
-				name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
-				common.addDir(name, str(prevPage), 31, iconimage, infos={"Title": name, "Plot": name}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
-			name = common.GetLabelColor(common.GetLocaleString(30012), color="green")
-			common.addDir(name, str(page), 31, iconimage, infos={"Title": name, "Plot": name}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
-			break
+def GetPodcastsList(iconimage):
+	url = '{0}/lobby/aod/'.format(baseUrl)
+	text = common.GetCF(url, userAgent)
+	#text = common.OpenURL(url)
+	matches = re.compile('class="podcast-item".*?<a href="(.*?)".*?title="(.*?)".*?src="(.*?)".*?"text">(.*?)</div>', re.S).findall(text)
+	for link, name, image, description in matches:
+		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
+		common.addDir(name, '{0}/{1}'.format(baseUrl, link), 32, common.UnEscapeXML(image), infos={"Title": name, "Plot": common.UnEscapeXML(description.strip())}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
 
 def GetPodcastEpisodesList(data, iconimage):
 	d = data.split(';')
@@ -610,7 +593,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 23: #------------- Radio Episodes: -----------------
 		GetRadioEpisodesList(url, iconimage, moreData)
 	elif mode == 31: #------------- Podcast Series: -----------------
-		GetPodcastsList(url, moduleIcon)
+		GetPodcastsList(moduleIcon)
 	elif mode == 32: #------------- Podcast Episodes: ---------------
 		GetPodcastEpisodesList(url, iconimage)
 	elif mode == 33: #------------- Kids Podcast Series: ------------
