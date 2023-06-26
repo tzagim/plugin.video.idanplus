@@ -43,7 +43,7 @@ def GetSeriesList(url, catName):
 			matches = json.loads('{"series":'+matches[0].strip()+'}')
 			for serie in matches['series']:
 				link = serie['Url']
-				image = serie['Image']
+				image = common.quoteNonASCII(serie['Image'])
 				description = serie['Description']
 				name = kanSeriesNames.get(link)
 				if name is None:
@@ -54,24 +54,24 @@ def GetSeriesList(url, catName):
 		else:
 			links = []
 			#matches = re.compile('<div class="block-media card-media ">(.*?)</button>', re.S).findall(text)
-			matches = re.compile('"background-image: url\((.*?)\).*?"h1">(.*?)</h1>.*?"info-description">(.*?)</div>.*?<a href="(.*?)"', re.S).findall(text)
+			matches = re.compile('"background-image: url\((.*?)\).*?"h1">(.*?)</h.*?"info-description">(.*?)</div>.*?<a href="(.*?)"', re.S).findall(text)
 			for match in matches:
 				link = match[3]
 				if link in links:
 					continue
 				links += [link]
-				image = common.UnEscapeXML(match[0])
+				image = common.quoteNonASCII(common.UnEscapeXML(match[0]))
 				name = common.GetLabelColor(common.UnEscapeXML(match[1].strip()), keyColor="prColor")
 				description = common.UnEscapeXML(match[2].strip())
 				common.addDir(name, '{0}{1}'.format(baseUrl, link), 2, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
 			matches = re.compile('<div class="ec-section section(.*?)</ul>', re.S).findall(text)
-			matches = re.compile('<a href="(.*?)".*?<img src="(.*?)".*?"font-weight-normal">(.*?)</div>.*?</a>', re.S).findall(matches[0])
+			matches = re.compile('<li>.*?<a href="(.*?)".*?<img src="(.*?)".*?"font-weight-normal">(.*?)</.*?</li>', re.S).findall(matches[0])
 			for match in matches:
 				link = match[0]
 				if link in links:
 					continue
 				links += [link]
-				image = common.UnEscapeXML(match[1])
+				image = common.quoteNonASCII(common.UnEscapeXML(match[1]))
 				description = common.UnEscapeXML(match[2].strip())
 				name = common.GetLabelColor(description, keyColor="prColor")
 				common.addDir(name, '{0}{1}'.format(baseUrl, link), 2, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
