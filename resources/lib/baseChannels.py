@@ -26,7 +26,7 @@ TvChannels = [
 	{'ch':'ch_99', 'index': 12, 'nameID': 30613, 'channelID':'99', 'mode': 10, 'image':'knesset.png', 'module':'knesset', 'resKey':'ch_99_res', 'tvgID':'99', 'type':'tv'}, 
 	#{'ch':'ch_n12', 'index': 13, 'nameID': 30636, 'channelID':'n12', 'mode': 10, 'image':'n12.png', 'module':'tv', 'resKey':'', 'tvgID':'', 'type':'tv'}, 
 	{'ch':'ch_ynet', 'index': 13, 'nameID': 30622, 'channelID':'ynet', 'mode': 10, 'image':'ynet.jpg', 'module':'tv', 'resKey':'ch_ynet_res', 'tvgID':'', 'type':'tv'}, 
-	#{'ch':'ch_walla', 'index': 14, 'nameID': 30624, 'channelID':'live', 'mode': 10, 'image':'wallanews.png', 'module':'walla', 'resKey':'ch_walla_res', 'tvgID':'', 'type':'tv'}, 
+	{'ch':'ch_walla', 'index': 14, 'nameID': 30624, 'channelID':'live', 'mode': 10, 'image':'walla.png', 'module':'walla', 'resKey':'ch_walla_res', 'tvgID':'', 'type':'tv'}, 
 	{'ch':'ch_sport5', 'index': 15, 'nameID': 30632, 'channelID':'5studio', 'mode': 10, 'image':'Sport5.png', 'module':'sport5','resKey':'','tvgID':'5radio','type':'tv'},
 	{'ch':'ch_100', 'index': 16, 'nameID': 30726, 'channelID':'100fm', 'mode': 10, 'image':'100fm.jpg', 'module':'tv', 'resKey':'', 'tvgID':'100fm', 'type':'tv'},
 	{'ch':'ch_891', 'index': 17, 'nameID': 30734, 'channelID':'891fm', 'mode': 10, 'image':'891fm.png', 'module':'tv', 'resKey':'', 'tvgID':'891fm', 'type':'tv'},

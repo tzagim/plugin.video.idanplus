@@ -519,6 +519,12 @@ def quote(text):
 	else:
 		return urlparse.quote(text)
 
+def quoteNonASCII(text):
+	t = ''
+	for i in range(len(text)):
+		t += text[i] if ord(text[i]) < 128 else quote(text[i])
+	return t
+
 def unquote(text):
 	if py2:
 		return urllib.unquote(text)
