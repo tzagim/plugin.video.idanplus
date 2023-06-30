@@ -38,9 +38,9 @@ def GetSeriesList(url, catName):
 	text = common.GetCF(url, userAgent)
 	if not ('kankids' in url):
 		kanSeriesNames = common.GetUpdatedList(kanSeriesNamesFile, kanSeriesNamesURL, headers={'Referer': 'http://idan-{0}.Kodi-{1}.fish'.format(common.AddonVer, common.GetKodiVer())}, deltaInSec=86400, isZip=True)
-		matches = re.compile('digitalSeries:(.*?)}\s*document', re.S).findall(text)
+		matches = re.compile('digitalSeries:.*?\[(.*?)}\]', re.S).findall(text)
 		if len(matches) > 0:
-			matches = json.loads('{"series":'+matches[0].strip()+'}')
+			matches = json.loads('{"series":['+matches[0].strip()+'}]}')
 			for serie in matches['series']:
 				link = serie['Url']
 				image = common.quoteNonASCII(serie['Image'])
@@ -121,7 +121,7 @@ def AddSeries(matches, catName):
 			except:
 				pass
 		name = common.GetLabelColor(name.strip(), keyColor="prColor", bold=True)
-		common.addDir(name, link, 6, iconimage, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+		common.addDir(name, link, 6, common.quoteNonASCII(iconimage), infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
 
 def GetEpisodesList(data, iconimage, moreData=''):
 	d = data.split(';')
@@ -146,7 +146,7 @@ def GetEpisodesList(data, iconimage, moreData=''):
 		for episode in episodes:
 			name = common.GetLabelColor(common.UnEscapeXML(episode[2].strip()), keyColor="chColor")
 			description = common.UnEscapeXML(episode[3].strip())
-			image = common.UnEscapeXML(episode[1])
+			image = common.quoteNonASCII(common.UnEscapeXML(episode[1]))
 			common.addDir(name, '{0}/{1}'.format(baseUrl, episode[0]), 3, image, infos={"Title": name, "Plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
 	else:
 		matches = re.compile('<div class="media-wrap(.*?)<div class="ec-section section', re.S).findall(body[0])
@@ -154,7 +154,7 @@ def GetEpisodesList(data, iconimage, moreData=''):
 			matches = re.compile('"background-image: url\((.*?)\).*?"title">(.*?)</h1>.*?<a href="(.*?)".*?>(.*?)</a', re.S).findall(matches[0])
 			name = common.GetLabelColor(common.UnEscapeXML(matches[0][1].strip()), keyColor="chColor")
 			description = common.UnEscapeXML(matches[0][3].strip())
-			common.addDir(name, '{0}/{1}'.format(baseUrl, matches[0][2]), 3, matches[0][0], infos={"Title": name, "Plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
+			common.addDir(name, '{0}/{1}'.format(baseUrl, matches[0][2]), 3, common.quoteNonASCII(matches[0][0]), infos={"Title": name, "Plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
 		else:
 			matches = re.compile('<div class="youtube-player(.*?)<div class="ec-section section', re.S).findall(body[0])
 			matches = re.compile('data-video-src="(.*?)".*?"h2">(.*?)</h2>.*?"info-description">(.*?)</div>', re.S).findall(matches[0])
