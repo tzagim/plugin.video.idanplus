@@ -63,7 +63,7 @@ def Play(name, url, iconimage, quality='best'):
 	common.PlayStream(final, quality, name, iconimage)
 
 def Watch(name, iconimage, quality='best'):
-	url = 'https://ch14-channel14.akamaized.net/hls/live/2097589/CH14_CHANNEL14/master.m3u8'
+	url = 'https://now14.g-mana.live/media/91517161-44ab-4e46-af70-e9fe26117d2e/mainManifest.m3u8'
 	Play(name, url, iconimage, quality)
 
 def Run(name, url, mode, iconimage='', moreData=''):

@@ -157,10 +157,12 @@ def GetEpisodesList(data, iconimage, moreData=''):
 			image = common.quoteNonASCII(common.UnEscapeXML(episode[1]))
 			common.addDir(name, '{0}{1}'.format(domain, episode[0]), 3, image, infos={"Title": name, "Plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
 	else:
-		matches = re.compile('<div class="block-media card-media(.*?)</div>\s*?</div>\s*?</div>\s*?</div>', re.S).findall(body[0])
+		matches1 = re.compile('<div class="block-media card-media(.*?)</div>\s*?</div>\s*?</div>\s*?</div>', re.S).findall(body[0])
 		#matches = re.compile('<div class="media-wrap(.*?)<div class="ec-section section', re.S).findall(body[0])
-		if len(matches) > 0:
-			matches = re.compile('desktop-vod-bg-image: url\(\'(.*?)\'\).*?"title.*?>(.*?)</h1>(.*?"info-description">(.*?)</div>.*?|.*?)<a href="(.*?)"', re.S).findall(matches[0])
+		if len(matches1) > 0:
+			matches = re.compile('desktop-vod-bg-image: url\(\'(.*?)\'\).*?"title.*?>(.*?)</h1>(.*?"info-description">(.*?)</div>.*?|.*?)<a href="(.*?)"', re.S).findall(matches1[0])
+			if len(matches) < 1:
+				matches = re.compile('desktop-vod-bg-image: url\(\'(.*?)\'\).*?"d-md-none.*?>(.*?)</.*?(.*?"info-description">(.*?)</div>.*?|.*?)<a href="(.*?)"', re.S).findall(matches1[0])
 			name = common.GetLabelColor(common.UnEscapeXML(matches[0][1].strip()), keyColor="chColor")
 			description = common.UnEscapeXML(matches[0][3].strip())# if len(matches[0]) > 4 ''
 			link = '{0}/{1}'.format(domain, matches[0][4])# if len(matches[0]) > 4 else '{0}/{1}'.format(domain, matches[0][2])
