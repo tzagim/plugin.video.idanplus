@@ -11,7 +11,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		'91fm': { 'link': 'https://acdn.streamgates.net/91fm', 'final': True},
 		'97fm': { 'link': 'https://www.ytn.co.il/radiodarom/97fm/', 'regex': '<video.*src="(.*?)"'},
 		'891fm': { 'link': 'http://www.891fm.co.il/', 'regex': 'data-mp3="(.*?)"'},
-		'1015fm': { 'link': 'https://www.ytn.co.il/radiodarom/1015fm/', 'regex': '<video.*src="(.*?)"'},
+		'1015fm': { 'link': 'http://radio.2net.co.il/hatahana', 'regex': 'width="100%" src="(.*?)"'},
 		'102fm': { 'link': 'https://102fm.co.il/', 'regex': "src:\s*'(.*?)'"},
 		'102fmEilat': { 'link': 'https://www.fm102.co.il/LiveBroadcast', 'regex': 'mp3:\s*"(.*?)"'},
 		'103fm': { 'link': 'http://103fm.maariv.co.il/include/OnLineView.aspx', 'regex': 'data-file="(.*?)"'},
@@ -35,6 +35,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		link = channels[url]['link']
 	if link.find('://') < 0:
 		link = 'http://' + link
+
 	final = '{0}|User-Agent={1}&verifypeer=false'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
