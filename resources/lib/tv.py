@@ -22,7 +22,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		'33b2': {'link': 'https://www.dailymotion.com/video/k2slq6Tpsh2bm4wA43P', 'final': True},
 		'bbb': {'link': 'https://d2lckchr9cxrss.cloudfront.net/out/v1/c73af7694cce4767888c08a7534b503c/index.m3u8', 'referer': 'https://13tv.co.il/home/bb-livestream/', 'final': True},
 		'musayof': {'link': 'http://wowza.media-line.co.il/Musayof-Live/livestream.sdp/playlist.m3u8', 'referer': 'http://media-line.co.il/Media-Line-Player/musayof/livePlayer.aspx'},
-		'ynet': {'link': 'https://www.ynet.co.il/video/live/0,20658,1-5259927,00.html', 'regex': "progresivePath: function.*?return replacePath\(decodeURIComponent\('(.*?)'\).*?}", 'flags': re.S, 'direct': 'https://yitlivevid.mmdlive.lldns.net/yitlivevid/1dafd6053fb24d7fa905fb99eb4635be/manifest.m3u8'}
+		'ynet': {'link': 'https://ynet-live-01.ynet-pic1.yit.co.il/ynet/live.m3u8', 'final': True}
 	}
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
