@@ -668,3 +668,18 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 			xbmc.log(str(ex), 3)
 			return None
 	return ''
+
+def GetCFheaders(url, ua=None, retries=10):
+	for i in range(retries):
+		try:
+			scraper = cloudscraper.create_scraper(interpreter = 'native')
+			response = scraper.request('get', url)
+			if response.status_code == 403:
+				xbmc.sleep(1000)
+				xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), 3)
+				continue
+			return response.headers
+		except Exception as ex:
+			xbmc.log(str(ex), 3)
+			#return None
+	return ''
