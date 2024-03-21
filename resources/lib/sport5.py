@@ -81,13 +81,19 @@ def GetSeasonList(id, iconimage):
 def Play(name, url, iconimage, quality='best'):
 	link = referer = url
 	headers['Referer'] = referer
-	match = re.compile('videoUrl=(.*?)&').findall(referer)
+	match = re.compile('videoUrl=(.*?)&').findall(link)
 	if len(match) > 0:
 		link = match[0]
 	else:
-		match = re.compile('clipId=(.*?)&').findall(referer)
+		match = re.compile('clipId=(.*?)&').findall(link)
 		if len(match) > 0:
-			link = 'https://sport5-vh.akamaihd.net/i/{0}video{1}.csmil/master.m3u8'.format('UEFA/' if '/UCL2017' in referer else '', match[0])
+			link = 'https://sport5-vh.akamaihd.net/i/{0}video{1}.csmil/master.m3u8'.format('UEFA/' if '/UCL2017' in link else '', match[0])
+	match = re.compile('src=(.*?)&').findall(link)
+	if len(match) > 0:
+		link = match[0]
+	match = re.compile('referrer=(.*?)&').findall(referer)
+	if len(match) > 0:
+		referer = match[0]
 	link = common.GetStreams(link, headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}&Referer={2}'.format(link, userAgent, referer)
 	common.PlayStream(final, quality, name, iconimage)
@@ -150,7 +156,6 @@ def GetRadioSeriesList(url):
 		common.addDir(name, link, 23, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(icon), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(icon), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 		
 def PlayRadioEpisode(name, url, iconimage, quality='best'):
-	xbmc.log(url, 5)
 	link = common.GetStreams(url, headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
