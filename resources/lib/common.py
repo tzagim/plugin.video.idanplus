@@ -50,6 +50,7 @@ seriesUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin
 youtubePlugin = 'plugin://plugin.video.youtube'
 
 userAgents = [
+	'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0',
 	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36',
 	'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36',
 	'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
@@ -138,8 +139,8 @@ userAgents = [
 	'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36',
 	'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36'
 ]
-userAgent = random.choice(userAgents)
-
+# userAgent = random.choice(userAgents)
+userAgent ='Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0'
 
 def GetAddon():
 	Addon = xbmcaddon.Addon(AddonID)
@@ -297,6 +298,12 @@ def addDir(name, url, mode, iconimage='DefaultFolder.png', infos=None, contextMe
 			contextMenu = [item]
 		else:
 			contextMenu.append(item)
+	item2 = (GetLocaleString(32004), 'RunPlugin({0}?mode=16)'.format(sys.argv[0]))
+
+	if contextMenu is None:
+		contextMenu = [item2]
+	else:
+		contextMenu.append(item2)
 	if contextMenu is not None:
 		listitem.addContextMenuItems(items=contextMenu)
 	handle = GetHandle()
@@ -336,6 +343,8 @@ def GetStreams(url, headers={}, user_data=None, session=None, retries=1, quality
 			link = resolution[2].strip()
 			if not link.startswith('http'): 
 				link = urlparse.urljoin(baseUrl, link)
+				if base.query != '':
+					link = '{0}?{1}'.format(link, base.query)
 			check = OpenURL(link, headers=headers, user_data=user_data, session=session, retries=retries)
 			if check is not None:
 				break
@@ -364,12 +373,14 @@ def GetStreams(url, headers={}, user_data=None, session=None, retries=1, quality
 				link = resolution[2]
 	if not link.startswith('http'): 
 		link = urlparse.urljoin(baseUrl, link)
+	if base.query != '' and base.query not in link:
+		link = '{0}?{1}'.format(link, base.query)
 	return link
 
 def PlayStream(url, quality='best', name='', iconimage=''):
 	plot = xbmc.getInfoLabel("ListItem.Plot")
 	year = xbmc.getInfoLabel("ListItem.Year")
-	infos = {"title": name, "plot": plot, "year": year}
+	infos = {"title": name, "plot": plot, "year": year,u'mpaa':'heb'}
 	if 'dailymotion' in url:
 		url = GetDailymotion(url)
 	try:

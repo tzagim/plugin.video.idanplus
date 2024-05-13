@@ -2,6 +2,7 @@
 import xbmc
 import sys, re
 import resources.lib.common as common
+from resources.lib import cache as  cache
 
 module = '14tv'
 moduleIcon = common.GetIconFullPath("14tv.png")
@@ -16,7 +17,8 @@ def GetCategoriesList(iconimage):
 
 def GetSeriesList(iconimage):
 	#text = common.OpenURL(baseUrl)
-	text = common.OpenURL('{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl))
+	#text = common.OpenURL('{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl))
+	text = cache.get(common.OpenURL, 24, '{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl), table='pages')
 	match = re.compile 	('<ul class="navbar2">(.*?)</ul>', re.S).findall(text)
 	match = re.compile('<a href=(.*?)>(.*?)</a>', re.S).findall(match[0])
 	grids_arr = []
@@ -37,7 +39,8 @@ def GetQuoteUrl(url):
 
 def GetEpisodesList(url, image):
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
-	text = common.OpenURL(url)
+	#text = common.OpenURL(url)
+	text = cache.get(common.OpenURL, 24, url, table='pages')
 	#lastEpisode = re.compile('<div class=\'kaltura-zone\'>.*?src=".*?data-guid=(.*?)"></iframe>.*?<h1.*?>(.*?)</h1>.*?<div class="date-zone">.*?\((.*?)\).*?</div>', re.S).findall(text)
 	#videoid = lastEpisode[0][0].strip()
 	#date = lastEpisode[0][2].replace('/', '.')

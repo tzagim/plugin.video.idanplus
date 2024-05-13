@@ -2,6 +2,7 @@
 import xbmc, xbmcplugin
 import sys, uuid, re, json
 import resources.lib.common as common
+from resources.lib import cache as  cache
 
 module = 'keshet'
 moduleIcon = common.GetIconFullPath("mako.png")
@@ -40,7 +41,8 @@ def GetCategoriesList(iconimage):
 #'''
 def GetSeriesList(url, iconimage):
 	url = "{0}&{1}".format(url, endings) if "?" in url else "{0}?{1}".format(url, endings)
-	prms = GetJson(url)
+	#prms = GetJson(url)
+	prms = cache.get(GetJson, 24, url, table='pages')
 	if prms is None:
 		"Cannot get list for url {0}".format(url)
 		return
@@ -66,7 +68,8 @@ def GetProgramUrl(url):
 	return programUrl.format(urlParts[0], urlParts[1])
 
 def GetSeasonsList(url, iconimage):
-	data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
+	#data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
+	data = cache.get(GetJson, 24, GetProgramUrl(url), table='pages')["pageProps"]["data"]
 	#if iconimage == common.GetIconFullPath('search.jpg'):
 	iconimage = data["seo"]["image"]
 	seasons = data.get("seasons", [])
@@ -89,6 +92,7 @@ def GetSeasonsList(url, iconimage):
 
 def GetEpisodesList(url, icon, data=None):
 	if data is None:
+		# data = cache.get(GetJson, 24, GetProgramUrl(url), table='pages')["pageProps"]["data"]
 		data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
 	videoChannelId = data["channelId"]
 	isEpisodes = False
@@ -256,11 +260,13 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	sortBy = int(common.GetAddonSetting('makoSortBy'.format(module)))
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
 	programNameFormat = int(common.GetAddonSetting("programNameFormat"))
-	deviceID = common.GetAddonSetting("makoDeviceID")
-	if deviceID.strip() == '':
-		uuidStr = str(uuid.uuid1()).upper()
-		deviceID = "W{0}{1}".format(uuidStr[:8], uuidStr[9:])
-		common.SetAddonSetting("makoDeviceID", deviceID)
+	#deviceID = common.GetAddonSetting("makoDeviceID")
+	#if deviceID.strip() == '':
+	#	uuidStr = str(uuid.uuid1()).upper()
+	#	deviceID = "W{0}{1}".format(uuidStr[:8], uuidStr[9:])
+	#	common.SetAddonSetting("makoDeviceID", deviceID)
+	uuidStr = str(uuid.uuid1()).upper()
+	deviceID = "W{0}{1}".format(uuidStr[:8], uuidStr[9:])
 	username = common.GetAddonSetting("makoUsername")
 	password = common.GetAddonSetting("makoPassword")
 	makoShowShortSubtitle = common.GetAddonSetting("makoShowShortSubtitle") == 'true'

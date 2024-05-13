@@ -2,6 +2,7 @@
 import xbmc, xbmcaddon
 import sys, re, json, collections, datetime, time
 import resources.lib.common as common
+from resources.lib import cache as  cache
 
 Addon = xbmcaddon.Addon(common.AddonID)
 module = 'reshet'
@@ -40,7 +41,8 @@ def GetUrlJson(url, root=False):
 	return result
 
 def GetSeriesListOld(url, iconimage):
-	result = GetUrlJson(url)
+	#result = GetUrlJson(url)
+	result = cache.get(GetUrlJson, 24, url, table='pages')
 	if len(result) < 1:
 		return
 	grids_arr = []
@@ -107,7 +109,8 @@ def GetSeriesListOld(url, iconimage):
 		common.addDir(name, '{0}{1}'.format(baseUrl, link), 21, str(icon), infos=infos, module=module)
 
 def GetSeasonListOld(url, iconimage):
-	result = GetUrlJson(url)
+	#result = GetUrlJson(url)
+	result = cache.get(GetUrlJson, 24, url, table='pages')
 	seasons, episodes = GetLinks(url, result, iconimage)
 	if len(seasons) > 0:
 		for link, title in common.items(seasons):
@@ -119,7 +122,8 @@ def GetSeasonListOld(url, iconimage):
 	ShowPaging(result, iconimage)
 
 def GetEpisodesListOld(url, iconimage):
-	result = GetUrlJson(url)
+	#result = GetUrlJson(url)
+	result = cache.get(GetUrlJson, 24, url, table='pages')
 	seasons, episodes = GetLinks(url, result, iconimage)
 	ShowEpisodes(episodes, iconimage)
 	ShowPaging(result, iconimage)
@@ -386,7 +390,9 @@ def GetNewsCategoriesList(iconimage):
 		common.addDir(name, link, 21, icon, infos=infos, module=module)
 
 def GetSeriesList(url, iconimage):
-	result = GetUrlJson(url, root=True)
+	#result = GetUrlJson(url, root=True)
+	root = True
+	result = cache.get(GetUrlJson, 24, url, root, table='pages')
 	if len(result) < 1:
 		return
 	buildId = result['buildId']
@@ -412,7 +418,9 @@ def GetSeasonList(url, iconimage, buildId):
 		url += '/'
 	serie = url[url.rfind('/', 0, len(url)-1)+1:-1]
 	if len(buildId) < 1:
-		result = GetUrlJson('{0}/all-shows/all-shows-list/'.format(baseUrl), root=True)
+		#result = GetUrlJson('{0}/all-shows/all-shows-list/'.format(baseUrl), root=True)
+		root=True
+		result = cache.get(GetUrlJson, 24, '{0}/all-shows/all-shows-list/'.format(baseUrl),  root, table='pages')
 		if len(result) < 1:
 			return
 		buildId = result['buildId']

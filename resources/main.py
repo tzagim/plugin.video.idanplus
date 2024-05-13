@@ -374,6 +374,10 @@ def route(query):
 			Podcasts()
 		elif mode == 14:
 			Musics()
+		elif mode == 16:
+			from resources.lib import cache
+			cache.clear(['pages'])
+			xbmc.executebuiltin("Notification({0}, {1}, 5000, {2})".format(AddonName, common.GetLocaleString(32005), icon))
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
 	else:

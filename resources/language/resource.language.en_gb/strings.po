@@ -578,3 +578,11 @@ msgstr ""
 msgctxt "#32003"
 msgid "plugin.video.MyYoutube"
 msgstr ""
+
+msgctxt "#32004"
+msgid "ניקוי קאש"
+msgstr ""
+
+msgctxt "#32005"
+msgid "נוקה"
+msgstr ""
