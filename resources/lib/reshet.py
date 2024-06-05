@@ -84,13 +84,14 @@ def GetSeriesListOld(url, iconimage):
 					continue
 				series[link] = name
 				seriesIDs.append(seriesID)
+				image = serie['imageObj']['d']
 				pageTitle = serie.get('secondaryTitle', {})
 				description = '' if pageTitle is None else common.encode(pageTitle, 'utf-8')
 				matches = [grids_arr.index(x) for x in grids_arr if link == x[1]]
 				if len(matches) == 1:
-					grids_arr[matches[0]] = (name, link, serie['image'], {"Title": name, "Plot": description,'mediatype': 'movie'})
+					grids_arr[matches[0]] = (name, link, image, {"Title": name, "Plot": description,'mediatype': 'movie'})
 				else:
-					grids_arr.append((name, link, serie['image'], {"Title": name, "Plot": description,'mediatype': 'movie'}))
+					grids_arr.append((name, link, image, {"Title": name, "Plot": description,'mediatype': 'movie'}))
 			except Exception as ex:
 				xbmc.log('SerieID: {0}\n{1}'.format(seriesID, str(ex)), 3)
 	mainMenus = result.get('Header', {}).get('mainMenu', [])
@@ -392,7 +393,7 @@ def GetNewsCategoriesList(iconimage):
 def GetSeriesList(url, iconimage):
 	#result = GetUrlJson(url, root=True)
 	root = True
-	result = cache.get(GetUrlJson, 24, url, root, table='pages')
+	result = cache.get(GetUrlJson, 72, url, root, table='pages')
 	if len(result) < 1:
 		return
 	buildId = result['buildId']
