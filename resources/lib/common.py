@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
-import sys, gzip, os, io, random, re, json, urllib, requests, xmltodict, time, collections, xml.parsers.expat as expat
-import resources.lib.cloudscraper as cloudscraper
+import sys, gzip, os, io, random, re, json, urllib, xmltodict, time, collections, xml.parsers.expat as expat
+#import requests, resources.lib.cloudscraper as cloudscraper
 #import zipfile
 
 try:
@@ -139,8 +139,8 @@ userAgents = [
 	'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36',
 	'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36'
 ]
-# userAgent = random.choice(userAgents)
-userAgent ='Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0'
+userAgent = random.choice(userAgents)
+
 
 def GetAddon():
 	Addon = xbmcaddon.Addon(AddonID)
@@ -229,10 +229,12 @@ def GetUserAgent():
 	return userAgent
 
 def GetSession():
+	import requests
 	return requests.session()
 
 def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries=1, responseMethod='text', verify=True):
 	link = ""
+	import requests
 	if headers.get('Accept-encoding', '') == '':
 		headers['Accept-encoding'] = 'gzip'
 	if headers.get('User-agent', '') == '':
@@ -267,6 +269,7 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 
 def GetRedirect(url, headers={}):
 	try:
+		import requests
 		response = requests.head(url, headers=headers, allow_redirects=False)
 		if response.status_code in set([301, 302, 303, 307]) and 'location' in response.headers:
 			url = response.headers['location']
@@ -663,6 +666,7 @@ def GetYouTube(url):
 
 													   
 def GetCF(url, ua=None, retries=10, responseMethod='text'):
+	import resources.lib.cloudscraper as cloudscraper
 	for i in range(retries):
 		try:
 			scraper = cloudscraper.create_scraper(interpreter = 'native')
@@ -681,6 +685,7 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 	return ''
 
 def GetCFheaders(url, ua=None, retries=10):
+	import resources.lib.cloudscraper as cloudscraper
 	for i in range(retries):
 		try:
 			scraper = cloudscraper.create_scraper(interpreter = 'native')
