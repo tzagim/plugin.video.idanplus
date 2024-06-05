@@ -268,11 +268,11 @@ msgid "ערוץ הקניות 21"
 msgstr ""
 
 msgctxt "#30621"
-msgid "האח הגדול 26"
+msgid "האח הגדול 26 - מנותקים"
 msgstr ""
 
 msgctxt "#30625"
-msgid "האח הגדול 26 - גיבוי"
+msgid "האח הגדול 26 - מנותקים - גיבוי"
 msgstr ""
 
 msgctxt "#30622"

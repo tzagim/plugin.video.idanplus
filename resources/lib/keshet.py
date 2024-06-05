@@ -11,7 +11,7 @@ endings = 'platform=responsive'
 programUrl = "{0}/_next/data/4.7.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
 UA = common.GetUserAgent()
-
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
 
 def GetJson(url):
 	resultJSON = common.OpenURL(url, headers={"User-Agent": UA}, responseMethod='json')
@@ -42,7 +42,7 @@ def GetCategoriesList(iconimage):
 def GetSeriesList(url, iconimage):
 	url = "{0}&{1}".format(url, endings) if "?" in url else "{0}?{1}".format(url, endings)
 	#prms = GetJson(url)
-	prms = cache.get(GetJson, 24, url, table='pages')
+	prms = cache.get(GetJson, 72, url, table='pages')
 	if prms is None:
 		"Cannot get list for url {0}".format(url)
 		return
@@ -155,7 +155,8 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		'24': '{0}/mako-vod-live-tv/VOD-b3480d2eff3fd31006.htm'.format(baseUrl),
 		'2025': '{0}/mako-vod-live-tv/VOD-7469dcd71dcb761006.htm'.format(baseUrl)
 	}
-	PlayItem(channels[url], name, iconimage, quality, swichCdn=True)
+	#PlayItem(channels[url], name, iconimage, quality, swichCdn=True)
+	PlayItem(channels[url], name, iconimage, quality='auto', swichCdn=True)
 
 def PlayItem(url, name='', iconimage='', quality='best', swichCdn=False):
 	prms = GetJson("{0}?{1}".format(url, endings))
@@ -204,6 +205,8 @@ def GetLink(media, cdn, dv, headers, quality):
 	if url.startswith('//'):
 		url = 'https:{0}'.format(url) 
 	#xbmc.log('{0}?{1}'.format(url, ticket), 5)
+	if quality == 'auto':
+		return '{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), None		   
 	session = common.GetSession()
 	link = common.GetStreams('{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), headers=headers, session=session, quality=quality)
 	#xbmc.log(link, 5)
