@@ -1,10 +1,10 @@
 name: reset
 
 on:
-  push:
+  release:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    types: [prereleased]
+
 jobs:
   build:
     runs-on: ubuntu-latest
