@@ -31,7 +31,8 @@ TvChannels = [
 	{'ch':'ch_100', 'index': 16, 'nameID': 30726, 'channelID':'100fm', 'mode': 10, 'image':'100fm.jpg', 'module':'tv', 'resKey':'', 'tvgID':'100fm', 'type':'tv'},
 	{'ch':'ch_891', 'index': 17, 'nameID': 30734, 'channelID':'891fm', 'mode': 10, 'image':'891fm.png', 'module':'tv', 'resKey':'', 'tvgID':'891fm', 'type':'tv'},
 	{'ch':'ch_kabru', 'index': 18, 'nameID': 30629, 'channelID':'18', 'mode': 10, 'image':'kabbalah.jpg', 'module':'kabbalah', 'resKey':'ch_kabru_res', 'tvgID':'', 'type':'tv'},
-	{'ch':'ch_musayof', 'index': 19, 'nameID': 30635, 'channelID':'musayof', 'mode': 10, 'image':'musayof.jpg', 'module':'tv', 'resKey':'ch_musayof', 'tvgID':'', 'type':'tv'},
+	{'ch':'ch_musayof', 'index': 19, 'nameID': 30635, 'channelID':'musayof', 'mode': 10, 'image':'musayof.jpg', 'module':'tv', 'resKey':'ch_musayof_res', 'tvgID':'', 'type':'tv'},
+	{'ch':'ch_i24news', 'index': 20, 'nameID': 30643, 'channelID':'i24news', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24news_res', 'tvgID':'i24news', 'type':'tv'},
 	#{'ch':'ch_refresh', 'index': 100, 'nameID': 30618, 'channelID':'refresh', 'mode': 6, 'image': icon, 'module':'', 'resKey':'', 'tvgID':'', 'type':'refresh'}
 ]
 
