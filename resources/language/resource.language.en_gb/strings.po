@@ -343,6 +343,10 @@ msgctxt "#30642"
 msgid "מכאן 33 - דיילימושן"
 msgstr ""
 
+msgctxt "#30643"
+msgid "i24news"
+msgstr ""
+
 msgctxt "#30651"
 msgid "איכות שידור (ריק לאיכות מירבית)"
 msgstr ""

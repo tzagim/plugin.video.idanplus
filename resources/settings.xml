@@ -37,6 +37,7 @@
 		<setting id="ch_891" type="labelenum" label="30734" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="17" />
 		<setting id="ch_kabru" type="labelenum" label="30629" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="18" />
 		<setting id="ch_musayof" type="labelenum" label="30635" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="19" />
+		<setting id="ch_i24news" type="labelenum" label="30643" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|100" default="20" />
 		<!--<setting id="ch_refresh" type="labelenum" label="30618" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20|100" default="0" />-->
 		<setting label="30651" type="lsep"/>
 		<setting id="ch_11_res" type="text" label="30602" default="" />
@@ -57,6 +58,8 @@
 		<setting id="ch_ynet_res" type="text" label="30622" default="" />
 		<setting id="ch_walla_res" type="text" label="30624" default="" />
 		<setting id="ch_kabru_res" type="text" label="30629" default="" />
+		<setting id="ch_musayof_res" type="text" label="30635" default="" />
+		<setting id="ch_i24news_res" type="text" label="30643" default="" />
 	</category>
 	<category label="30700">
 		<setting label="30701" type="lsep"/>

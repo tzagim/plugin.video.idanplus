@@ -43,6 +43,8 @@ def GetUrlJson(url, root=False):
 def GetSeriesListOld(url, iconimage):
 	#result = GetUrlJson(url)
 	result = cache.get(GetUrlJson, 24, url, table='pages')
+	if result==[]:
+		result = cache.get(GetUrlJson,0, url, table='pages')
 	if len(result) < 1:
 		return
 	grids_arr = []
@@ -125,6 +127,8 @@ def GetSeasonListOld(url, iconimage):
 def GetEpisodesListOld(url, iconimage):
 	#result = GetUrlJson(url)
 	result = cache.get(GetUrlJson, 24, url, table='pages')
+	if result==[]:
+		result = cache.get(GetUrlJson, 0, url, table='pages')
 	seasons, episodes = GetLinks(url, result, iconimage)
 	ShowEpisodes(episodes, iconimage)
 	ShowPaging(result, iconimage)
@@ -394,6 +398,8 @@ def GetSeriesList(url, iconimage):
 	#result = GetUrlJson(url, root=True)
 	root = True
 	result = cache.get(GetUrlJson, 72, url, root, table='pages')
+	if result==[]:
+		result = cache.get(GetUrlJson, 0, url, root, table='pages')
 	if len(result) < 1:
 		return
 	buildId = result['buildId']
@@ -422,6 +428,8 @@ def GetSeasonList(url, iconimage, buildId):
 		#result = GetUrlJson('{0}/all-shows/all-shows-list/'.format(baseUrl), root=True)
 		root=True
 		result = cache.get(GetUrlJson, 24, '{0}/all-shows/all-shows-list/'.format(baseUrl),  root, table='pages')
+		if result==[]:
+			result = cache.get(GetUrlJson, 0, '{0}/all-shows/all-shows-list/'.format(baseUrl),  root, table='pages')
 		if len(result) < 1:
 			return
 		buildId = result['buildId']
@@ -439,7 +447,7 @@ def GetSeasonList(url, iconimage, buildId):
 				for season in grid["episodesSeasonsMap"]:
 					name = common.GetLabelColor(season["name"], keyColor="timesColor", bold=True)
 					grids_arr.append(("0", name, url, iconimage, {"Title": name, "Plot": name}))
-	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
+	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[1], reverse=True)
 	for key, name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 2, icon, infos={"Title": name}, moreData=key, module=module)
 

@@ -43,6 +43,8 @@ def GetSeriesList(url, iconimage):
 	url = "{0}&{1}".format(url, endings) if "?" in url else "{0}?{1}".format(url, endings)
 	#prms = GetJson(url)
 	prms = cache.get(GetJson, 72, url, table='pages')
+	if prms==[]:
+		prms = cache.get(GetJson, 0, url, table='pages')
 	if prms is None:
 		"Cannot get list for url {0}".format(url)
 		return
@@ -70,6 +72,8 @@ def GetProgramUrl(url):
 def GetSeasonsList(url, iconimage):
 	#data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
 	data = cache.get(GetJson, 24, GetProgramUrl(url), table='pages')["pageProps"]["data"]
+	if data==[]:
+		data = cache.get(GetJson, 0, GetProgramUrl(url), table='pages')["pageProps"]["data"]
 	#if iconimage == common.GetIconFullPath('search.jpg'):
 	iconimage = data["seo"]["image"]
 	seasons = data.get("seasons", [])
