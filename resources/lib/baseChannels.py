@@ -3,7 +3,6 @@
 TvChannels = [
 	{'ch':'ch_11', 'index': 1, 'nameID': 30602, 'channelID':'11', 'mode': 10, 'image':'kan.jpg', 'module':'kan', 'resKey':'ch_11_res', 'tvgID':'11', 'type':'tv'}, 
 	{'ch':'ch_11b', 'index': 1, 'nameID': 30633, 'channelID':'11b', 'mode': 10, 'image':'kan.jpg', 'module':'tv', 'resKey':'', 'tvgID':'11', 'type':'tv'}, 
-	{'ch':'ch_11b2', 'index': 1, 'nameID': 30638, 'channelID':'11b2', 'mode': 10, 'image':'kan.jpg', 'module':'tv', 'resKey':'', 'tvgID':'11', 'type':'tv'}, 
 	{'ch':'ch_11c', 'index': 1, 'nameID': 30637, 'channelID':'11c', 'mode': 10, 'image':'kan.jpg', 'module':'kan', 'resKey':'ch_11c_res', 'tvgID':'11', 'type':'tv'}, 
 	{'ch':'ch_12', 'index': 2, 'nameID': 30603, 'channelID':'12', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12_res', 'tvgID':'12', 'type':'tv'}, 
 	{'ch':'ch_12c', 'index': 2, 'nameID': 30626, 'channelID':'12c', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12c_res', 'tvgID':'12', 'type':'tv'}, 
@@ -14,26 +13,22 @@ TvChannels = [
 	{'ch':'ch_21', 'index': 5, 'nameID': 30619, 'channelID':'21', 'mode': 10, 'image':'21.jpg', 'module':'21tv', 'resKey':'ch_21_res', 'tvgID':'21', 'type':'tv'}, 
 	{'ch':'ch_23', 'index': 6, 'nameID': 30607, 'channelID':'23', 'mode': 10, 'image':'23tv.jpg', 'module':'kan', 'resKey':'ch_23_res', 'tvgID':'23', 'type':'tv'}, 
 	{'ch':'ch_23b', 'index': 6, 'nameID': 30639, 'channelID':'23b', 'mode': 10, 'image':'23tv.jpg', 'module':'tv', 'resKey':'', 'tvgID':'23', 'type':'tv'}, 
-	{'ch':'ch_23b2', 'index': 6, 'nameID': 30640, 'channelID':'23b2', 'mode': 10, 'image':'23tv.jpg', 'module':'tv', 'resKey':'', 'tvgID':'23', 'type':'tv'}, 
 	{'ch':'ch_24', 'index': 7, 'nameID': 30608, 'channelID':'24', 'mode': 10, 'image':'24telad.png', 'module':'keshet', 'resKey':'ch_24_res', 'tvgID':'24', 'type':'tv'}, 
 	{'ch':'ch_bb', 'index': 8, 'nameID': 30621, 'channelID':'bb', 'mode': 4, 'image':'bb.jpg', 'module':'reshet', 'resKey':'ch_bb_res', 'tvgID':'', 'type':'tv'}, 
 	{'ch':'ch_bbb', 'index': 8, 'nameID': 30625, 'channelID':'bbb', 'mode': 10, 'image':'bb.jpg', 'module':'tv', 'resKey':'', 'tvgID':'', 'type':'tv'}, 
 	{'ch':'ch_33', 'index': 9, 'nameID': 30609, 'channelID':'33', 'mode': 10, 'image':'makan.png', 'module':'kan', 'resKey':'ch_33_res', 'tvgID':'33', 'type':'tv'}, 
 	{'ch':'ch_33b', 'index': 9, 'nameID': 30641, 'channelID':'33b', 'mode': 10, 'image':'makan.png', 'module':'tv', 'resKey':'', 'tvgID':'33', 'type':'tv'}, 
-	{'ch':'ch_33b2', 'index': 9, 'nameID': 30642, 'channelID':'33b2', 'mode': 10, 'image':'makan.png', 'module':'tv', 'resKey':'', 'tvgID':'33', 'type':'tv'}, 
 	{'ch':'ch_66', 'index': 10, 'nameID': 30610, 'channelID':'17', 'mode': 10, 'image':'kabbalah.jpg', 'module':'kabbalah', 'resKey':'ch_66_res', 'tvgID':'66', 'type':'tv'}, 
 	{'ch':'ch_97', 'index': 11, 'nameID': 30612, 'channelID':'97', 'mode': 10, 'image':'hidabroot.jpg', 'module':'hidabroot', 'resKey':'ch_97_res', 'tvgID':'97', 'type':'tv'}, 
 	{'ch':'ch_99', 'index': 12, 'nameID': 30613, 'channelID':'99', 'mode': 10, 'image':'knesset.png', 'module':'knesset', 'resKey':'ch_99_res', 'tvgID':'99', 'type':'tv'}, 
-	#{'ch':'ch_n12', 'index': 13, 'nameID': 30636, 'channelID':'n12', 'mode': 10, 'image':'n12.png', 'module':'tv', 'resKey':'', 'tvgID':'', 'type':'tv'}, 
 	{'ch':'ch_ynet', 'index': 13, 'nameID': 30622, 'channelID':'ynet', 'mode': 10, 'image':'ynet.jpg', 'module':'tv', 'resKey':'ch_ynet_res', 'tvgID':'', 'type':'tv'}, 
-	{'ch':'ch_walla', 'index': 14, 'nameID': 30624, 'channelID':'live', 'mode': 10, 'image':'walla.png', 'module':'walla', 'resKey':'ch_walla_res', 'tvgID':'', 'type':'tv'}, 
+	{'ch':'ch_walla', 'index': 14, 'nameID': 30624, 'channelID':'live', 'mode': 10, 'image':'walla.png', 'module':'walla', 'resKey':'ch_walla_res', 'tvgID':'walla', 'type':'tv'}, 
 	{'ch':'ch_sport5', 'index': 15, 'nameID': 30632, 'channelID':'5studio', 'mode': 10, 'image':'Sport5.png', 'module':'sport5','resKey':'','tvgID':'5radio','type':'tv'},
 	{'ch':'ch_100', 'index': 16, 'nameID': 30726, 'channelID':'100fm', 'mode': 10, 'image':'100fm.jpg', 'module':'tv', 'resKey':'', 'tvgID':'100fm', 'type':'tv'},
 	{'ch':'ch_891', 'index': 17, 'nameID': 30734, 'channelID':'891fm', 'mode': 10, 'image':'891fm.png', 'module':'tv', 'resKey':'', 'tvgID':'891fm', 'type':'tv'},
 	{'ch':'ch_kabru', 'index': 18, 'nameID': 30629, 'channelID':'18', 'mode': 10, 'image':'kabbalah.jpg', 'module':'kabbalah', 'resKey':'ch_kabru_res', 'tvgID':'', 'type':'tv'},
 	{'ch':'ch_musayof', 'index': 19, 'nameID': 30635, 'channelID':'musayof', 'mode': 10, 'image':'musayof.jpg', 'module':'tv', 'resKey':'ch_musayof_res', 'tvgID':'', 'type':'tv'},
-	{'ch':'ch_i24news', 'index': 20, 'nameID': 30643, 'channelID':'i24news', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24news_res', 'tvgID':'i24news', 'type':'tv'},
-	#{'ch':'ch_refresh', 'index': 100, 'nameID': 30618, 'channelID':'refresh', 'mode': 6, 'image': icon, 'module':'', 'resKey':'', 'tvgID':'', 'type':'refresh'}
+	{'ch':'ch_i24news', 'index': 20, 'nameID': 30643, 'channelID':'i24news', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24news_res', 'tvgID':'i24news', 'type':'tv'}
 ]
 
 RadioChannels = [
@@ -63,16 +58,11 @@ RadioChannels = [
 	{'ch':'rd_891', 'index': 24, 'nameID': 30734, 'channelID':'891fm', 'mode': 11, 'image':'891fm.png', 'module':'radio', 'tvgID':'891fm', 'type':'radio'}, 
 	{'ch':'rd_1064', 'index': 25, 'nameID': 30737, 'channelID':'1064fm', 'mode': 11, 'image':'1064fm.jpg', 'module':'1064fm', 'tvgID':'', 'type':'radio'}, 
 	{'ch':'rd_makan', 'index': 26, 'nameID': 30714, 'channelID':'makan', 'mode': 11, 'image':'makan.png', 'module':'kan', 'tvgID':'makan', 'type':'radio'}, 
-	#{'ch':'rd_persian', 'index': 24, 'nameID': 30715, 'channelID':'persian', 'mode': 11, 'image':'persian.png', 'module':'kan', 'tvgID':'persian', 'type':'radio'}, 
-	#{'ch':'rd_nos', 'index': 25, 'nameID': 30720, 'channelID':'nos', 'mode': 11, 'image':'nos.png', 'module':'kan', 'tvgID':'', 'type':'radio'}, 
-	#{'ch':'rd_oriental', 'index': 26, 'nameID': 30722, 'channelID':'oriental', 'mode': 11, 'image':'oriental.png', 'module':'kan', 'tvgID':'', 'type':'radio'}, 
-	#{'ch':'rd_international', 'index': 27, 'nameID': 30716, 'channelID':'international', 'mode': 11, 'image':'kan-international.jpg', 'module':'kan', 'tvgID':'', 'type':'radio'}, 
 	{'ch':'rd_mizrahit', 'index': 27, 'nameID': 30733, 'channelID':'mizrahit', 'mode': 11, 'image':'mizrahit.png', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
 	{'ch':'rd_kolhay', 'index': 28, 'nameID': 30739, 'channelID':'kolhay', 'mode': 11, 'image':'kolhay.jpg', 'module':'radio', 'tvgID':'kolhay', 'type':'radio'}, 
-	{'ch':'rd_kolhaymusic', 'index': 28, 'nameID': 30740, 'channelID':'kolhaymusic', 'mode': 11, 'image':'kolhaymusic.jpg', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
-	{'ch':'rd_kolbarama', 'index': 29, 'nameID': 30741, 'channelID':'kolbarama', 'mode': 11, 'image':'kolbarama.jpg', 'module':'radio', 'tvgID':'kolbarama', 'type':'radio'}, 
-	{'ch':'rd_kolplay', 'index': 29, 'nameID': 30742, 'channelID':'kolplay', 'mode': 11, 'image':'kolplay.png', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
-	{'ch':'rd_gly', 'index': 30, 'nameID': 30743, 'channelID':'gly', 'mode': 11, 'image':'gly.jpg', 'module':'radio', 'tvgID':'gly', 'type':'radio'}, 
-	{'ch':'rd_ynet', 'index': 31, 'nameID': 30744, 'channelID':'ynet', 'mode': 11, 'image':'ynet.jpg', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
-	#{'ch':'rd_refresh', 'index': 100, 'nameID': 30723, 'channelID':'refresh', 'mode': 6, 'image': icon, 'module':'', 'tvgID':'', 'type':'refresh'}
+	{'ch':'rd_kolhaymusic', 'index': 29, 'nameID': 30740, 'channelID':'kolhaymusic', 'mode': 11, 'image':'kolhaymusic.jpg', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
+	{'ch':'rd_kolbarama', 'index': 30, 'nameID': 30741, 'channelID':'kolbarama', 'mode': 11, 'image':'kolbarama.jpg', 'module':'radio', 'tvgID':'kolbarama', 'type':'radio'}, 
+	{'ch':'rd_kolplay', 'index': 31, 'nameID': 30742, 'channelID':'kolplay', 'mode': 11, 'image':'kolplay.png', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
+	{'ch':'rd_gly', 'index': 32, 'nameID': 30743, 'channelID':'gly', 'mode': 11, 'image':'gly.jpg', 'module':'radio', 'tvgID':'gly', 'type':'radio'},
+	{'ch':'rd_fm995', 'index': 33, 'nameID': 30745, 'channelID':'fm995', 'mode': 11, 'image':'fm95.5.png', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
 ]

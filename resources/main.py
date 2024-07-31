@@ -62,12 +62,8 @@ def LiveChannels():
 	nowEPG = epg.GetNowEPG()
 	channels = GetUserChannels(type='tv')
 	for channel in channels:
-		if channel.get('type') == 'refresh': 
-			name = common.GetLabelColor(common.GetLocaleString(channel['nameID']), bold=True, color="none")
-			common.addDir(name, 'Container.Refresh', channel['mode'], channel['image'], infos={"Title": name}, moreData=';noexit', isFolder=False)
-		else:
-			programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
-			LiveChannel(common.GetLocaleString(channel['nameID']), channel['channelID'], channel['mode'], channel['image'], channel['module'], contextMenu=[], resKey=channel['resKey'], programs=programs, tvgID=channel['tvgID'])
+		programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
+		LiveChannel(common.GetLocaleString(channel['nameID']), channel['channelID'], channel['mode'], channel['image'], channel['module'], contextMenu=[], resKey=channel['resKey'], programs=programs, tvgID=channel['tvgID'])
 
 def LiveChannel(name, url, mode, iconimage, module, contextMenu=[], choose=True, resKey='', bitrate='', programs=[], tvgID='', addFav=True):
 	displayName = common.GetLabelColor(name, keyColor="chColor", bold=True)
@@ -147,12 +143,8 @@ def Radios():
 	nowEPG = epg.GetNowEPG()
 	channels = GetUserChannels(type='radio') 
 	for channel in channels:
-		if channel.get('type') == 'refresh': 
-			name = common.GetLabelColor(common.GetLocaleString(channel['nameID']), bold=True, color="none")
-			common.addDir(name, 'Container.Refresh', channel['mode'], channel['image'], infos={"Title": name}, moreData=';noexit', isFolder=False)
-		else:
-			programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
-			LiveChannel(common.GetLocaleString(channel['nameID']), channel['channelID'], channel['mode'], channel['image'], channel['module'], contextMenu=[], choose=False, programs=programs, tvgID=channel['tvgID'])
+		programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
+		LiveChannel(common.GetLocaleString(channel['nameID']), channel['channelID'], channel['mode'], channel['image'], channel['module'], contextMenu=[], choose=False, programs=programs, tvgID=channel['tvgID'])
 
 def RadioVODs():
 	name = common.GetLabelColor("תכניות רדיו - כאן", bold=True, color="none")

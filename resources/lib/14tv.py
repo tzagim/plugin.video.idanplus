@@ -7,6 +7,7 @@ from resources.lib import cache as  cache
 module = '14tv'
 moduleIcon = common.GetIconFullPath("14tv.png")
 baseUrl = 'https://www.now14.co.il'
+userAgent = common.GetUserAgent()
 
 def GetCategoriesList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
@@ -41,13 +42,6 @@ def GetEpisodesList(url, image):
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
 	#text = common.OpenURL(url)
 	text = cache.get(common.OpenURL, 24, url, table='pages')
-	#lastEpisode = re.compile('<div class=\'kaltura-zone\'>.*?src=".*?data-guid=(.*?)"></iframe>.*?<h1.*?>(.*?)</h1>.*?<div class="date-zone">.*?\((.*?)\).*?</div>', re.S).findall(text)
-	#videoid = lastEpisode[0][0].strip()
-	#date = lastEpisode[0][2].replace('/', '.')
-	#name = common.GetLabelColor('{0} - {1}'.format(common.UnEscapeXML(lastEpisode[0][1].strip()), date), keyColor="chColor")
-	#iconimage = 'https://frankly-vod.akamaized.net/channel14/transcoded/{0}/poster.jpg'.format(videoid)
-	#link = 'https://frankly-vod.akamaized.net/channel14/transcoded/{0}/hls/master.m3u8'.format(videoid)
-	#common.addDir(name, link, 2, iconimage, infos={"Title": name, "Aired": date}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=set_14tv_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(iconimage), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 	episodes = re.compile('<div class="katan-unit(.*?)</div>\s*</div>\s*</div>', re.S).findall(text)
 	for episode in episodes:
 		match = re.compile('data-videoid="(.*?)".*?src=["\'](.*?)["\'].*?<div class="the-title">(.*?)</div>.*?<div class="episode_air_date"\s*?>(.*?)</div>', re.S).findall(episode)
@@ -60,13 +54,17 @@ def GetEpisodesList(url, image):
 			common.addDir(name, link, 2, iconimage, infos={"Title": name, "Aired": date}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=set_14tv_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(iconimage), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 
 def Play(name, url, iconimage, quality='best'):
-	userAgent = common.GetUserAgent()
 	link = common.GetStreams(url, headers={"User-Agent": userAgent}, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
 def Watch(name, iconimage, quality='best'):
-	url = 'https://now14.g-mana.live/media/91517161-44ab-4e46-af70-e9fe26117d2e/mainManifest.m3u8'
+	url = 'https://ch14-channel14-content.akamaized.net/hls/live/2104807/CH14_CHANNEL14/master.m3u8'
+	try:
+		data = common.OpenURL('https://insight-api-channel14.univtec.com/cms/interface/channels/play?relations=true&filter=guid||$eq||b676b906-5625-48af-a331-11a5d22e151b', headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
+		url = data.get('vod').get('hlsMaster')
+	except Exception as ex:
+		xbmc.log(str(ex), 3)
 	Play(name, url, iconimage, quality)
 
 def Run(name, url, mode, iconimage='', moreData=''):

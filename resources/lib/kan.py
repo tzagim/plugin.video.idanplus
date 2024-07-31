@@ -429,7 +429,7 @@ def WatchLive(url, name='', iconimage='', quality='best', type='video'):
 		#'music': '{0}/radio/player.aspx?stationid=7'.format(baseUrl),
 		'music': 'https://kankolhamusica.media.kan.org.il/hls/live/2024817/2024817/playlist.m3u8',
 		#'kankids': 'https://www.kankids.org.il/radio/radio-kids.aspx',
-		'kankids': '',
+		'kankids': 'https://kankids.media.kan.org.il/hls/live/2024820/2024820/playlist.m3u8',
 		#'reka': '{0}/radio/player.aspx?stationid=10'.format(baseUrl),
 		'reka': 'https://kanreka.media.kan.org.il/hls/live/2024815/2024815/playlist.m3u8',
 		#'makan': '{0}/radio/player.aspx?stationId=13'.format(baseUrl)

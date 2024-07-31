@@ -259,10 +259,6 @@ msgctxt "#30613"
 msgid "כנסת 99"
 msgstr ""
 
-msgctxt "#30618"
-msgid "רענון רשימה"
-msgstr ""
-
 msgctxt "#30619"
 msgid "ערוץ הקניות 21"
 msgstr ""
@@ -315,32 +311,16 @@ msgctxt "#30635"
 msgid "מוסיוף"
 msgstr ""
 
-msgctxt "#30636"
-msgid "חדשות N12"
-msgstr ""
-
 msgctxt "#30637"
 msgid "כאן 11 - לקויי שמיעה"
-msgstr ""
-
-msgctxt "#30638"
-msgid "כאן 11 - דיילימושן"
 msgstr ""
 
 msgctxt "#30639"
 msgid "כאן חינוכית 23 - גיבוי"
 msgstr ""
 
-msgctxt "#30640"
-msgid "כאן חינוכית 23 - דיילימושן"
-msgstr ""
-
 msgctxt "#30641"
 msgid "מכאן 33 - גיבוי"
-msgstr ""
-
-msgctxt "#30642"
-msgid "מכאן 33 - דיילימושן"
 msgstr ""
 
 msgctxt "#30643"
@@ -419,26 +399,6 @@ msgctxt "#30714"
 msgid "כאן مكان"
 msgstr ""
 
-msgctxt "#30715"
-msgid "כאן فارسی"
-msgstr ""
-
-msgctxt "#30720"
-msgid "כאן נוסטלגי"
-msgstr ""
-
-msgctxt "#30722"
-msgid "כאן ים תיכוני"
-msgstr ""
-
-msgctxt "#30716"
-msgid "כאן תל אביב 2019"
-msgstr ""
-
-msgctxt "#30723"
-msgid "רענון רשימה"
-msgstr ""
-
 msgctxt "#30724"
 msgid "90FM רדיו תשעים"
 msgstr ""
@@ -515,8 +475,8 @@ msgctxt "#30743"
 msgid "גלי ישראל"
 msgstr ""
 
-msgctxt "#30744"
-msgid "Ynet Radio"
+msgctxt "#30745"
+msgid "95.5FM רדיו"
 msgstr ""
 
 msgctxt "#30800"
@@ -569,18 +529,6 @@ msgstr ""
 
 msgctxt "#32000"
 msgid "כללי"
-msgstr ""
-
-msgctxt "#32001"
-msgid "ניגון דרך הרחבת YouTube"
-msgstr ""
-
-msgctxt "#32002"
-msgid "plugin.video.youtube"
-msgstr ""
-
-msgctxt "#32003"
-msgid "plugin.video.MyYoutube"
 msgstr ""
 
 msgctxt "#32004"

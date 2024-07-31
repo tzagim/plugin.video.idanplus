@@ -11,7 +11,6 @@ endings = 'platform=responsive'
 programUrl = "{0}/_next/data/4.7.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
 UA = common.GetUserAgent()
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
 
 def GetJson(url):
 	resultJSON = common.OpenURL(url, headers={"User-Agent": UA}, responseMethod='json')
