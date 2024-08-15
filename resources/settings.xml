@@ -130,6 +130,7 @@
 	<category label="30200">
 		<setting id="reshetSortBy" type="enum" label="30001" lvalues="30002|30003" default="0" />
 		<setting id="reshet_res" type="text" label="30023" default="" />
+		<setting id="reshetSiteBuildID" type="text" option="hidden" visible="false" default="" />
 	</category>
 	<category label="30500">
 		<setting id="14tvSortBy" type="enum" label="30001" lvalues="30002|30003" default="0" />

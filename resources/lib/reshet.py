@@ -402,7 +402,6 @@ def GetSeriesList(url, iconimage):
 		result = cache.get(GetUrlJson, 0, url, root, table='pages')
 	if len(result) < 1:
 		return
-	buildId = result['buildId']
 	result = result['props']['pageProps']['page']
 	grids_arr = []
 	grids = result.get('Content', {}).get('PageGrid', {})
@@ -410,7 +409,10 @@ def GetSeriesList(url, iconimage):
 		for serie in grid.get('shows', {}):
 			try:
 				if serie['url'] == "":
-					continue
+					if serie['id'] == '613':
+						serie['url'] = '/all-shows/vort/'
+					else:
+						continue
 				name = common.encode(serie['title'], 'utf-8')
 				name = common.GetLabelColor(name, keyColor="prColor", bold=True)
 				grids_arr.append((name, serie['url'], serie['poster'], {"Title": name, "Plot": name,'mediatype': 'movie'}))
@@ -418,23 +420,22 @@ def GetSeriesList(url, iconimage):
 				xbmc.log('SerieID: {0}\n{1}'.format(serie['id'], str(ex)), 3)
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
-		common.addDir(name, '{0}{1}'.format(baseUrl, link), 1, str(icon), infos=infos, moreData=buildId, module=module)
+		common.addDir(name, '{0}{1}'.format(baseUrl, link), 1, str(icon), infos=infos, module=module)
 
-def GetSeasonList(url, iconimage, buildId):
+def GetSeasonList(url, iconimage):
 	if len(url) > 0 and url[-1] != '/':
 		url += '/'
 	serie = url[url.rfind('/', 0, len(url)-1)+1:-1]
-	if len(buildId) < 1:
-		#result = GetUrlJson('{0}/all-shows/all-shows-list/'.format(baseUrl), root=True)
-		root=True
-		result = cache.get(GetUrlJson, 24, '{0}/all-shows/all-shows-list/'.format(baseUrl),  root, table='pages')
-		if result==[]:
-			result = cache.get(GetUrlJson, 0, '{0}/all-shows/all-shows-list/'.format(baseUrl),  root, table='pages')
-		if len(result) < 1:
-			return
-		buildId = result['buildId']
+	buildId = common.GetAddonSetting("reshetSiteBuildID")
 	url = "{0}/_next/data/{1}/he/all-shows/{2}.json?all=all-shows&all={2}".format(baseUrl, buildId, serie)
 	result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
+	if result is None:
+		result = GetUrlJson('{0}/all-shows/all-shows-list/'.format(baseUrl), root=True)
+		buildId = result['buildId']
+		common.SetAddonSetting("reshetSiteBuildID", buildId)
+		url = "{0}/_next/data/{1}/he/all-shows/{2}.json?all=all-shows&all={2}".format(baseUrl, buildId, serie)
+		result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
+	
 	grids = result['pageProps']['page']['Content']['PageGrid']
 	grids_arr = []
 	for grid in grids:
@@ -484,7 +485,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 0:
 		GetSeriesList(url, moduleIcon)					# Series
 	elif mode == 1:
-		GetSeasonList(url, iconimage, moreData)			# Seasons
+		GetSeasonList(url, iconimage)					# Seasons
 	elif mode == 2:
 		GetEpisodesList(url, iconimage, moreData)		# Episodes
 	elif mode == 3:

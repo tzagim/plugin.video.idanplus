@@ -264,11 +264,11 @@ msgid "ערוץ הקניות 21"
 msgstr ""
 
 msgctxt "#30621"
-msgid "האח הגדול 26 - מנותקים"
+msgid "האח הגדול 26"
 msgstr ""
 
 msgctxt "#30625"
-msgid "האח הגדול 26 - מנותקים - גיבוי"
+msgid "האח הגדול 26 - גיבוי"
 msgstr ""
 
 msgctxt "#30622"
