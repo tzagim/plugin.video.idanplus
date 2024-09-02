@@ -1,0 +1,94 @@
+name: Fetch and Unzip Latest Plugin
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+
+jobs:
+  fetch_and_unzip:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up jq for JSON parsing
+      run: sudo apt-get install -y jq
+
+    - name: Get last version from ver.txt
+      id: get_version
+      run: |
+        if [ -f ver.txt ]; then
+          echo "VERSION=$(cat ver.txt)" >> $GITHUB_ENV
+        else
+          echo "VERSION=none" >> $GITHUB_ENV
+        fi
+
+    - name: List and get latest ZIP file
+      id: get_latest_zip
+      run: |
+        response=$(curl -s https://api.github.com/repos/Fishenzon/repo/contents/zips/plugin.video.idanplus)
+        latest_version=$(echo "$response" | jq -r '.[] | select(.name | test("plugin.video.idanplus-.*\\.zip$")) | .name' | sort -V | tail -n 1 | sed -E 's/plugin.video.idanplus-(.*)\.zip/\1/')
+
+        if [ -z "$latest_version" ]; then
+          echo "No valid ZIP files found."
+          exit 1
+        fi
+
+        echo "Latest version: $latest_version"
+
+        if [ "$latest_version" == "$VERSION" ]; then
+          echo "No new version found. Exiting."
+          echo "BUILD_STATUS=none" >> $GITHUB_ENV
+          exit 0
+        fi
+
+        echo "$latest_version" > ver.txt
+
+        latest_url=$(echo "$response" | jq -r --arg version "$latest_version" '.[] | select(.name == ("plugin.video.idanplus-" + $version + ".zip")) | .download_url')
+
+        if [ -z "$latest_url" ]; then
+          echo "Latest ZIP URL not found."
+          exit 1
+        fi
+
+        echo "LATEST_URL=$latest_url" >> $GITHUB_ENV
+        echo "LATEST_VERSION=$latest_version" >> $GITHUB_ENV
+
+    - name: Download latest plugin.video.idanplus ZIP
+      id: download_zip
+      if: env.BUILD_STATUS != 'none'
+      run: |
+        if [ -n "$LATEST_URL" ]; then
+          curl -L -o plugin.video.idanplus.zip "$LATEST_URL"
+        else
+          echo "LATEST_URL is not set. Exiting."
+          exit 1
+        fi
+
+    - name: Unzip file if new
+      if: env.BUILD_STATUS != 'none'
+      run: |
+        if [ -f plugin.video.idanplus.zip ]; then
+          unzip -o plugin.video.idanplus.zip -d .
+          ls -la
+        else
+          echo "plugin.video.idanplus.zip does not exist. Exiting."
+          exit 1
+        fi
+
+    - name: Clean up temporary files
+      run: |
+        rm -f plugin.video.idanplus.zip
+
+    - name: Commit and push unzipped files
+      if: env.BUILD_STATUS != 'none' && github.ref == 'refs/heads/main'
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        git add .
+        git commit -m "${{ env.LATEST_VERSION }}"
+        git push
