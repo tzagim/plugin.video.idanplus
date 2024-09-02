@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 */6 * * *'  # Runs every 6 hours
+    - cron: '0 */3 * * *'  # Runs every 6 hours
 
 jobs:
   fetch_and_unzip:
@@ -92,3 +92,9 @@ jobs:
         git add .
         git commit -m "${{ env.LATEST_VERSION }}"
         git push
+
+    - name: Prevent workflow deactivation
+      uses: gautamkrishnar/keepalive-workflow@v2
+      with:
+        committer_username: "tzagim"
+        committer_email: "username@users.noreply.github.com"
