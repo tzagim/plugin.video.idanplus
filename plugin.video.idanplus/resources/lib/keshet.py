@@ -8,7 +8,7 @@ module = 'keshet'
 moduleIcon = common.GetIconFullPath("mako.png")
 baseUrl = 'https://www.mako.co.il'
 endings = 'platform=responsive'
-programUrl = "{0}/_next/data/4.7.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
+programUrl = "{0}/_next/data/5.9.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
 UA = common.GetUserAgent()
 
@@ -154,12 +154,15 @@ def GetChannels(url, iconimage):
 def WatchLive(url, name='', iconimage='', quality='best'):
 	channels = {
 		'12': '{0}/mako-vod-live-tv/VOD-6540b8dcb64fd31006.htm'.format(baseUrl),
+		'12b': 'vcmid=1e2258089b67f510VgnVCM2000002a0c10acRCRD&videoChannelId=d1d6f5dfc8517810VgnVCM100000700a10acRCRD',
 		'12c': '{0}/mako-vod-live-tv/VOD-319a699f834e661006.htm'.format(baseUrl),
 		'24': '{0}/mako-vod-live-tv/VOD-b3480d2eff3fd31006.htm'.format(baseUrl),
 		'2025': '{0}/mako-vod-live-tv/VOD-7469dcd71dcb761006.htm'.format(baseUrl)
 	}
-	#PlayItem(channels[url], name, iconimage, quality, swichCdn=True)
-	PlayItem(channels[url], name, iconimage, quality='auto', swichCdn=True)
+	if url == '12b':
+		Play(channels[url], name, iconimage, quality, swichCdn=True)
+	else:
+		PlayItem(channels[url], name, iconimage, quality, swichCdn=True)
 
 def PlayItem(url, name='', iconimage='', quality='best', swichCdn=False):
 	prms = GetJson("{0}?{1}".format(url, endings))
@@ -177,7 +180,7 @@ def Play(url, name='', iconimage='', quality='best', swichCdn=False):
 	dv = url[url.find('vcmid=')+6: url.find('&videoChannelId=')]
 	ch = url[url.find('&videoChannelId=')+16:]
 	media = common.OpenURL('{0}/AjaxPage?jspName=playlist.jsp&vcmid={1}&videoChannelId={2}&galleryChannelId={1}&isGallery=false&consumer=web_html5&encryption=no'.format(baseUrl, dv, ch), headers=headers, responseMethod='json')['media']
-	cdns = ['AKAMAI', 'CASTTIME'] if swichCdn else ['CASTTIME', 'AKAMAI']
+	cdns = ['AKAMAI', 'AWS'] if swichCdn else ['AWS', 'AKAMAI']
 	link, cookie_jar = GetLink(media, cdns[0], dv, headers, quality)
 	if link is None:
 		link, cookie_jar = GetLink(media, cdns[1], dv, headers, quality)

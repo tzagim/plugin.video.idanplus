@@ -223,6 +223,10 @@ msgctxt "#30603"
 msgid "קשת 12"
 msgstr ""
 
+msgctxt "#30605"
+msgid "קשת 12 - גיבוי"
+msgstr ""
+
 msgctxt "#30626"
 msgid "קשת 12 - לקויי שמיעה"
 msgstr ""

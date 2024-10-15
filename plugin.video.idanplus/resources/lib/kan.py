@@ -11,13 +11,21 @@ baseKidsUrl = 'https://www.kankids.org.il'
 archiveUrl = 'https://archive.kan.org.il'
 userAgent = common.GetUserAgent()
 headers={"User-Agent": userAgent}
-kanSeriesNamesFile = os.path.join(common.profileDir, 'kanSeriesNames.json')
-kanSeriesNamesURL = 'https://bit.ly/kanSeriesNames'
+kanSeriesFile = os.path.join(common.profileDir, 'kanSeries.json')
+kanSeriesURL = 'https://bit.ly/kanSeries'
+
+def GetImageLink(link):
+	if link.startswith('/'):
+		link = '{0}{1}'.format(baseUrl, link)
+	#return link
+	return link[:link.find('?')].replace('https://','http://') 
 
 def GetCategoriesList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
 	name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
 	common.addDir(name, "toggleSortingMethod", 4, iconimage, {"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
+	name = common.GetLabelColor("כל התוכניות - קטגוריות", bold=True, color="none")
+	common.addDir(name, '{0}/lobby/kan-box'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30602))
 	name = common.GetLabelColor("כל התוכניות", bold=True, color="none")
 	common.addDir(name, '{0}/lobby/kan11'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30602))
 	name = common.GetLabelColor("תוכניות אקטואליה", bold=True, color="none")
@@ -27,7 +35,7 @@ def GetCategoriesList(iconimage):
 	name = common.GetLabelColor(common.GetLocaleString(30607), bold=True, color="none")
 	common.addDir(name, baseKidsUrl, 5, common.GetIconFullPath("23tv.jpg"), infos={"Title": name}, module=module, moreData=common.GetLocaleString(30607))
 	name = common.GetLabelColor("כאן - ארכיון", bold=True, color="none")
-	common.addDir(name, archiveUrl, 41, iconimage, infos={"Title": name}, module=module, moreData="כאן ארכיון")
+	common.addDir(name, '{0}/lobby/archive/'.format(baseUrl), 41, iconimage, infos={"Title": name}, module=module, moreData="כאן ארכיון")
 	name = common.GetLabelColor("תכניות רדיו", bold=True, color="none")
 	common.addDir(name, '', 21, iconimage, infos={"Title": name}, module=module)
 	name = common.GetLabelColor("פודקאסטים", bold=True, color="none")
@@ -42,7 +50,7 @@ def GetSeriesList(url, catName):
 		text = cache.get(common.GetCF, 0, url, userAgent, table='pages')
 	#if not ('kankids' in url):
 	domain = baseKidsUrl if 'kankids' in url else baseUrl
-	kanSeriesNames = common.GetUpdatedList(kanSeriesNamesFile, kanSeriesNamesURL, headers={'Referer': 'http://idan-{0}.Kodi-{1}.fish'.format(common.AddonVer, common.GetKodiVer())}, deltaInSec=86400, isZip=True)
+	kanSeries = common.GetUpdatedList(kanSeriesFile, kanSeriesURL, headers={'Referer': 'http://idan-{0}.Kodi-{1}.fish'.format(common.AddonVer, common.GetKodiVer())}, deltaInSec=86400, isZip=True)
 	matches = re.compile('digitalSeries:.*?\[(.*?)}\]', re.S).findall(text)
 	if len(matches) > 0:
 		matches = json.loads('{"series":['+matches[0].strip()+'}]}')
@@ -50,60 +58,119 @@ def GetSeriesList(url, catName):
 			link = serie['Url']
 			if not link.startswith('http'):
 				link = '{0}{1}'.format(domain, link)
-			image = common.quoteNonASCII(serie['Image'])
-			image = image[:image.find('?')].replace('https://','http://')
-			description = serie['Description']
-			name = kanSeriesNames.get(link)
-			if name is None:
+			kanSerie = kanSeries.get(link)
+			if kanSerie is not None:
+				image = GetImageLink(common.quoteNonASCII(kanSerie['image']))
+				description = kanSerie['description']
+				name = kanSerie['name']
+			else:
+				image = GetImageLink(common.quoteNonASCII(serie['Image']))
+				description = serie['Description']
 				name = link[link.rfind('/', 0, len(link)-1)+1:len(link)-1].replace('-', ' ')
 			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
 			common.addDir(name, link, 7, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
 		return
 	else:
 		links = []
-		#matches = re.compile('<div class="block-media card-media ">(.*?)</button>', re.S).findall(text)
-		matches = re.compile('"background-image: url\((.*?)\).*?"h1">(.*?)</h.*?"info-description">(.*?)</div>.*?<a href="(.*?)"', re.S).findall(text)
-		for match in matches:
-			link = match[3]
+		matches = re.compile('<main id="main"(.*)</main>', re.S).findall(text)
+		if len(matches) < 1:
+			return
+		
+		series = re.compile('<div class="vod-section(.*?)<div class="section-content">', re.S).findall(matches[0])
+		series = re.compile('<div aria-label="(.*?)">.*?url\((.*?)">.*?<div class="info-description">(.*?)</div>\s*<a href="(.*?)"', re.S).findall(series[0])
+		for name, image, description, link in series:
+			if not link.startswith('http'):
+				link = '{0}{1}'.format(domain, link)
 			if link in links:
 				continue
 			links += [link]
-			image = common.quoteNonASCII(common.UnEscapeXML(match[0])).replace('https://','http://')
-			name = common.GetLabelColor(common.UnEscapeXML(match[1].strip()), keyColor="prColor", bold=True)
-			description = common.UnEscapeXML(match[2].strip())
+			image = GetImageLink(common.quoteNonASCII(image))
+			name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="prColor", bold=True)
+			description = common.UnEscapeXML(description.strip())
 			common.addDir(name, link, 7, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
-		matches = re.compile('"section-title">עוד אקטואליה(.*?)</ul>', re.S).findall(text)
-		matches = re.compile('<li>.*?<a href="(.*?)".*?<img src="(.*?)".*?"font-weight-normal">(.*?)</.*?</li>', re.S).findall(matches[0])
-		for match in matches:
-			link = match[0]
-			if link in links:
-				continue
-			links += [link]
-			image = common.quoteNonASCII(common.UnEscapeXML(match[1])).replace('https://','http://')
-			description = common.UnEscapeXML(match[2].strip())
-			name = common.GetLabelColor(description, keyColor="prColor", bold=True)
-			common.addDir(name, link, 7, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+		categories = re.compile('<div class="section elem"(.*)<div class="ec-section', re.S).findall(matches[0])
+		if len(categories) > 0:
+			categories = re.compile('<div class="block-list-item">.*?<a href="(.*?)" class="unstyled-link">(.*?)</a>', re.S).findall(categories[0])
+			for link, name in categories:
+				if not link.startswith('http'):
+					link = '{0}{1}'.format(domain, link)
+				if link in links:
+					continue
+				links += [link]
+				name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="none", bold=True)
+				common.addDir(name, link, 8, image, infos={"Title": name, "Plot": name}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+			return
+		else:
+			matches = re.compile('"section-title">עוד אקטואליה(.*?)</ul>', re.S).findall(text)
+			matches = re.compile('<li>.*?<a href="(.*?)".*?<img src="(.*?)".*?"font-weight-normal">(.*?)</.*?</li>', re.S).findall(matches[0])
+			for link, image, description in matches:
+				if not link.startswith('http'):
+					link = '{0}{1}'.format(domain, link)
+				if link in links:
+					continue
+				links += [link]
+				kanSerie = kanSeries.get(link)
+				if kanSerie is not None:
+					image = GetImageLink(common.quoteNonASCII(kanSerie['image']))
+					description = kanSerie['description']
+					name = kanSerie['name']
+				else:
+					name = description
+				image = GetImageLink(common.quoteNonASCII(common.UnEscapeXML(image)))
+				description = common.UnEscapeXML(description.strip())
+				name = common.GetLabelColor(name, keyColor="prColor", bold=True)
+				common.addDir(name, link, 7, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+			return
+
+def GetSubCategories(url, iconimage, catName):
+	text = cache.get(common.GetCF, 24, url, userAgent, table='pages')
+	if text==[]:
+		text = cache.get(common.GetCF, 0, url, userAgent, table='pages')
+	domain = baseKidsUrl if 'kankids' in url else baseUrl
+	kanSeries = common.GetUpdatedList(kanSeriesFile, kanSeriesURL, headers={'Referer': 'http://idan-{0}.Kodi-{1}.fish'.format(common.AddonVer, common.GetKodiVer())}, deltaInSec=86400, isZip=True)
+	links = []
+	matches = re.compile('<div class="card">\s*<a href="(.*?)".*?<img src="(.*?)".*?"card-title">(.*?)<', re.S).findall(text)
+	if len(matches) < 1:
+		return
+	for link, image, name in matches:
+		if not link.startswith('http'):
+			link = '{0}{1}'.format(domain, link)
+		if link in links:
+			continue
+		links += [link]
+		kanSerie = kanSeries.get(link)
+		if kanSerie is not None:
+			image = GetImageLink(common.quoteNonASCII(kanSerie['image']))
+			description = kanSerie['description']
+			name = kanSerie['name']
+		else:
+			description = name
+		image = GetImageLink(common.quoteNonASCII(common.UnEscapeXML(image)))
+		description = common.UnEscapeXML(description.strip())
+		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
+		common.addDir(name, link, 7, image, infos={"Title": name, "Plot": description}, module=module, moreData=catName, urlParamsData={'catName': catName})
+	
+	pages = int(re.compile('name="NumberOfPages" type="hidden" value="(\d*)"').findall(text)[0])
+	if pages < 2:
 		return
 	
-	'''
-	text = common.OpenURL(url, headers=headers)
-	matches = re.compile('<div class="component_sm_item news">(.*?)</a>', re.S).findall(text)
-	for match in matches:
-		m = re.compile('<a.*?href="(.+?)".+?"background-image: url\(\'(.+?)\'\);.*?"\s*title="(.*?)">.*?"news_up_txt">(.*?)</div>', re.S).findall(match)
-		AddSeries(m, catName)
+	j = url.find('?')
+	if j < 0:
+		_url = url
+		page = 1
+	else:
+		_url = url[:j]
+		page = int(re.compile('page=(\d*)').findall(url)[0])
 	
-	matches = re.compile('<a class="magazine_info_link w-inline-block.+?href=\'(.+?)\'.+?"background-image: url\(\'(.+?)\'\);.+?"magazine_info_title">(.*?)</h2>.*?"magazine_info_txt">(.*?)</div>', re.S|re.I).findall(text)
-	AddSeries(matches, catName)
-	for match in matches:
-		item = match[0]
-		description = match[1]
-		m = re.compile('url\(\'(.+?)\'\);.+?href=".+?/Program/\?catId=(.+?)["\'].+?class="it_small_title">(.*?)</div>', re.S|re.I).findall(item)
-		if len(m) == 0:
-			continue
-		iconimage, id, name = m[0]
-		name = common.GetLabelColor(name.strip(), keyColor="prColor", bold=True)
-		common.addDir(name, id, 6, iconimage, infos={"Title": name, "Plot": description.strip(),'mediatype': 'movie'}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
-	'''
+	if page > 1:
+		name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
+		common.addDir(name, '{0}?page={1}'.format(_url, page-1), 9, iconimage, infos={"Title": name, "Plot": name}, module=module, moreData=catName)
+	if pages > page:
+		name = common.GetLabelColor(common.GetLocaleString(30012), color="green")
+		common.addDir(name, '{0}?page={1}'.format(_url, page+1), 9, iconimage, infos={"Title": name, "Plot": name}, module=module, moreData=catName)
+	if pages > 1:
+		name = common.GetLabelColor(common.GetLocaleString(30013), color="green")
+		common.addDir(name, '{0}?p={1}&pages={2}'.format(_url, page, pages), 45, iconimage, infos={"Title": name, "Plot": name}, module=module, moreData=catName)
 
 def GetSubCategoriesList(url, iconimage):
 	name = common.GetLabelColor("קטנטנים", bold=True, color="none")
@@ -183,7 +250,7 @@ def GetEpisodesList(url, iconimage, moreData=''):
 			name = common.GetLabelColor(common.UnEscapeXML(name[0].strip()), keyColor="chColor")
 			description = re.compile('"card-text">(.*?)</div>', re.S).findall(episode[2])
 			description = common.UnEscapeXML(description[0].strip()) if len(description) > 0 else ''
-			image = common.quoteNonASCII(common.UnEscapeXML(episode[1])).replace('https://','http://')
+			image = GetImageLink(common.quoteNonASCII(common.UnEscapeXML(episode[1])))
 			#cfHeaders = common.GetCFheaders(image)
 			#xbmc.log(str(cfHeaders), 5)
 			#cookies =  re.compile('__cf_bm=(.*?);.*?_cfuvid=(.*?);').findall(cfHeaders['Set-Cookie'])
@@ -235,7 +302,7 @@ def GetKidsEpisodesList(data, iconimage, moreData=''):
 				if 'kaltura' in link:
 					link = re.compile('entry_id=(.*?)"').findall(link+'"')[0]
 					link = 'kaltura:{0}'.format(link)
-				common.addDir(name, link, 3, image.replace('https://','http://'), infos={"Title": name, "Plot": description}, module=module, isFolder=False, isPlayable=True, urlParamsData={'catName': 'חינוכית 23'})
+				common.addDir(name, link, 3, GetImageLink(image), infos={"Title": name, "Plot": description}, module=module, isFolder=False, isPlayable=True, urlParamsData={'catName': 'חינוכית 23'})
 		if len(matches) < 9:
 			if page > pagesPerList:
 				name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
@@ -479,7 +546,7 @@ def GetPodcastsList():
 	matches = re.compile('class="podcast-item".*?<a href="(.*?)".*?title="(.*?)".*?src="(.*?)".*?"text">(.*?)</div>', re.S).findall(text)
 	for link, name, image, description in matches:
 		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
-		common.addDir(name, link, 32, common.UnEscapeXML(image).replace('https://','http://'), infos={"Title": name, "Plot": common.UnEscapeXML(description.strip())}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
+		common.addDir(name, link, 32, GetImageLink(common.UnEscapeXML(image)), infos={"Title": name, "Plot": common.UnEscapeXML(description.strip())}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
 
 def GetPodcastEpisodesList(data, iconimage):
 	d = data.split(';')
@@ -503,7 +570,7 @@ def GetPodcastEpisodesList(data, iconimage):
 				name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="chColor")
 				if not link.startswith('http'):
 					link = '{0}{1}'.format(domain, link)
-				common.addDir(name, link, 3, common.UnEscapeXML(image).replace('https://','http://'), infos={"Title": name, "Plot": common.UnEscapeXML(description.strip())}, module=module, isFolder=False, isPlayable=True, urlParamsData={'catName': 'כאן פודקאסטים'})
+				common.addDir(name, link, 3, GetImageLink(common.UnEscapeXML(image)), infos={"Title": name, "Plot": common.UnEscapeXML(description.strip())}, module=module, isFolder=False, isPlayable=True, urlParamsData={'catName': 'כאן פודקאסטים'})
 		if len(body) < 8:
 			if page > pagesPerList:
 				name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
@@ -528,19 +595,42 @@ def GetKidsPodcastsList():
 	for image, link, name, description in matches:
 		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
 		description = common.UnEscapeXML(description.strip())
-		image = common.quoteNonASCII(common.UnEscapeXML(image)).replace('https://','http://')
+		image = GetImageLink(common.quoteNonASCII(common.UnEscapeXML(image)))
 		common.addDir(name, '{0}{1}'.format(baseKidsUrl, link), 32, image, infos={"Title": name, "Plot": description.replace('&nbsp;', '').strip()}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
 
 def GetArchiveCategoriesList(url, iconimage, catName):
 	text = common.GetCF(url, userAgent)
 	#text = common.OpenURL(url)
-	matches = re.compile('id="mainNav">(.*?)</ul>', re.S).findall(text)
-	matches = re.compile('<a class="nav-link" href="(.*?)".*?>\s*?(.*?)</a>', re.S).findall(matches[0])
-	for url, name in matches:
-		if url == '/main/about/' or url == '/main/zinuk-podcast/':
+	domain = baseKidsUrl if 'kankids' in url else baseUrl
+	links = []
+	matches = re.compile('<main id="main"(.*)</main>', re.S).findall(text)
+	if len(matches) < 1:
+		return
+	
+	series = re.compile('<div class="vod-section(.*?)<div class="section-content">', re.S).findall(matches[0])
+	series = re.compile('<div.*?aria-label="(.*?)">.*?class="video-article__text">(.*?)</div>\s*<a href="(.*?)"', re.S).findall(series[0])
+	for name, description, link in series:
+		if not link.startswith('http'):
+			link = '{0}{1}'.format(domain, link)
+		if link in links:
 			continue
-		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
-		common.addDir(name, '{0}/{1}'.format(archiveUrl, url), 42, iconimage, infos={"Title": name}, module=module, urlParamsData={'catName': catName})
+		links += [link]
+		name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="prColor", bold=True)
+		description = common.UnEscapeXML(description.strip())
+		common.addDir(name, link, 2, iconimage, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+	
+	series = re.compile('<div class="ec-section(.*?)&#x5D1;&#x5D7;&#x5D9;&#x5E8;&#x5EA; &#x5D4;&#x5E2;&#x5D5;&#x5E8;&#x5DB;&#x5EA;', re.S).findall(matches[0])
+	series = re.compile('<a.*?href="(.*?)".*?aria-label="(.*?)".*?img src="(.*?)"', re.S).findall(series[0])
+	for link, name, image in series:
+		if not link.startswith('http'):
+			link = '{0}{1}'.format(domain, link)
+		if link in links:
+			continue
+		links += [link]
+		name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="prColor", bold=True)
+		description = name
+		image = GetImageLink(common.quoteNonASCII(image))
+		common.addDir(name, link, 2, image, infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
 
 def GetArchiveSeriesList(url, iconimage, catName):
 	#text = common.GetCF(url, userAgent)
@@ -608,7 +698,7 @@ def GetArchiveEpisodes(url, iconimage, text, catName):
 		image = common.quoteNonASCII(image)
 		if image.startswith('http') == False:
 			image = '{0}{1}'.format(archiveUrl, image)
-		common.addDir(name, common.encode(entryId, 'utf-8').replace('​&amp;', '&'), 3, image.replace('https://','http://'), infos={"Title": name, "Plot": description.replace('&nbsp;', '').strip()}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
+		common.addDir(name, common.encode(entryId, 'utf-8').replace('​&amp;', '&'), 3, GetImageLink(image), infos={"Title": name, "Plot": description.replace('&nbsp;', '').strip()}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
 	matches = re.compile('<ul class="pagination">(.*?)</div>', re.S).findall(text)
 	if len(matches) < 1:
 		return
@@ -635,6 +725,18 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	
 	if mode == 0:	#------------- Categories: ----------------------
 		GetCategoriesList(moduleIcon)
+	elif mode == 8:	#------------- Sub-Categories: ------------------
+		GetSubCategories(url, iconimage, moreData)
+	elif mode == 9:	#------------- Sub-Categories: ------------------
+		GetSubCategories(url, iconimage, moreData)
+	elif mode == 45:		#--- Move to a specific episodes' page  --
+		urlp = common.url_parse(url)
+		prms = common.parse_qs(urlp.query)
+		page = common.GetIndexFromUser(name, int(prms['pages'][0]))
+		if page == 0:
+			page = int(prms['p'][0])
+		url = '{0}://{1}{2}?page={3}'.format(urlp.scheme, urlp.netloc, urlp.path, page)
+		GetSubCategories(url, iconimage, moreData)
 	elif mode == 5:	#------------- Sub-Categories: ------------------
 		GetSubCategoriesList(url, iconimage)
 	elif mode == 1:	#------------- Series: -------------------------

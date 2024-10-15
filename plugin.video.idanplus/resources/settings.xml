@@ -9,6 +9,7 @@
 		<setting id="ch_11b" type="labelenum" label="30633" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="1" />
 		<setting id="ch_11c" type="labelenum" label="30637" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="1" />
 		<setting id="ch_12" type="labelenum" label="30603" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="2" />
+		<setting id="ch_12b" type="labelenum" label="30605" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="2" />
 		<setting id="ch_12c" type="labelenum" label="30626" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="2" />
 		<setting id="ch_13" type="labelenum" label="30604" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="3" />
 		<setting id="ch_13b" type="labelenum" label="30634" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="3" />
@@ -37,6 +38,7 @@
 		<setting id="ch_11_res" type="text" label="30602" default="" />
 		<setting id="ch_11c_res" type="text" label="30637" default="" />
 		<setting id="ch_12_res" type="text" label="30603" default="" />
+		<setting id="ch_12b_res" type="text" label="30605" default="" />
 		<setting id="ch_12c_res" type="text" label="30626" default="" />
 		<setting id="ch_13_res" type="text" label="30604" default="" />
 		<setting id="ch_13c_res" type="text" label="30631" default="" />
