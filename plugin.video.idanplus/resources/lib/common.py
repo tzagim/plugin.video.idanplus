@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
-import sys, gzip, os, io, random, re, json, urllib, xmltodict, time, collections, xml.parsers.expat as expat
+import sys, gzip, os, io, random, re, json, urllib, xmltodict, time, collections, xml.parsers.expat as expat, unicodedata
 
 try:
 	# For Python 3.0 and later
@@ -684,6 +684,8 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 				continue
 			if responseMethod == 'json':
 				return response.json()
+			elif responseMethod == 'full':
+				return response
 			else:
 				return response.text
 		except Exception as ex:
@@ -706,3 +708,27 @@ def GetCFheaders(url, ua=None, retries=10):
 			xbmc.log(str(ex), 3)
 			#return None
 	return ''
+
+def SaveImage(logoUrl, logoFile):
+	try:
+		if not os.path.isfile(logoFile):
+			import threading
+			threading.Thread(target=GetImageLinkBackground, args=(logoUrl, logoFile, )).start()
+	except Exception as ex:
+		xbmc.log("{0}".format(ex), 3)
+	
+def GetImageLinkBackground(logoUrl, logoFile):
+	response = GetCF(logoUrl, responseMethod='full')
+	if response.status_code == 200:
+		with open(logoFile, 'wb') as f:
+			for chunk in response:
+				f.write(chunk)
+
+def slugify(value, allow_unicode=False):
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')

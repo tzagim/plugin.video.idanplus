@@ -5,35 +5,39 @@
 	</category>
 	<category label="30600">
 		<setting label="30601" type="lsep"/>
-		<setting id="ch_11" type="labelenum" label="30602" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="1" />
-		<setting id="ch_11b" type="labelenum" label="30633" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="1" />
-		<setting id="ch_11c" type="labelenum" label="30637" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="1" />
-		<setting id="ch_12" type="labelenum" label="30603" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="2" />
-		<setting id="ch_12b" type="labelenum" label="30605" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="2" />
-		<setting id="ch_12c" type="labelenum" label="30626" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="2" />
-		<setting id="ch_13" type="labelenum" label="30604" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="3" />
-		<setting id="ch_13b" type="labelenum" label="30634" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="3" />
-		<setting id="ch_13c" type="labelenum" label="30631" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="3" />
-		<setting id="ch_14" type="labelenum" label="30606" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="4" />
-		<setting id="ch_21" type="labelenum" label="30619" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="5" />
-		<setting id="ch_23" type="labelenum" label="30607" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="6" />
-		<setting id="ch_23b" type="labelenum" label="30639" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="6" />
-		<setting id="ch_24" type="labelenum" label="30608" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="7" />
-		<setting id="ch_bb" type="labelenum" label="30621" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="8" />
-		<setting id="ch_bbb" type="labelenum" label="30625" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="8" />
-		<setting id="ch_33" type="labelenum" label="30609" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="9" />
-		<setting id="ch_33b" type="labelenum" label="30641" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="9" />
-		<setting id="ch_66" type="labelenum" label="30610" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="10" />
-		<setting id="ch_97" type="labelenum" label="30612" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="11" />
-		<setting id="ch_99" type="labelenum" label="30613" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="12" />
-		<setting id="ch_ynet" type="labelenum" label="30622" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="13" />
-		<setting id="ch_walla" type="labelenum" label="30624" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|19|20" default="14" />
-		<setting id="ch_sport5" type="labelenum" label="30632" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20" default="15" />
-		<setting id="ch_100" type="labelenum" label="30726" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20" default="16" />
-		<setting id="ch_891" type="labelenum" label="30734" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20" default="17" />
-		<setting id="ch_kabru" type="labelenum" label="30629" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20" default="18" />
-		<setting id="ch_musayof" type="labelenum" label="30635" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20" default="19" />
-		<setting id="ch_i24news" type="labelenum" label="30643" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20" default="20" />
+		<setting id="ch_11" type="labelenum" label="30602" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="1" />
+		<setting id="ch_11b" type="labelenum" label="30633" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="1" />
+		<setting id="ch_11c" type="labelenum" label="30637" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="1" />
+		<setting id="ch_12" type="labelenum" label="30603" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="2" />
+		<setting id="ch_12b" type="labelenum" label="30605" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="2" />
+		<setting id="ch_12c" type="labelenum" label="30626" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="2" />
+		<setting id="ch_13" type="labelenum" label="30604" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="3" />
+		<setting id="ch_13b" type="labelenum" label="30634" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="3" />
+		<setting id="ch_13b2" type="labelenum" label="30644" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="3" />
+		<setting id="ch_13c" type="labelenum" label="30631" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="3" />
+		<setting id="ch_14" type="labelenum" label="30606" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="4" />
+		<setting id="ch_21" type="labelenum" label="30619" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="5" />
+		<setting id="ch_23" type="labelenum" label="30607" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="6" />
+		<setting id="ch_23b" type="labelenum" label="30639" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="6" />
+		<setting id="ch_24" type="labelenum" label="30608" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="7" />
+		<setting id="ch_bb" type="labelenum" label="30621" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="8" />
+		<setting id="ch_bbb" type="labelenum" label="30625" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="8" />
+		<setting id="ch_33" type="labelenum" label="30609" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="9" />
+		<setting id="ch_33b" type="labelenum" label="30641" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="9" />
+		<setting id="ch_66" type="labelenum" label="30610" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="10" />
+		<setting id="ch_97" type="labelenum" label="30612" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="11" />
+		<setting id="ch_99" type="labelenum" label="30613" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="12" />
+		<setting id="ch_ynet" type="labelenum" label="30622" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="13" />
+		<setting id="ch_walla" type="labelenum" label="30624" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="14" />
+		<setting id="ch_sport5" type="labelenum" label="30632" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="15" />
+		<setting id="ch_100" type="labelenum" label="30726" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="16" />
+		<setting id="ch_891" type="labelenum" label="30734" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="17" />
+		<setting id="ch_kabru" type="labelenum" label="30629" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="18" />
+		<setting id="ch_musayof" type="labelenum" label="30635" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="19" />
+		<setting id="ch_i24news" type="labelenum" label="30643" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="20" />
+		<setting id="ch_13comedy" type="labelenum" label="30645" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="21" />
+		<setting id="ch_13nofesh" type="labelenum" label="30646" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="22" />
+		<setting id="ch_13reality" type="labelenum" label="30647" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="23" />
 		<setting label="30651" type="lsep"/>
 		<setting id="ch_11_res" type="text" label="30602" default="" />
 		<setting id="ch_11c_res" type="text" label="30637" default="" />
@@ -41,6 +45,8 @@
 		<setting id="ch_12b_res" type="text" label="30605" default="" />
 		<setting id="ch_12c_res" type="text" label="30626" default="" />
 		<setting id="ch_13_res" type="text" label="30604" default="" />
+		<setting id="ch_13b_res" type="text" label="30634" default="" />
+		<setting id="ch_13b2_res" type="text" label="30644" default="" />
 		<setting id="ch_13c_res" type="text" label="30631" default="" />
 		<setting id="ch_14_res" type="text" label="30606" default="" />
 		<setting id="ch_21_res" type="text" label="30619" default="" />
@@ -56,6 +62,9 @@
 		<setting id="ch_kabru_res" type="text" label="30629" default="" />
 		<setting id="ch_musayof_res" type="text" label="30635" default="" />
 		<setting id="ch_i24news_res" type="text" label="30643" default="" />
+		<setting id="ch_13comedy_res" type="text" label="30645" default="" />
+		<setting id="ch_13nofesh_res" type="text" label="30646" default="" />
+		<setting id="ch_13reality_res" type="text" label="30647" default="" />
 	</category>
 	<category label="30700">
 		<setting label="30701" type="lsep"/>
@@ -120,6 +129,8 @@
 		<setting id="kan_res" type="text" label="30023" default="" />
 		<setting id="kanPreferYoutube" type="bool" label="30401" default="true" />
 		<setting id="kanPagesPerList" type="number" label="30403" default="4" />
+		<setting id="saveKanImages" type="bool" label="30404" default="false" />
+		<setting id="actDeleteKanImages" type="action" label="30405" action="RunPlugin(plugin://plugin.video.idanplus/?mode=50&amp;module=kan)" option="close" />
 	</category>
 	<category label="30100">
 		<setting id="makoSortBy" type="enum" label="30001" lvalues="30002|30003" default="0" />

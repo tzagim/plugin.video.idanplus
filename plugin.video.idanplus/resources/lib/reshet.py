@@ -349,10 +349,15 @@ def Play(video, name='', iconimage='', quality='best'):
 def WatchLive(url, name='', iconimage='', quality='best'):
 	channels = {
 		'13': {'brv': 'videoId', 'cst': '1', 'klt': '1_ubg28z0w', 'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/08bc71cf0a0f4712b6b03c732b0e6d25/index.m3u8'},
+		'13b': {'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/2f2bc414a3db4698a8e94b89eaf2da2a/index.m3u8', 'referer': '{0}/live/'.format(baseUrl)},
+		'13b2': {'klt': '1_pjrmtdaf', 'link': 'https://d2xg1g9o5vns8m.cloudfront.net/out/v1/0855d703f7d5436fae6a9c7ce8ca5075/index.m3u8', 'referer': '{0}/allshows/2010263/'.format(baseUrl)},
 		'13c': {'brv': 'accessibility_ref', 'cst': '27', 'klt': '1_8dlti2jz', 'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d198ztbnlup2iq.cloudfront.net/out/v1/2d9050c90fb94df8b78d1d98306a1a65/index.m3u8'},
-		'bb': {'brv': 'videoId', 'cst': '26', 'klt': '1_6fr5xbw2', 'referer': '{0}/home/bb-livestream/'.format(baseUrl), 'link': 'https://d2lckchr9cxrss.cloudfront.net/out/v1/c73af7694cce4767888c08a7534b503c/index.m3u8'}
+		'bb': {'brv': 'videoId', 'cst': '26', 'klt': '1_6fr5xbw2', 'referer': '{0}/home/bb-livestream/'.format(baseUrl), 'link': 'https://d2lckchr9cxrss.cloudfront.net/out/v1/c73af7694cce4767888c08a7534b503c/index.m3u8'},
+		'13comedy': {'klt': 'adsadadas', 'link': 'https://d15ds134q59udk.cloudfront.net/out/v1/fbba879221d045598540ee783b140fe2/index.m3u8', 'referer': '{0}/allshows/2605018/'.format(baseUrl)}, 
+		'13nofesh': {'klt': '1_g7lqf2yg', 'link': 'https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index.m3u8', 'referer': '{0}/allshows/2395628/'.format(baseUrl)}, 
+		'13reality': {'klt': '1_khfzmmtx', 'link': 'https://d2dffl3588mvfk.cloudfront.net/out/v1/d8e15050ca4148aab0ee387a5e2eb46b/index.m3u8', 'referer': '{0}/allshows/2395629/'.format(baseUrl)}
 	}
-	referer = channels[url]['referer']
+	referer = channels[url].get('referer')
 	try:
 		'''
 		result = GetUrlJson(referer)
@@ -364,13 +369,24 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 			result = common.OpenURL('{0}{1}'.format(brvApi, result['Header']['Live'][channels[url]['brv']]), headers={"Accept": brvPk, "User-Agent": userAgent})
 			link = json.loads(result)['sources'][0]['src']
 		'''
-		link = common.GetKaltura(channels[url]['klt'], 2748741, baseUrl, userAgent, quality=quality)
+		headers={"User-Agent": userAgent}
+		if referer:
+			headers['referer'] = referer
+		link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
+		'''
+		link = ''
+		kalturaId = channels[url].get('klt')
+		if kalturaId:
+			link = common.GetKaltura(channels[url]['klt'], 2748741, baseUrl, userAgent, quality=quality)
 		if link == '':
-			link = common.GetStreams(channels[url]['link'], headers={"User-Agent": userAgent, 'Referer': referer}, quality=quality)
+			link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
+		'''
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
-		link = common.GetStreams(channels[url]['link'], headers={"User-Agent": userAgent, 'Referer': referer}, quality=quality)
-	final = '{0}|User-Agent={1}&Referer={2}'.format(link, userAgent, referer)
+		#link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
+	final = '{0}|User-Agent={1}'.format(link, userAgent)
+	if referer:
+		final = '{0}&Referer={1}'.format(final, referer)
 	common.PlayStream(final, quality, name, iconimage)
 
 def GetNewsCategoriesList(iconimage):

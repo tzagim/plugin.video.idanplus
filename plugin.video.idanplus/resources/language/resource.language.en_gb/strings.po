@@ -203,6 +203,14 @@ msgctxt "#30403"
 msgid "מספר דפים ברשימה"
 msgstr ""
 
+msgctxt "#30404"
+msgid "שמירת אייקונים מקומית"
+msgstr ""
+
+msgctxt "#30405"
+msgid "מחיקת תמונות"
+msgstr ""
+
 msgctxt "#30500"
 msgid "14"
 msgstr ""
@@ -311,6 +319,10 @@ msgctxt "#30634"
 msgid "רשת 13 - גיבוי"
 msgstr ""
 
+msgctxt "#30644"
+msgid "רשת 13 - גיבוי 2"
+msgstr ""
+
 msgctxt "#30635"
 msgid "מוסיוף"
 msgstr ""
@@ -329,6 +341,18 @@ msgstr ""
 
 msgctxt "#30643"
 msgid "i24news"
+msgstr ""
+
+msgctxt "#30645"
+msgid "13 ערוץ הקומדיות"
+msgstr ""
+
+msgctxt "#30646"
+msgid "ערוץ הנופש"
+msgstr ""
+
+msgctxt "#30647"
+msgid "ערוץ הריאליטי"
 msgstr ""
 
 msgctxt "#30651"

@@ -9,7 +9,6 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		'891fm': {'link': 'https://www.oles.tv/891fm/player/', 'regex': "streamSource\s*=\s*'(.*?)'"},
 		'100fm': {'link': 'https://cdn.cybercdn.live/Radios_100FM/Video/playlist.m3u8'},
 		'11b': {'link': 'http://kan11.media.kan.org.il/hls/live/2024514/2024514/source1_2.5k/chunklist.m3u8', 'final': True},
-		'13b': {'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/08bc71cf0a0f4712b6b03c732b0e6d25/index.m3u8', 'referer': 'https://13tv.co.il/live/'},
 		'23b': {'link': 'https://kan23.media.kan.org.il/hls/live/2024691/2024691/source1_2.5k/chunklist.m3u8', 'final': True},
 		'33b': {'link': 'https://makan.media.kan.org.il/hls/live/2024680/2024680/source1_2.5k/chunklist.m3u8', 'final': True},
 		'bbb': {'link': 'https://d2lckchr9cxrss.cloudfront.net/out/v1/c73af7694cce4767888c08a7534b503c/index.m3u8', 'referer': 'https://13tv.co.il/home/bb-livestream/', 'final': True},
