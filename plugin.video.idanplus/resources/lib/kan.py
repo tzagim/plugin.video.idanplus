@@ -51,7 +51,7 @@ def GetCategoriesList(iconimage):
 	name = common.GetLabelColor("פודקאסטים לילדים", bold=True, color="none")
 	common.addDir(name, '{0}/lobby-kids/podcasts-kids/'.format(baseKidsUrl), 33, common.GetIconFullPath("23tv.jpg"), infos={"Title": name}, module=module)
 
-def GetSeriesList(url, catName):
+def GetSeriesList(url, iconimage, catName):
 	#text = common.GetCF(url, userAgent)
 	text = cache.get(common.GetCF, 24, url, userAgent, table='pages')
 	if text==[]:
@@ -105,8 +105,8 @@ def GetSeriesList(url, catName):
 				if link in links:
 					continue
 				links += [link]
-				name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="none", bold=True)
-				common.addDir(name, link, 8, image, infos={"Title": name, "Plot": name}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+				name = common.GetLabelColor(common.UnEscapeXML(name), color="none", bold=True)
+				common.addDir(name, link, 8, iconimage, infos={"Title": name, "Plot": name}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
 			return
 		else:
 			matches = re.compile('"section-title">עוד אקטואליה(.*?)</ul>', re.S).findall(text)
@@ -155,7 +155,7 @@ def GetSubCategories(url, iconimage, catName):
 			description = name
 		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="prColor", bold=True)
 		description = common.UnEscapeXML(description.strip())
-		image = GetImageLink(common.quoteNonASCII(common.UnEscapeXML(image)), name.strip())
+		image = GetImageLink(common.quoteNonASCII(image), name.strip())
 		common.addDir(name, link, 7, image, infos={"Title": name, "Plot": description}, module=module, moreData=catName, urlParamsData={'catName': catName})
 	
 	pages = int(re.compile('name="NumberOfPages" type="hidden" value="(\d*)"').findall(text)[0])
@@ -766,7 +766,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 5:	#------------- Sub-Categories: ------------------
 		GetSubCategoriesList(url, iconimage)
 	elif mode == 1:	#------------- Series: -------------------------
-		GetSeriesList(url, moreData)
+		GetSeriesList(url, iconimage, moreData)
 	elif mode == 7:	#------------- Seasons: ------------------------
 		GetSeasonsList(url, iconimage, moreData)
 	elif mode == 2:	#------------- Episodes: ------------------------
