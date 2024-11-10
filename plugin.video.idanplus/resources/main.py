@@ -126,7 +126,7 @@ def VODs():
 	name = common.GetLabelColor(common.GetLocaleString(30607), bold=True, color="none")
 	common.addDir(name, 'https://www.kankids.org.il', 5, common.GetIconFullPath("23tv.jpg"), infos={"Title": name}, module='kan')
 	name = common.GetLabelColor("כאן - ארכיון", bold=True, color="none")
-	common.addDir(name, 'https://archive.kan.org.il/', 41,  common.GetIconFullPath("kan.jpg"), infos={"Title": name}, module='kan')
+	common.addDir(name, 'https://www.kan.org.il/lobby/archive/', 41,  common.GetIconFullPath("kan.jpg"), infos={"Title": name}, module='kan')
 	name = common.GetLabelColor(common.GetLocaleString(30608), bold=True, color="none")
 	common.addDir(name, 'https://www.mako.co.il/mako-vod-index?filter=provider&vcmId=3377c13070733210VgnVCM2000002a0c10acRCRD', 1, common.GetIconFullPath("24telad.png"), infos={"Title": name}, module='keshet')
 	name = common.GetLabelColor(common.GetLocaleString(30630), bold=True, color="none")
@@ -166,7 +166,7 @@ def Musics():
 
 def Podcasts():
 	name = common.GetLabelColor("פודקאסטים - כאן", bold=True, color="none")
-	common.addDir(name, '', 31, common.GetIconFullPath('kan.jpg'), infos={"Title": name}, module='kan')
+	common.addDir(name, '4451', 31, common.GetIconFullPath('kan.jpg'), infos={"Title": name}, module='kan')
 	name = common.GetLabelColor("פודקאסטים לילדים - כאן", bold=True, color="none")
 	common.addDir(name, '', 33, common.GetIconFullPath('kan.jpg'), infos={"Title": name}, module='kan')
 	name = common.GetLabelColor("פודקאסטים ספורט 5", bold=True, color="none")
@@ -201,13 +201,13 @@ def GetModuleName(module, mode, moreData, catName=''):
 	if module == 'kan': 		moduleName = common.GetLocaleString(30400) if catName == '' else catName
 	elif module == 'keshet': 	moduleName = common.GetLocaleString(30603)
 	elif module == 'reshet': 	moduleName = common.GetLocaleString(30604)
-	elif module == '14tv': 	moduleName = common.GetLocaleString(30606)
+	elif module == '14tv': 		moduleName = common.GetLocaleString(30606)
 	elif module == '9tv': 		moduleName = common.GetLocaleString(30630)
 	elif module == '891fm': 	moduleName = common.GetLocaleString(30734)
 	elif module == 'sport5': 	moduleName = common.GetLocaleString(30632)
 	elif module == 'sport1': 	moduleName = common.GetLocaleString(31000)
-	elif module == '99fm': 	moduleName = common.GetLocaleString(30704)
-	elif module == 'glz': 	moduleName = common.GetLocaleString(30702)
+	elif module == '99fm': 		moduleName = common.GetLocaleString(30704)
+	elif module == 'glz': 		moduleName = common.GetLocaleString(30702)
 	elif module == '100fm': 	moduleName = common.GetLocaleString(30726)
 	return moduleName
 
