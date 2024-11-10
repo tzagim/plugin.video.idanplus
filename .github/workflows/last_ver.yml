@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2
 
     - name: Set up jq for JSON parsing
       run: sudo apt-get install -y jq
@@ -94,7 +94,7 @@ jobs:
         git push
 
     - name: Prevent workflow deactivation
-      uses: gautamkrishnar/keepalive-workflow@v2
+      uses: gautamkrishnar/keepalive-workflow@v2.0.7
       with:
         committer_username: "tzagim"
         committer_email: "username@users.noreply.github.com"
