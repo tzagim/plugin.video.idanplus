@@ -9,6 +9,9 @@ moduleIcon = common.GetIconFullPath("kan.jpg")
 baseUrl = 'https://www.kan.org.il'
 baseKidsUrl = 'https://www.kankids.org.il'
 archiveUrl = 'https://archive.kan.org.il'
+baseMobApiUrl = 'https://mobapi.kan.org.il'
+mobapi = 'https://mobapi.kan.org.il/api/mobile/subClass'
+
 userAgent = common.GetUserAgent()
 headers={"User-Agent": userAgent}
 kanSeriesFile = os.path.join(common.profileDir, 'kanSeries.json')
@@ -21,8 +24,12 @@ if not os.path.exists(logosDir):
 
 
 def GetImageLink(imageUrl, imageName):
+	i = imageUrl.find('?')
+	if i > 0:
+		imageLink = imageUrl[:i]
+	imageUrl = imageUrl.replace(baseUrl, baseMobApiUrl).replace(baseKidsUrl, baseMobApiUrl)
 	if imageUrl.startswith('/'):
-		imageLink = imageUrl = '{0}{1}'.format(baseUrl, imageUrl[:imageUrl.find('?')])
+		imageLink = imageUrl = '{0}{1}'.format(baseMobApiUrl, imageUrl)
 	if saveKanImages:
 		imageLink = os.path.join(logosDir, common.slugify(imageName, allow_unicode=True))
 		common.SaveImage(imageUrl, imageLink)
@@ -35,11 +42,11 @@ def GetCategoriesList(iconimage):
 	name = common.GetLabelColor("כל התוכניות - קטגוריות", bold=True, color="none")
 	common.addDir(name, '{0}/lobby/kan-box'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30602))
 	name = common.GetLabelColor("כל התוכניות", bold=True, color="none")
-	common.addDir(name, '{0}/lobby/kan11'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30602))
+	common.addDir(name, '{0}/lobby/kan11'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData='{0}__4444'.format(common.GetLocaleString(30602)))
 	name = common.GetLabelColor("תוכניות אקטואליה", bold=True, color="none")
 	common.addDir(name, '{0}/lobby/newstv'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30602))
 	name = common.GetLabelColor("דיגיטל", bold=True, color="none")
-	common.addDir(name, '{0}/lobby/digital-lobby'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30602))
+	common.addDir(name, '{0}/lobby/digital-lobby'.format(baseUrl), 1, iconimage, infos={"Title": name}, module=module, moreData='{0}__4464'.format(common.GetLocaleString(30602)))
 	name = common.GetLabelColor(common.GetLocaleString(30607), bold=True, color="none")
 	common.addDir(name, baseKidsUrl, 5, common.GetIconFullPath("23tv.jpg"), infos={"Title": name}, module=module, moreData=common.GetLocaleString(30607))
 	name = common.GetLabelColor("כאן - ארכיון", bold=True, color="none")
@@ -47,11 +54,27 @@ def GetCategoriesList(iconimage):
 	name = common.GetLabelColor("תכניות רדיו", bold=True, color="none")
 	common.addDir(name, '', 21, iconimage, infos={"Title": name}, module=module)
 	name = common.GetLabelColor("פודקאסטים", bold=True, color="none")
-	common.addDir(name, '', 31, iconimage, infos={"Title": name}, module=module)
+	common.addDir(name, '4451', 31, iconimage, infos={"Title": name}, module=module)
 	name = common.GetLabelColor("פודקאסטים לילדים", bold=True, color="none")
 	common.addDir(name, '{0}/lobby-kids/podcasts-kids/'.format(baseKidsUrl), 33, common.GetIconFullPath("23tv.jpg"), infos={"Title": name}, module=module)
 
 def GetSeriesList(url, iconimage, catName):
+	cat = catName.split('__')
+	catName = cat[0]
+	if len(cat) > 1:
+		i = 1
+		while (i > 0):
+			url = '{0}?from={1}&id={2}'.format(mobapi, i, cat[1])
+			matches = common.OpenURL(url, responseMethod='json').get('entry')
+			i = 0 if len(matches) < 200 else 200 + i
+			for serie in matches:
+				name = common.GetLabelColor(serie['title'], keyColor="prColor", bold=True)
+				description = serie['description']
+				link = serie['link']['href'].replace('?app=true', '')
+				image = serie['media_group'][0]['media_item'][3]['src']
+				common.addDir(name, link, 7, image[:image.find('?')], infos={"Title": name, "Plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
+		return
+	
 	#text = common.GetCF(url, userAgent)
 	text = cache.get(common.GetCF, 24, url, userAgent, table='pages')
 	if text==[]:
@@ -182,9 +205,9 @@ def GetSubCategories(url, iconimage, catName):
 
 def GetSubCategoriesList(url, iconimage):
 	name = common.GetLabelColor("קטנטנים", bold=True, color="none")
-	common.addDir(name, '{0}/lobby-kids/tiny/'.format(baseKidsUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30607))
+	common.addDir(name, '{0}/lobby-kids/tiny/'.format(baseKidsUrl), 1, iconimage, infos={"Title": name}, module=module, moreData='{0}__4462'.format(common.GetLocaleString(30607)))
 	name = common.GetLabelColor("ילדים ונוער", bold=True, color="none")
-	common.addDir(name, '{0}/lobby-kids/kids-teens/'.format(baseKidsUrl), 1, iconimage, infos={"Title": name}, module=module, moreData=common.GetLocaleString(30607))
+	common.addDir(name, '{0}/lobby-kids/kids-teens/'.format(baseKidsUrl), 1, iconimage, infos={"Title": name}, module=module, moreData='{0}__4453'.format(common.GetLocaleString(30607)))
 
 def AddSeries(matches, catName):
 	for link, iconimage, name, description in matches:
@@ -325,21 +348,34 @@ def GetKidsEpisodesList(data, iconimage, moreData=''):
 		
 def GetRadioCategoriesList(iconimage):
 	name = common.GetLabelColor("כאן ב", bold=True, color="none")
-	common.addDir(name, 'kan-b', 22, common.GetIconFullPath("bet.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-b', 22, common.GetIconFullPath("bet.png"), infos={"Title": name}, module=module, moreData='4483')
 	name = common.GetLabelColor("כאן גימל", bold=True, color="none")
-	common.addDir(name, 'kan-gimel', 22, common.GetIconFullPath("gimel.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-gimel', 22, common.GetIconFullPath("gimel.png"), infos={"Title": name}, module=module, moreData='4490')
 	name = common.GetLabelColor("כאן 88", bold=True, color="none")
-	common.addDir(name, 'kan-88', 22, common.GetIconFullPath("88.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-88', 22, common.GetIconFullPath("88.png"), infos={"Title": name}, module=module, moreData='4504')
 	name = common.GetLabelColor("כאן תרבות", bold=True, color="none")
-	common.addDir(name, 'kan-tarbut', 22, common.GetIconFullPath("culture.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-tarbut', 22, common.GetIconFullPath("culture.png"), infos={"Title": name}, module=module, moreData='4497')
 	name = common.GetLabelColor("כאן קול המוסיקה", bold=True, color="none")
-	common.addDir(name, 'kan-music', 22, common.GetIconFullPath( "music.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-music', 22, common.GetIconFullPath( "music.png"), infos={"Title": name}, module=module, moreData='4518')
 	name = common.GetLabelColor("כאן מורשת", bold=True, color="none")
-	common.addDir(name, 'kan-moreshet', 22, common.GetIconFullPath("moreshet.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-moreshet', 22, common.GetIconFullPath("moreshet.png"), infos={"Title": name}, module=module, moreData='4511')
 	name = common.GetLabelColor("כאן Reka", bold=True, color="none")
-	common.addDir(name, 'kan-reka', 22, common.GetIconFullPath("reka.png"), infos={"Title": name}, module=module)
+	common.addDir(name, 'kan-reka', 22, common.GetIconFullPath("reka.png"), infos={"Title": name}, module=module, moreData='4525')
 
-def GetRadioSeriesList(url, catName):
+def GetRadioSeriesList(url, catName, id=None):
+	if id:
+		i = 1
+		while (i > 0):
+			url = '{0}?from={1}&id={2}'.format(mobapi, i, id)
+			matches = common.OpenURL(url, responseMethod='json').get('entry')
+			i = 0 if len(matches) < 200 else 200 + i
+			for serie in matches:
+				name = common.GetLabelColor(serie['title'], keyColor="prColor", bold=True)
+				description = serie['description']
+				link = serie['link']['href'].replace('?app=true', '')
+				image = serie['media_group'][0]['media_item'][2]['src']
+				common.addDir(name, link, 23, image[:image.find('?')], infos={"Title": name, "Plot": description}, module=module, moreData=catName, urlParamsData={'catName': catName})
+		return
 	text = common.GetCF('{0}/content/kan/{1}/'.format(baseUrl, url), userAgent)
 	#text = common.OpenURL(url)
 	match = re.compile('<div class="tab-pane fade show active(.*?)</ul>', re.S).findall(text)
@@ -545,7 +581,20 @@ def WatchLive(url, name='', iconimage='', quality='best', type='video'):
 	link = common.GetStreams(channelUrl, quality=quality)
 	common.PlayStream(link, quality, name, iconimage)
 
-def GetPodcastsList():
+def GetPodcastsList(id=None):
+	if id:
+		i = 1
+		while (i > 0):
+			url = '{0}?from={1}&id={2}'.format(mobapi, i, id)
+			matches = common.OpenURL(url, responseMethod='json').get('entry')
+			i = 0 if len(matches) < 200 else 200 + i
+			for serie in matches:
+				name = common.GetLabelColor(serie['title'], keyColor="prColor", bold=True)
+				description = serie['description']
+				link = serie['link']['href'].replace('?app=true', '')
+				image = serie['media_group'][0]['media_item'][2]['src']
+				common.addDir(name, link, 32, image[:image.find('?')], infos={"Title": name, "Plot": description}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
+		return
 	url = '{0}/lobby/aod/'.format(baseUrl)
 	#text = common.GetCF(url, userAgent)
 	text = cache.get(common.GetCF, 24, url, userAgent, table='pages')
@@ -780,11 +829,11 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 21: #------------- Radio Categories: ---------------
 		GetRadioCategoriesList(moduleIcon)
 	elif mode == 22: #------------- Radio Series: -------------------
-		GetRadioSeriesList(url, common.GetUnColor(name))
+		GetRadioSeriesList(url, common.GetUnColor(name), moreData)
 	elif mode == 23: #------------- Radio Episodes: -----------------
 		GetRadioEpisodesList(url, iconimage, moreData)
 	elif mode == 31: #------------- Podcast Series: -----------------
-		GetPodcastsList()
+		GetPodcastsList(url)
 	elif mode == 32: #------------- Podcast Episodes: ---------------
 		GetPodcastEpisodesList(url, iconimage)
 	elif mode == 33: #------------- Kids Podcast Series: ------------
