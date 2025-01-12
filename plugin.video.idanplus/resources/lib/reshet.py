@@ -348,10 +348,11 @@ def Play(video, name='', iconimage='', quality='best'):
 
 def WatchLive(url, name='', iconimage='', quality='best'):
 	channels = {
-		'13': {'brv': 'videoId', 'cst': '1', 'klt': '1_ubg28z0w', 'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/08bc71cf0a0f4712b6b03c732b0e6d25/index.m3u8'},
-		'13b': {'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/2f2bc414a3db4698a8e94b89eaf2da2a/index.m3u8', 'referer': '{0}/live/'.format(baseUrl)},
+		'13': {'referer': '{0}/live/'.format(baseUrl), 'link': 'https://reshet.g-mana.live/media/87f59c77-03f6-4bad-a648-897e095e7360/mainManifest.m3u8'},
+		'13b': {'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/2f2bc414a3db4698a8e94b89eaf2da2a/index.m3u8'},
 		'13b2': {'klt': '1_pjrmtdaf', 'link': 'https://d2xg1g9o5vns8m.cloudfront.net/out/v1/0855d703f7d5436fae6a9c7ce8ca5075/index.m3u8', 'referer': '{0}/allshows/2010263/'.format(baseUrl)},
-		'13c': {'brv': 'accessibility_ref', 'cst': '27', 'klt': '1_8dlti2jz', 'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d198ztbnlup2iq.cloudfront.net/out/v1/2d9050c90fb94df8b78d1d98306a1a65/index.m3u8'},
+		#'13c': {'brv': 'accessibility_ref', 'cst': '27', 'klt': '1_8dlti2jz', 'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d198ztbnlup2iq.cloudfront.net/out/v1/2d9050c90fb94df8b78d1d98306a1a65/index.m3u8'},
+		'13c': {'referer': '{0}/live/'.format(baseUrl), 'link': 'https://reshet.g-mana.live/media/4607e158-e4d4-4e18-9160-3dc3ea9bc677/mainManifest.m3u8'},
 		'bb': {'brv': 'videoId', 'cst': '26', 'klt': '1_6fr5xbw2', 'referer': '{0}/home/bb-livestream/'.format(baseUrl), 'link': 'https://d2lckchr9cxrss.cloudfront.net/out/v1/c73af7694cce4767888c08a7534b503c/index.m3u8'},
 		'13comedy': {'klt': 'adsadadas', 'link': 'https://d15ds134q59udk.cloudfront.net/out/v1/fbba879221d045598540ee783b140fe2/index.m3u8', 'referer': '{0}/allshows/2605018/'.format(baseUrl)}, 
 		'13nofesh': {'klt': '1_g7lqf2yg', 'link': 'https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index.m3u8', 'referer': '{0}/allshows/2395628/'.format(baseUrl)}, 
@@ -427,6 +428,8 @@ def GetSeriesList(url, iconimage):
 				if serie['url'] == "":
 					if serie['id'] == '613':
 						serie['url'] = '/all-shows/vort/'
+					elif serie['id'] == '655':
+						serie['url'] = '/shows/patrick/'
 					else:
 						continue
 				name = common.encode(serie['title'], 'utf-8')

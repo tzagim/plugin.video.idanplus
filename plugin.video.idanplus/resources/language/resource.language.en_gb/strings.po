@@ -272,7 +272,7 @@ msgid "כנסת 99"
 msgstr ""
 
 msgctxt "#30619"
-msgid "ערוץ הקניות 21"
+msgid "כלכלה 10"
 msgstr ""
 
 msgctxt "#30621"

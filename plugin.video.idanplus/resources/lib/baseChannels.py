@@ -12,7 +12,7 @@ TvChannels = [
 	{'ch':'ch_13b2', 'index': 3, 'nameID': 30644, 'channelID':'13b2', 'mode': 4, 'image':'13.jpg', 'module':'reshet', 'resKey':'ch_13b2_res', 'tvgID':'13', 'type':'tv'}, 
 	{'ch':'ch_13c', 'index': 3, 'nameID': 30631, 'channelID':'13c', 'mode': 4, 'image':'13.jpg', 'module':'reshet', 'resKey':'ch_13c_res', 'tvgID':'13', 'type':'tv'}, 
 	{'ch':'ch_14', 'index': 4, 'nameID': 30606, 'channelID':'14', 'mode': 10, 'image':'14tv.png', 'module':'14tv', 'resKey':'ch_14_res', 'tvgID':'14', 'type':'tv'}, 
-	{'ch':'ch_21', 'index': 5, 'nameID': 30619, 'channelID':'21', 'mode': 10, 'image':'21.jpg', 'module':'21tv', 'resKey':'ch_21_res', 'tvgID':'21', 'type':'tv'}, 
+	{'ch':'ch_10', 'index': 5, 'nameID': 30619, 'channelID':'10', 'mode': 10, 'image':'10tv.png', 'module':'tv', 'resKey':'ch_10_res', 'tvgID':'10', 'type':'tv'}, 
 	{'ch':'ch_23', 'index': 6, 'nameID': 30607, 'channelID':'23', 'mode': 10, 'image':'23tv.jpg', 'module':'kan', 'resKey':'ch_23_res', 'tvgID':'23', 'type':'tv'}, 
 	{'ch':'ch_23b', 'index': 6, 'nameID': 30639, 'channelID':'23b', 'mode': 10, 'image':'23tv.jpg', 'module':'tv', 'resKey':'', 'tvgID':'23', 'type':'tv'}, 
 	{'ch':'ch_24', 'index': 7, 'nameID': 30608, 'channelID':'24', 'mode': 10, 'image':'24telad.png', 'module':'keshet', 'resKey':'ch_24_res', 'tvgID':'24', 'type':'tv'}, 
