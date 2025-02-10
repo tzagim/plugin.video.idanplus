@@ -2,7 +2,7 @@
 import xbmc, xbmcgui, xbmcplugin
 import re, json, os
 import resources.lib.common as common
-from resources.lib import cache as  cache
+from resources.lib import cache as cache
 
 module = 'kan'
 moduleIcon = common.GetIconFullPath("kan.jpg")

@@ -248,6 +248,8 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 		headers['Accept-encoding'] = 'gzip'
 	if headers.get('User-agent', '') == '':
 		headers['User-agent'] = userAgent
+	if headers.get('User-Agent', '') == '':
+		headers['User-Agent'] = userAgent
 	for i in range(retries):
 		try:
 			if session is None:

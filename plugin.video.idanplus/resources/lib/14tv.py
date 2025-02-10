@@ -7,7 +7,7 @@ from resources.lib import cache as  cache
 module = '14tv'
 moduleIcon = common.GetIconFullPath("14tv.png")
 baseUrl = 'https://www.now14.co.il'
-userAgent = common.GetUserAgent()
+userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0'
 
 def GetCategoriesList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
@@ -19,8 +19,9 @@ def GetCategoriesList(iconimage):
 def GetSeriesList(iconimage):
 	#text = common.OpenURL(baseUrl)
 	#text = common.OpenURL('{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl))
-	text = cache.get(common.OpenURL, 24, '{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl), table='pages')
-	match = re.compile 	('<ul class="navbar2">(.*?)</ul>', re.S).findall(text)
+	text = cache.get(common.OpenURL, 24, '{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl), {"User-agent": userAgent}, table='pages')
+	match = re.compile('<ul class="navbar2">(.*?)</ul>', re.S).findall(text)
+	xbmc.log(str(len(match)), 5)
 	match = re.compile('<a href=(.*?)>(.*?)</a>', re.S).findall(match[0])
 	grids_arr = []
 	for link, name in match[1:]:
@@ -41,7 +42,7 @@ def GetQuoteUrl(url):
 def GetEpisodesList(url, image):
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
 	#text = common.OpenURL(url)
-	text = cache.get(common.OpenURL, 24, url, table='pages')
+	text = cache.get(common.OpenURL, 24, url, {"User-agent": userAgent}, table='pages')
 	episodes = re.compile('<div class="katan-unit(.*?)</div>\s*</div>\s*</div>', re.S).findall(text)
 	for episode in episodes:
 		match = re.compile('data-videoid="(.*?)".*?src=["\'](.*?)["\'].*?<div class="the-title">(.*?)</div>.*?<div class="episode_air_date"\s*?>(.*?)</div>', re.S).findall(episode)

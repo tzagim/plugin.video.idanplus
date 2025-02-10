@@ -2,6 +2,8 @@
 <settings>
 	<category label="32000">
 		<setting id="actUpdateEPG" type="action" label="30014" action="RunPlugin(plugin://plugin.video.idanplus/?mode=3&amp;module=epg)" option="close" />
+		<setting id="startup_ch" type="labelenum" label="32001" lvalues="32003|30602|30633|30637|30603|30605|30626|30604|30634|30644|30631|30606|30619|30607|30639|30608|30621|30625|30609|30641|30610|30612|30613|30622|30624|30632|30726|30734|30629|30635|30643|30645|30646|30647" default="32003" />
+		<setting id="startup_rd" type="labelenum" label="32002" lvalues="32003|30702|30703|30724|30725|30704|30726|30727|30728|30705|30729|30706|30730|30731|30707|30708|30709|30710|30711|30712|30738|30632|30713|30734|30737|30714|30733|30739|30740|30741|30742|30743|30745" default="32003" />
 	</category>
 	<category label="30600">
 		<setting label="30601" type="lsep"/>
