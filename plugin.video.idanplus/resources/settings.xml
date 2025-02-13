@@ -29,6 +29,7 @@
 		<setting id="ch_66" type="labelenum" label="30610" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="10" />
 		<setting id="ch_97" type="labelenum" label="30612" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="11" />
 		<setting id="ch_99" type="labelenum" label="30613" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="12" />
+		<setting id="ch_99c" type="labelenum" label="30614" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="12" />
 		<setting id="ch_ynet" type="labelenum" label="30622" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="13" />
 		<setting id="ch_walla" type="labelenum" label="30624" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="14" />
 		<setting id="ch_sport5" type="labelenum" label="30632" values="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23" default="15" />
@@ -59,6 +60,7 @@
 		<setting id="ch_66_res" type="text" label="30610" default="" />
 		<setting id="ch_97_res" type="text" label="30612" default="" />
 		<setting id="ch_99_res" type="text" label="30613" default="" />
+		<setting id="ch_99c_res" type="text" label="30614" default="" />
 		<setting id="ch_ynet_res" type="text" label="30622" default="" />
 		<setting id="ch_walla_res" type="text" label="30624" default="" />
 		<setting id="ch_kabru_res" type="text" label="30629" default="" />

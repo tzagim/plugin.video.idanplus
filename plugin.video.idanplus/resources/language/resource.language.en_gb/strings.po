@@ -271,6 +271,10 @@ msgctxt "#30613"
 msgid "כנסת 99"
 msgstr ""
 
+msgctxt "#30614"
+msgid "כנסת 99 - לקויי שמיעה"
+msgstr ""
+
 msgctxt "#30619"
 msgid "כלכלה 10"
 msgstr ""

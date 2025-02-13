@@ -23,6 +23,7 @@ TvChannels = [
 	{'ch':'ch_66', 'index': 10, 'nameID': 30610, 'channelID':'17', 'mode': 10, 'image':'kabbalah.jpg', 'module':'kabbalah', 'resKey':'ch_66_res', 'tvgID':'66', 'type':'tv'}, 
 	{'ch':'ch_97', 'index': 11, 'nameID': 30612, 'channelID':'97', 'mode': 10, 'image':'hidabroot.jpg', 'module':'hidabroot', 'resKey':'ch_97_res', 'tvgID':'97', 'type':'tv'}, 
 	{'ch':'ch_99', 'index': 12, 'nameID': 30613, 'channelID':'99', 'mode': 10, 'image':'knesset.png', 'module':'knesset', 'resKey':'ch_99_res', 'tvgID':'99', 'type':'tv'}, 
+	{'ch':'ch_99c', 'index': 12, 'nameID': 30614, 'channelID':'99c', 'mode': 10, 'image':'knesset.png', 'module':'knesset', 'resKey':'ch_99c_res', 'tvgID':'99', 'type':'tv'}, 
 	{'ch':'ch_ynet', 'index': 13, 'nameID': 30622, 'channelID':'ynet', 'mode': 10, 'image':'ynet.jpg', 'module':'tv', 'resKey':'ch_ynet_res', 'tvgID':'', 'type':'tv'}, 
 	{'ch':'ch_walla', 'index': 14, 'nameID': 30624, 'channelID':'live', 'mode': 10, 'image':'walla.png', 'module':'walla', 'resKey':'ch_walla_res', 'tvgID':'walla', 'type':'tv'}, 
 	{'ch':'ch_sport5', 'index': 15, 'nameID': 30632, 'channelID':'5studio', 'mode': 10, 'image':'Sport5.png', 'module':'sport5','resKey':'','tvgID':'5radio','type':'tv'},

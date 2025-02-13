@@ -17,15 +17,12 @@ def GetCategoriesList(iconimage):
 	common.addDir(name, '', 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות ערוץ עכשיו 14"}, module=module)
 
 def GetSeriesList(iconimage):
-	#text = common.OpenURL(baseUrl)
-	#text = common.OpenURL('{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl))
 	text = cache.get(common.OpenURL, 24, '{0}/tochniot_haarutz/%D7%94%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%94-%D7%94%D7%9E%D7%A8%D7%9B%D7%96%D7%99%D7%AA/'.format(baseUrl), {"User-agent": userAgent}, table='pages')
 	match = re.compile('<ul class="navbar2">(.*?)</ul>', re.S).findall(text)
 	xbmc.log(str(len(match)), 5)
 	match = re.compile('<a href=(.*?)>(.*?)</a>', re.S).findall(match[0])
 	grids_arr = []
 	for link, name in match[1:]:
-		#name = common.unquote(common.encode(link[link.rfind('/')+1:], 'utf-8'))
 		name = common.GetLabelColor(common.UnEscapeXML(name.replace('-', ' ')), keyColor="prColor", bold=True)	
 		grids_arr.append((name, link, iconimage, {"Title": name}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
@@ -41,7 +38,6 @@ def GetQuoteUrl(url):
 
 def GetEpisodesList(url, image):
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
-	#text = common.OpenURL(url)
 	text = cache.get(common.OpenURL, 24, url, {"User-agent": userAgent}, table='pages')
 	episodes = re.compile('<div class="katan-unit(.*?)</div>\s*</div>\s*</div>', re.S).findall(text)
 	for episode in episodes:

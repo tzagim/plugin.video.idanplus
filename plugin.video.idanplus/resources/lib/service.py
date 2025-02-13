@@ -1,10 +1,5 @@
 import xbmc
-from time import time
 import common, baseChannels
-
-end_pause = time() + 15
-monitor = xbmc.Monitor()
-wait_for_abort = monitor.waitForAbort
 
 channels = None
 startup_ch = common.GetAddonSetting("startup_ch")
@@ -27,9 +22,6 @@ if channels is not None:
 		autoplayCommand = 'PlayMedia(plugin://plugin.video.idanplus/?mode=5&url={0})'.format(channel['ch'])
 		xbmc.executebuiltin(autoplayCommand)
 
-while not monitor.abortRequested():
-	while time() < end_pause: wait_for_abort(1)
-	refreshCommand = 'RunPlugin(plugin://plugin.video.idanplus/?mode=7)'
-	xbmc.executebuiltin(refreshCommand)
-	xbmc.executebuiltin('AlarmClock(idanplus,{0},12:00:00,silent,loop)'.format(refreshCommand))
-	break
+refreshCommand = 'RunPlugin(plugin://plugin.video.idanplus/?mode=7)'
+xbmc.executebuiltin(refreshCommand)
+xbmc.executebuiltin('AlarmClock(idanplus,{0},12:00:00,silent,loop)'.format(refreshCommand))
