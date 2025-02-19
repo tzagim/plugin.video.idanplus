@@ -582,3 +582,15 @@ msgstr ""
 msgctxt "#32003"
 msgid "ללא"
 msgstr ""
+
+msgctxt "#32006"
+msgid "בחירה"
+msgstr ""
+
+msgctxt "#32007"
+msgid "ביטול ניגון ערוץ טלויזיה בפתיחת קודי"
+msgstr ""
+
+msgctxt "#32008"
+msgid "ביטול ניגון ערוץ רדיו בפתיחת קודי"
+msgstr ""

@@ -1,18 +1,19 @@
 import xbmc
 import common, baseChannels
 
+startup_name = u'ללא'
 channels = None
-startup_ch = common.GetAddonSetting("startup_ch")
-startup_rd = common.GetAddonSetting("startup_rd")
+is_startup_ch = common.Addon.getSettingBool("is_startup_ch")
+is_startup_rd = common.Addon.getSettingBool("is_startup_rd")
 
-if startup_ch != u'ללא':	
+if is_startup_ch:	
 	channels = baseChannels.TvChannels
-	startup_name = startup_ch
-elif startup_rd != u'ללא':	
+	startup_name = common.Addon.getSettingString("startup_ch")
+elif is_startup_rd:	
 	channels = baseChannels.RadioChannels
-	startup_name = startup_rd
+	startup_name = common.Addon.getSettingString("startup_rd")
 
-if channels is not None:
+if startup_name != u'ללא' and channels is not None:
 	channel = None
 	for ch in channels:
 		if common.GetLocaleString(ch['nameID']) == startup_name: 
