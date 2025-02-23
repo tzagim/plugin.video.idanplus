@@ -32,9 +32,12 @@ TvChannels = [
 	{'ch':'ch_kabru', 'index': 18, 'nameID': 30629, 'channelID':'18', 'mode': 10, 'image':'kabbalah.jpg', 'module':'kabbalah', 'resKey':'ch_kabru_res', 'tvgID':'', 'type':'tv'},
 	{'ch':'ch_musayof', 'index': 19, 'nameID': 30635, 'channelID':'musayof', 'mode': 10, 'image':'musayof.jpg', 'module':'tv', 'resKey':'ch_musayof_res', 'tvgID':'', 'type':'tv'},
 	{'ch':'ch_i24news', 'index': 20, 'nameID': 30643, 'channelID':'i24news', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24news_res', 'tvgID':'i24news', 'type':'tv'},
-	{'ch':'ch_13comedy', 'index': 20, 'nameID': 30645, 'channelID':'13comedy', 'mode': 4, 'image':'13comedy.jpg', 'module':'reshet', 'resKey':'ch_13comedy_res', 'tvgID':'13comedy', 'type':'tv'},
-	{'ch':'ch_13nofesh', 'index': 20, 'nameID': 30646, 'channelID':'13nofesh', 'mode': 4, 'image':'13nofesh.jpg', 'module':'reshet', 'resKey':'ch_13nofesh_res', 'tvgID':'13nofesh', 'type':'tv'},
-	{'ch':'ch_13reality', 'index': 20, 'nameID': 30647, 'channelID':'13reality', 'mode': 4, 'image':'13reality.jpg', 'module':'reshet', 'resKey':'ch_13reality_res', 'tvgID':'13reality', 'type':'tv'}
+	{'ch':'ch_i24newsen', 'index': 21, 'nameID': 30648, 'channelID':'i24newsen', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24newsen_res', 'tvgID':'i24news', 'type':'tv'},
+	{'ch':'ch_i24newsfr', 'index': 22, 'nameID': 30649, 'channelID':'i24newsfr', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24newsfr_res', 'tvgID':'i24news', 'type':'tv'},
+	{'ch':'ch_i24newsar', 'index': 23, 'nameID': 30650, 'channelID':'i24newsar', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24newsar_res', 'tvgID':'i24news', 'type':'tv'},
+	{'ch':'ch_13comedy', 'index': 24, 'nameID': 30645, 'channelID':'13comedy', 'mode': 4, 'image':'13comedy.jpg', 'module':'reshet', 'resKey':'ch_13comedy_res', 'tvgID':'13comedy', 'type':'tv'},
+	{'ch':'ch_13nofesh', 'index': 25, 'nameID': 30646, 'channelID':'13nofesh', 'mode': 4, 'image':'13nofesh.jpg', 'module':'reshet', 'resKey':'ch_13nofesh_res', 'tvgID':'13nofesh', 'type':'tv'},
+	{'ch':'ch_13reality', 'index': 26, 'nameID': 30647, 'channelID':'13reality', 'mode': 4, 'image':'13reality.jpg', 'module':'reshet', 'resKey':'ch_13reality_res', 'tvgID':'13reality', 'type':'tv'}
 ]
 
 RadioChannels = [

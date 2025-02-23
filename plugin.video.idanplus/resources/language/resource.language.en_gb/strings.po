@@ -347,6 +347,18 @@ msgctxt "#30643"
 msgid "i24news"
 msgstr ""
 
+msgctxt "#30648"
+msgid "i24news en"
+msgstr ""
+
+msgctxt "#30649"
+msgid "i24news fr"
+msgstr ""
+
+msgctxt "#30650"
+msgid "i24news ar"
+msgstr ""
+
 msgctxt "#30645"
 msgid "13 ערוץ הקומדיות"
 msgstr ""
