@@ -8,16 +8,17 @@ module = '101fm'
 def WatchLive(url, name='', iconimage='', quality='best'):
 	userAgent = common.GetUserAgent()
 	headers = {"User-Agent": userAgent}
+	channels = common.GetChannelsLinks("radio", module)
+	link = channels['link']
 	try:
-		url = 'http://live1.co.il/jrs101fm/'
-		text = common.OpenURL(url, headers=headers)
+		text = common.OpenURL(channels['ch'], headers=headers)
 		match = re.compile('<iframe.*?player/(.*?)/').findall(text)
-		url = 'http://opml.tunein.com/Tune.ashx?render=json&id={0}'.format(match[0])
+		url = channels['tunein'].format(match[0])
 		data = common.OpenURL(url, headers=headers, responseMethod='json')
 		link = data['body']['url']
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
-		link = 'http://101.cdnwz.net/101fm'
+		
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 

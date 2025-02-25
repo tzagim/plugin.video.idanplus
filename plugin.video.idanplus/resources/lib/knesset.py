@@ -4,10 +4,7 @@ import resources.lib.common as common
 module = 'knesset'
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = {
-		'99': 'https://kneset.gostreaming.tv/p2-kneset/_definst_/myStream/index.m3u8',
-		'99c': 'https://kneset.gostreaming.tv/p2-Accessibility/_definst_/myStream/index.m3u8',
-	}
+	channels = common.GetChannelsLinks("tv", module)
 	url = channels[url]
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}

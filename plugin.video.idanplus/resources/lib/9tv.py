@@ -66,12 +66,6 @@ def Play(name, url, iconimage, quality='best'):
 		match = re.compile('<source src="(.*?)"').findall(text)
 	if match == []:
 		return
-	'''
-	if match == []:
-		match = re.compile('type="video/mp4"\s*src="(.*?)"').findall(text)
-	if match == []:
-		match = re.compile('file:\s*"(.*?)"').findall(text)
-	'''
 	if 'youtube' in match[0] or 'youtu.be' in match[0]:
 		final = common.GetYouTube(match[0])
 	else:

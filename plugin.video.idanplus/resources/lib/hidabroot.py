@@ -8,7 +8,8 @@ module = 'hidabroot'
 def WatchLive(name='', iconimage='', quality='best'):
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
-	text = common.OpenURL('https://www.hidabroot.org/live', headers=headers)
+	url = common.GetChannelsLinks("tv", module)
+	text = common.OpenURL(url, headers=headers)
 	match = re.compile('<source\s*?src="(.*?)"', re.S).findall(text)
 	#text = common.OpenURL('https://go.shidur.net/player/testlive.php', headers=headers)
 	#match = re.compile('hls\.loadSource\(["\'](.*?)["\']\)').findall(text)

@@ -40,12 +40,13 @@ def Play(name, url, iconimage, quality='best'):
 def WatchLive(url, name='', iconimage='', quality='best'):
 	userAgent = common.GetUserAgent()
 	headers = {"User-Agent": userAgent}
+	channels = common.GetChannelsLinks("radio", module)
+	link = channels['link']
 	try:
-		playlist = common.OpenURL('http://digital.100fm.co.il/app/', headers={"User-Agent": userAgent}, responseMethod='json')
+		playlist = common.OpenURL(channels['ch'], headers={"User-Agent": userAgent}, responseMethod='json')
 		link = playlist['stations'][0]['audio']
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
-		link = 'https://cdn.cybercdn.live/Radios_100FM/Audio/icecast.audio'
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 

@@ -18,7 +18,8 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		'Accept-Encoding': 'gzip, deflate',
 		'Accept-Language': 'en-US,en;q=0.9'
 		}
-	channels = common.OpenURL('http://kab.tv/api/streams', headers=headers, responseMethod='json')
+	baseUrl = common.GetChannelsLinks("tv", module)
+	channels = common.OpenURL(baseUrl, headers=headers, responseMethod='json')
 	for channel in channels:
 		if str(channel['id']) == url:
 			link = channel['url'].strip()

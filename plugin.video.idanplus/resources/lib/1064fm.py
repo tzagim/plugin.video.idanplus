@@ -41,13 +41,14 @@ def Play(name, url, iconimage, quality='best'):
 	common.PlayStream(final, quality, name, iconimage)
 
 def WatchLive(url, name='', iconimage='', quality='best'):
+	channels = common.GetChannelsLinks("radio", module)
+	link = channels['link']
 	try:
-		text = common.OpenURL(baseUrl, headers=headers)
+		text = common.OpenURL(channels['ch'], headers=headers)
 		link = re.compile('"webapp\.broadcast_link":"(.*?)"').findall(text)[0]
 		link = link.replace('\\u002F', '/')
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
-		link = 'https://cdna.streamgates.net/TheBest/live/playlist.m3u8'
 
 	link = common.GetStreams(link, headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)

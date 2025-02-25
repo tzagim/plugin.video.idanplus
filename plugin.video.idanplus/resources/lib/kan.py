@@ -516,68 +516,10 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
 	return '{0}|User-Agent={1}'.format(link, userAgent)
 
 def WatchLive(url, name='', iconimage='', quality='best', type='video'):
-	channels = {
-		#'11': '{0}/live/tv.aspx?stationid=2'.format(baseUrl),
-		'11': 'https://kan11.media.kan.org.il/hls/live/2024514/2024514/master.m3u8',
-		#'11c': '{0}/live/tv.aspx?stationid=23'.format(baseUrl),
-		'11c': 'https://kan11sub.media.kan.org.il/hls/live/2024678/2024678/master.m3u8',
-		#'23': '{0}/live/tv.aspx?stationid=20'.format(baseUrl),
-		'23': 'https://kan23.media.kan.org.il/hls/live/2024691/2024691/master.m3u8',
-		#'33': 'https://www.makan.org.il/live/tv.aspx?stationid=25',
-		'33': 'https://makan.media.kan.org.il/hls/live/2024680/2024680/master.m3u8',
-		#'kan4K': '{0}/live/tv.aspx?stationid=18'.format(baseUrl),
-		#'wfb2019': '{0}/Item/?itemId=53195'.format(baseUrl),
-		#'yfb2019': '{0}/Item/?itemId=52450'.format(baseUrl),
-		#'bet': '{0}/radio/player.aspx?stationId=3'.format(baseUrl),
-		'bet': 'https://kanbet.media.kan.org.il/hls/live/2024811/2024811/playlist.m3u8',
-		#'gimel': '{0}/radio/player.aspx?stationid=9'.format(baseUrl),
-		'gimel': 'https://kangimmel.media.kan.org.il/hls/live/2024813/2024813/playlist.m3u8',
-		#'culture': '{0}/radio/player.aspx?stationid=5'.format(baseUrl),
-		'culture': 'https://kantarbut.media.kan.org.il/hls/live/2024816/2024816/playlist.m3u8',
-		#'88': '{0}/radio/player.aspx?stationid=4'.format(baseUrl),
-		'88': 'https://kan88.media.kan.org.il/hls/live/2024812/2024812/playlist.m3u8',
-		#'moreshet':'{0}/radio/player.aspx?stationid=6'.format(baseUrl),
-		'moreshet':'https://kanmoreshet.media.kan.org.il/hls/live/2024814/2024814/playlist.m3u8',
-		#'music': '{0}/radio/player.aspx?stationid=7'.format(baseUrl),
-		'music': 'https://kankolhamusica.media.kan.org.il/hls/live/2024817/2024817/playlist.m3u8',
-		#'kankids': 'https://www.kankids.org.il/radio/radio-kids.aspx',
-		'kankids': 'https://kankids.media.kan.org.il/hls/live/2024820/2024820/playlist.m3u8',
-		#'reka': '{0}/radio/player.aspx?stationid=10'.format(baseUrl),
-		'reka': 'https://kanreka.media.kan.org.il/hls/live/2024815/2024815/playlist.m3u8',
-		#'makan': '{0}/radio/player.aspx?stationId=13'.format(baseUrl)
-		'makan': 'https://makanradio.media.kan.org.il/hls/live/2024818/2024818/playlist.m3u8'
-		#'persian': 'http://farsi.kan.org.il/',
-		#'nos': '{0}/radio/radio-nos.aspx'.format(baseUrl),
-		#'oriental': '{0}/radio/oriental.aspx'.format(baseUrl),
-		#'international': '{0}/radio/radio-international.aspx'.format(baseUrl)
-	}
+	channels = common.GetChannelsLinks("tv", module)
+	radioChannelsLinks = common.GetChannelsLinks("radio", module)
+	channels.update(radioChannelsLinks)
 	channelUrl = channels[url]
-	#text = common.GetCF(url, userAgent)
-	#text = common.OpenURL(channelUrl, headers=headers)
-	'''
-	if text is None:
-		return
-	if url == 'persian':
-		match = re.compile('id="playerFrame".*?src="(.*?)"', re.S).findall(text)
-	elif '?itemId=' in channelUrl:
-		match = re.compile('<div class=\'videoWrapper\'><iframe.*?src="(.*?)"').findall(text)
-	elif type == 'video':
-		match = re.compile('<iframe.*id="streamIframe" data-src="(.+?)"').findall(text)
-		if len(match) == 0: 
-			match = re.compile('<iframe.*class="embedly-embed".*src="(.+?)"').findall(text)
-	else:
-		match = re.compile('<div class="player_content">.*?iframe src="(.*?)"', re.S).findall(text)
-		if len(match) == 0:
-			match = re.compile('iframeLink\s*?=\s*?"(.*?)"').findall(text)
-	if 'dailymotion' in match[0]:
-		#id = re.compile('.*?video/(.*?)\?').findall(match[0])
-		#link = 'plugin://plugin.video.dailymotion_com/?url={0}&mode=playLiveVideo'.format(id[0])
-		link = match[0]
-	else:
-		link = GetPlayerKanUrl(match[0], headers=headers, quality=quality)
-	'''
-	#Play(channelUrl, name, iconimage, quality)
-	#link = common.GetKaltura(channelUrl, 2717431, baseUrl, userAgent)
 	link = common.GetStreams(channelUrl, quality=quality)
 	common.PlayStream(link, quality, name, iconimage)
 

@@ -347,44 +347,15 @@ def Play(video, name='', iconimage='', quality='best'):
 		xbmc.log(str(ex), 3)
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = {
-		'13': {'referer': '{0}/live/'.format(baseUrl), 'link': 'https://reshet.g-mana.live/media/87f59c77-03f6-4bad-a648-897e095e7360/mainManifest.m3u8'},
-		'13b': {'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d18b0e6mopany4.cloudfront.net/out/v1/2f2bc414a3db4698a8e94b89eaf2da2a/index.m3u8'},
-		'13b2': {'klt': '1_pjrmtdaf', 'link': 'https://d2xg1g9o5vns8m.cloudfront.net/out/v1/0855d703f7d5436fae6a9c7ce8ca5075/index.m3u8', 'referer': '{0}/allshows/2010263/'.format(baseUrl)},
-		#'13c': {'brv': 'accessibility_ref', 'cst': '27', 'klt': '1_8dlti2jz', 'referer': '{0}/live/'.format(baseUrl), 'link': 'https://d198ztbnlup2iq.cloudfront.net/out/v1/2d9050c90fb94df8b78d1d98306a1a65/index.m3u8'},
-		'13c': {'referer': '{0}/live/'.format(baseUrl), 'link': 'https://reshet.g-mana.live/media/4607e158-e4d4-4e18-9160-3dc3ea9bc677/mainManifest.m3u8'},
-		'bb': {'brv': 'videoId', 'cst': '26', 'klt': '1_6fr5xbw2', 'referer': '{0}/home/bb-livestream/'.format(baseUrl), 'link': 'https://d2lckchr9cxrss.cloudfront.net/out/v1/c73af7694cce4767888c08a7534b503c/index.m3u8'},
-		'13comedy': {'klt': 'adsadadas', 'link': 'https://d15ds134q59udk.cloudfront.net/out/v1/fbba879221d045598540ee783b140fe2/index.m3u8', 'referer': '{0}/allshows/2605018/'.format(baseUrl)}, 
-		'13nofesh': {'klt': '1_g7lqf2yg', 'link': 'https://d1yd8hohnldm33.cloudfront.net/out/v1/19dee23c2cc24f689bd4e1288661ee0c/index.m3u8', 'referer': '{0}/allshows/2395628/'.format(baseUrl)}, 
-		'13reality': {'klt': '1_khfzmmtx', 'link': 'https://d2dffl3588mvfk.cloudfront.net/out/v1/d8e15050ca4148aab0ee387a5e2eb46b/index.m3u8', 'referer': '{0}/allshows/2395629/'.format(baseUrl)}
-	}
+	channels = common.GetChannelsLinks("tv", module)
 	referer = channels[url].get('referer')
 	try:
-		'''
-		result = GetUrlJson(referer)
-		provider = result['Header']['Live']['extras']['live_video_provider']
-		if provider == 'cast_time':
-			result = common.OpenURL('{0}/?userId={1}&serverType=web&cdnName=casttime&ch={2}'.format(cstApi, cstUserId, channels[url]['cst']), headers={"User-Agent": userAgent})
-			link = json.loads(result)[0]['Link']
-		else:
-			result = common.OpenURL('{0}{1}'.format(brvApi, result['Header']['Live'][channels[url]['brv']]), headers={"Accept": brvPk, "User-Agent": userAgent})
-			link = json.loads(result)['sources'][0]['src']
-		'''
 		headers={"User-Agent": userAgent}
 		if referer:
 			headers['referer'] = referer
 		link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
-		'''
-		link = ''
-		kalturaId = channels[url].get('klt')
-		if kalturaId:
-			link = common.GetKaltura(channels[url]['klt'], 2748741, baseUrl, userAgent, quality=quality)
-		if link == '':
-			link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
-		'''
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
-		#link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	if referer:
 		final = '{0}&Referer={1}'.format(final, referer)

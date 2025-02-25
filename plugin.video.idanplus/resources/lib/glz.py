@@ -6,10 +6,7 @@ module = 'glz'
 apiUrl = 'https://glz.co.il/umbraco/api/'
 userAgent = common.GetUserAgent()
 headers = {"User-Agent": userAgent}
-channels = {
-		'glz': {'rootId': '1051', 'live': 'http://glzwizzlv.bynetcdn.com/glz_mp3?awCollectionId=misc&awEpisodeId=glz'},
-		'glglz': {'rootId': '1920', 'live': 'http://glzwizzlv.bynetcdn.com/glglz_mp3?awCollectionId=misc&awEpisodeId=glglz'}
-	}
+channels = common.GetChannelsLinks("radio", module)
 
 def GetPlaylists(url):
 	url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, channels[url]['rootId'])

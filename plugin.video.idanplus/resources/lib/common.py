@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
-import sys, gzip, os, io, random, re, json, urllib, xmltodict, time, collections, xml.parsers.expat as expat, unicodedata
+import sys, os, io, random, re, json, urllib
 
 try:
 	# For Python 3.0 and later
@@ -212,6 +212,7 @@ def GetTextFile(filename):
 	return content
 
 def ReadList(fileName):
+	import collections
 	try:
 		with io.open(fileName, 'r', encoding='utf-8') as f:
 			content = json.load(f, object_pairs_hook=collections.OrderedDict) if NewerThanPyVer('2.6.99') else json.load(f)
@@ -231,6 +232,7 @@ def WriteList(filename, list):
 	return success
 
 def isFileOld(filename, deltaInSec=86400):
+	import time
 	lastUpdate = 0 if not os.path.isfile(filename) else int(os.path.getmtime(filename))
 	return (time.time() - lastUpdate) > deltaInSec
 
@@ -415,6 +417,7 @@ def EscapeXML(text):
 	return text.replace('&', '&amp;').replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
 
 def UnEscapeXML(st):
+	import xml.parsers.expat as expat
 	st = st.replace("&hellip;", "").replace("&nbsp;", " ")
 	want_unicode = False
 	if py2 and isinstance(st, unicode):
@@ -440,6 +443,7 @@ def UnEscapeXML(st):
 	return es.join(list)
 
 def XmlToDict(text):
+	import xmltodict
 	return xmltodict.parse(text)
 
 def GetLabelColor(text, keyColor=None, bold=False, color=None):
@@ -530,6 +534,15 @@ def GetUpdatedList(listFile, listUrl, headers={}, deltaInSec=86400, isZip=False,
 			xbmc.log("{0}".format(ex), 3)
 	items = ReadList(listFile)
 	return sorted(items,key=lambda items: items['name']) if sort else items
+
+def GetChannelsLinks(kind, module):
+	channelsFile = os.path.join(profileDir, 'channels.json')
+	channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/channels.json.zip'
+	channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=86400, isZip=True)
+	if len(channels) == 0:
+		resourcesDir = decode(translatePath(os.path.join(Addon.getAddonInfo('path'), 'resources')), "utf-8")
+		channels = ReadList(os.path.join(resourcesDir, 'channels.json'))
+	return channels.get(kind, {}).get(module, {}) if len(channels) > 0 else {}
 
 def GetKeyboardText(title = '', defaultText = ''):
 	keyboard = xbmc.Keyboard(defaultText, title)
@@ -672,7 +685,6 @@ def GetYouTube(url):
 	if '?' in video_id:
 		video_id = video_id[:video_id.find('?')]
 	return '{0}/play/?video_id={1}'.format(youtubePlugin, video_id)
-
 													   
 def GetCF(url, ua=None, retries=10, responseMethod='text'):
 	import resources.lib.cloudscraper as cloudscraper
@@ -727,10 +739,11 @@ def GetImageLinkBackground(logoUrl, logoFile):
 				f.write(chunk)
 
 def slugify(value, allow_unicode=False):
-    value = str(value)
-    if allow_unicode:
-        value = unicodedata.normalize('NFKC', value)
-    else:
-        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub(r'[^\w\s-]', '', value.lower())
-    return re.sub(r'[-\s]+', '-', value).strip('-_')
+	import unicodedata
+	value = str(value)
+	if allow_unicode:
+		value = unicodedata.normalize('NFKC', value)
+	else:
+		value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+	value = re.sub(r'[^\w\s-]', '', value.lower())
+	return re.sub(r'[-\s]+', '-', value).strip('-_')

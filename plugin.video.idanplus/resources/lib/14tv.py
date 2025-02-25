@@ -56,13 +56,14 @@ def Play(name, url, iconimage, quality='best'):
 	common.PlayStream(final, quality, name, iconimage)
 
 def Watch(name, iconimage, quality='best'):
-	url = 'https://ch14-channel14-content.akamaized.net/hls/live/2104807/CH14_CHANNEL14/master.m3u8'
+	channels = common.GetChannelsLinks("tv", module)
+	link = channels['link']
 	try:
-		data = common.OpenURL('https://insight-api-channel14.univtec.com/cms/interface/channels/play?relations=true&filter=guid||$eq||b676b906-5625-48af-a331-11a5d22e151b', headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
-		url = data.get('vod').get('hlsMaster')
+		data = common.OpenURL(channels['ch'], headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
+		link = data.get('vod').get('hlsMaster')
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
-	Play(name, url, iconimage, quality)
+	Play(name, link, iconimage, quality)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy

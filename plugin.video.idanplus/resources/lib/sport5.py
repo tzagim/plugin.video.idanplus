@@ -108,10 +108,9 @@ def GetRadioData(node='data'):
 	return result[node]
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = {
-		'5live': {'ch': 'liveurl', 'link': 'https://rgelive.akamaized.net/hls/live/2043150/radio5/playlist.m3u8'},
-		'5studio': {'ch': 'studioUrl', 'link': 'https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlist.m3u8'}
-	}
+	channels = common.GetChannelsLinks("tv", module)
+	radioChannelsLinks = common.GetChannelsLinks("radio", module)
+	channels.update(radioChannelsLinks)
 	link = channels[url]['link']
 	try:
 		link = GetRadioData(channels[url]['ch']).replace('https://nekot.sport5.co.il:10000?', '')

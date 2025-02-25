@@ -6,7 +6,8 @@ module = 'walla'
 baseUrl = 'https://www.walla.co.il'
 
 def WatchLive(name='', iconimage='', quality='best'):
-	link = 'https://amg01742-walla-wallanews-ono-btlna.amagi.tv/playlist/amg01742-walla-wallanews-ono/playlist.m3u8'
+	channels = common.GetChannelsLinks("tv", module)
+	link = channels['link']
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
 	text = common.OpenURL(baseUrl, headers=headers)

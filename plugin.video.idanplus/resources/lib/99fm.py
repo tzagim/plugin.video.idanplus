@@ -32,7 +32,7 @@ def Play(name, url, iconimage, quality='best'):
 	common.PlayStream(final, quality, name, iconimage)
 
 def WatchLive(name='', iconimage='', quality='best'):
-	link = 'http://eco-live.mediacast.co.il/99fm_aac'
+	link = common.GetChannelsLinks("radio", module)
 	final = '{0}|User-Agent={1}'.format(link, common.GetUserAgent())
 	common.PlayStream(final, quality, name, iconimage)
 
