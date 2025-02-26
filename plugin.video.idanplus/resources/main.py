@@ -102,8 +102,7 @@ def LiveChannel(name, url, mode, iconimage, module, contextMenu=[], choose=True,
 			nextProgramName = common.GetLabelColor(common.encode(programs[1]["name"], 'utf-8'), keyColor="prColor", bold=True)
 			nextProgramTime = common.GetLabelColor("[{0}-{1}]".format(datetime.datetime.fromtimestamp(programs[1]["start"]).strftime('%H:%M'), datetime.datetime.fromtimestamp(programs[1]["end"]).strftime('%H:%M')), keyColor="timesColor")
 			description = GetDescription(description, nextProgramTime, nextProgramName, channelNameFormat)
-	if contextMenu == []:
-		contextMenu = None
+	contextMenu.insert(0, (common.GetLocaleString(32009), 'RunPlugin({0}?mode=19)'.format(sys.argv[0])))
 	urlParamsData = {'name': common.GetLabelColor(name, keyColor="chColor", bold=True), 'tvgID': tvgID} if addFav else {}
 	common.addDir(displayName, url, mode, iconimage, infos={"Title": displayName, "Plot": description,'mediatype': 'movie'}, contextMenu=contextMenu, moreData=bitrate, module=module, isFolder=False, isPlayable=True, addFav=addFav, urlParamsData=urlParamsData)
 
@@ -398,6 +397,8 @@ def route(query):
 			SetAutoPlayChannel(name, moreData)
 		elif mode == 18:
 			DisableAutoPlayChannel(moreData)
+		elif mode == 19:
+			common.GetChannelsLinks("", "", downloadOnly=True)
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
 	else:

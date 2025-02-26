@@ -535,10 +535,13 @@ def GetUpdatedList(listFile, listUrl, headers={}, deltaInSec=86400, isZip=False,
 	items = ReadList(listFile)
 	return sorted(items,key=lambda items: items['name']) if sort else items
 
-def GetChannelsLinks(kind, module):
+def GetChannelsLinks(kind, module, downloadOnly=False):
 	channelsFile = os.path.join(profileDir, 'channels.json')
 	channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/channels.json.zip'
-	channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=86400, isZip=True)
+	deltaInSec = 0 if downloadOnly else Addon.getSettingInt("updateChannelsLinksInterval")*3600
+	channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=deltaInSec, isZip=True)
+	if (downloadOnly):
+		return
 	if len(channels) == 0:
 		resourcesDir = decode(translatePath(os.path.join(Addon.getAddonInfo('path'), 'resources')), "utf-8")
 		channels = ReadList(os.path.join(resourcesDir, 'channels.json'))
