@@ -268,11 +268,12 @@ def ShowFavorties(iconimage):
 		else:
 			common.addDir(name, url, mode, image, infos={"Title": name}, contextMenu=contextMenu, moreData=moreData, module=module, isFolder=isFolder, isPlayable=isPlayable, addFav=False)
 
-def Search():
+def Search(searchText=''):
 	series = common.GetUpdatedList(common.seriesFile, common.seriesUrl, isZip=True, sort=True)
 	filteredSeries = []
 	seriesLinks = []
-	searchText = common.GetKeyboardText('מילים לחיפוש', '').strip().lower()
+	if searchText == '':
+		searchText = common.GetKeyboardText('מילים לחיפוש', '').strip().lower()
 	if searchText != '':
 		for serie in series:
 			if serie['name'].lower().startswith(searchText):
@@ -362,7 +363,7 @@ def route(query):
 		elif mode == 12:
 			RadioVODs()
 		elif mode == 4:
-			Search()
+			Search(url)
 		elif mode == 5:
 			PlayLive(url)
 		elif mode == 6:

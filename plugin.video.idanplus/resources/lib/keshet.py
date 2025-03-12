@@ -8,7 +8,7 @@ module = 'keshet'
 moduleIcon = common.GetIconFullPath("mako.png")
 baseUrl = 'https://www.mako.co.il'
 endings = 'platform=responsive'
-programUrl = "{0}/_next/data/5.9.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
+programUrl = "{0}/_next/data/6.1.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
 UA = common.GetUserAgent()
 
