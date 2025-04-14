@@ -2,13 +2,12 @@
 import xbmc, xbmcplugin
 import sys, uuid, re, json
 import resources.lib.common as common
-from resources.lib import cache as  cache
+from resources.lib import cache as cache
 
 module = 'keshet'
 moduleIcon = common.GetIconFullPath("mako.png")
 baseUrl = 'https://www.mako.co.il'
 endings = 'platform=responsive'
-programUrl = "{0}/_next/data/6.1.0/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl)
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
 UA = common.GetUserAgent()
 
@@ -21,18 +20,27 @@ def GetJson(url):
 	else:
 		return resultJSON
 
+
+def GetJsonSection(url):
+	html = common.OpenURL(url, headers={"User-Agent": UA})
+	match = re.compile('type="application/json">(.*?)</script>').findall(html)
+	return json.loads(match[0])
+	
+def GetApiVer(url):
+	resultJSON = GetJsonSection(url)
+	if resultJSON is None or len(resultJSON) < 1:
+		return None
+	return resultJSON.get("buildId")
+
 def GetCategoriesList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
 	name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
 	common.addDir(name, "toggleSortingMethod", 7, iconimage, infos={"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	#name = "חיפוש"
 	#common.addDir(name, "{0}/autocomplete/vodAutocompletion.ashx?query={{0}}&max=60&id=query".format(baseUrl), 6, common.GetIconFullPath('search.jpg'), infos={"Title": name, "Plot": "חיפוש"}, module=module)
-	url = "{0}/mako-vod-index".format(baseUrl)
-	html = common.OpenURL(url, headers={"User-Agent": UA})
-	match = re.compile('type="application/json">(.*?)</script>').findall(html)
-	resultJSON = json.loads(match[0])
+	resultJSON = GetJsonSection("{0}/mako-vod-index".format(baseUrl))
 	if resultJSON is None or len(resultJSON) < 1:
-		return
+		return	
 	for menuItem in resultJSON.get("props", {}).get("pageProps", {}).get("menuPrograms", {}).get("menuItems", []):
 		name = common.GetLabelColor(menuItem["title"], bold=True, color="none")
 		common.addDir(name, "{0}{1}".format(baseUrl, menuItem["url"]), 1, iconimage, infos={"Title": name}, module=module)
@@ -66,6 +74,13 @@ def GetProgramUrl(url):
 	#urlParts = url[len(baseUrl)+1:].split("/")
 	i = url[8:].find("/")
 	urlParts = url.lower()[9+i:].split("/")
+	buildId = GetApiVer(url)
+	currentBuildId = common.GetAddonSetting("MakoBuildId")
+	if buildId is None:
+		buildId = currentBuildId
+	elif buildId != currentBuildId:
+		common.SetAddonSetting("MakoBuildId", buildId)
+	programUrl = "{0}/_next/data/{1}/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl, buildId)
 	return programUrl.format(urlParts[0], urlParts[1])
 
 def GetSeasonsList(url, iconimage):

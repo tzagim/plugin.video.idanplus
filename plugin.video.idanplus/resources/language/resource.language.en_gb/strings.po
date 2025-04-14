@@ -187,6 +187,10 @@ msgctxt "#30103"
 msgid "מזהה מכשיר"
 msgstr ""
 
+msgctxt "#30104"
+msgid "MakoBuildId"
+msgstr ""
+
 msgctxt "#30200"
 msgid "רשת"
 msgstr ""

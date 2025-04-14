@@ -153,6 +153,7 @@
 		<setting id="makoUsername" type="text" label="30101" default="" />
 		<setting id="makoPassword" type="text" option="hidden" label="30102" default="" />
 		<setting id="makoDeviceID" type="text" label="30103" default="" />
+		<setting id="MakoBuildId" type="text" label="30104" default="6.3.0" enable="false" />
 	</category>
 	<category label="30200">
 		<setting id="reshetSortBy" type="enum" label="30001" lvalues="30002|30003" default="0" />
