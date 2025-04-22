@@ -1,0 +1,49 @@
+name: "Keep your GitHub Actions alive automatically"
+## https://github.com/Entepotenz/keep-github-actions-alive-min-dependencies
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Fetch and Unzip Latest Plugin"]
+    types:
+      - completed
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Keep GitHub Actions alive
+        shell: bash
+        run: |
+          set -o nounset
+          set -o errexit
+          set -o pipefail
+          if [ "${TRACE-0}" -eq 1 ]; then set -o xtrace; fi
+
+          readonly COMMIT_USER_NAME="tzagim"
+          readonly COMMIT_USER_EMAIL="tzagim@users.noreply.github.com"
+          readonly TIME_ELAPSED_THRESHOLD_IN_DAYS='50'
+          readonly COMMIT_MESSAGE="Workflow keepalive"
+
+          git --version
+          git config user.name "$COMMIT_USER_NAME"
+          git config user.email "$COMMIT_USER_EMAIL"
+
+          LAST_COMMIT_DATE=$(git log -1 --format="%ct")
+          CURRENT_DATE=$(date "+%s")
+          TIME_DIFFERENCE=$((CURRENT_DATE - LAST_COMMIT_DATE))
+          DAYS_AGO=$((TIME_DIFFERENCE / (60 * 60 * 24)))
+
+          echo "Last commit is '$DAYS_AGO' days ago"
+
+          if [ "$DAYS_AGO" -gt "$TIME_ELAPSED_THRESHOLD_IN_DAYS" ]; then
+            echo "$DAYS_AGO > $TIME_ELAPSED_THRESHOLD_IN_DAYS -> add empty commit"
+            git commit --allow-empty -m "$COMMIT_MESSAGE"
+            git push
+            echo "done"
+          else
+            echo "$DAYS_AGO <= $TIME_ELAPSED_THRESHOLD_IN_DAYS -> nothing to do"
+          fi
