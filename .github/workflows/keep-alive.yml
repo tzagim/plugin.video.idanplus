@@ -1,4 +1,4 @@
-name: "Keep your GitHub Actions alive automatically"
+name: "Keep Actions alive"
 ## https://github.com/Entepotenz/keep-github-actions-alive-min-dependencies
 
 on:
