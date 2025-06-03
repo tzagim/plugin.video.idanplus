@@ -251,6 +251,14 @@ msgctxt "#30606"
 msgid "עכשיו 14"
 msgstr ""
 
+msgctxt "#30653"
+msgid "עכשיו 14 - גיבוי"
+msgstr ""
+
+msgctxt "#30654"
+msgid "עכשיו 14 - גיבוי 2"
+msgstr ""
+
 msgctxt "#30607"
 msgid "כאן חינוכית 23"
 msgstr ""
@@ -525,6 +533,14 @@ msgstr ""
 
 msgctxt "#30745"
 msgid "95.5FM רדיו"
+msgstr ""
+
+msgctxt "#30746"
+msgid "רדיו נושמים מזרחית"
+msgstr ""
+
+msgctxt "#30747"
+msgid "רדיו שירי דיכאון"
 msgstr ""
 
 msgctxt "#30800"

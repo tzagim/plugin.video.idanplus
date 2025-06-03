@@ -56,7 +56,7 @@
 		},
 		"14tv": {
 			"ch": "https://insight-api-channel14.univtec.com/cms/interface/channels/play?relations=true&filter=guid||$eq||b676b906-5625-48af-a331-11a5d22e151b",
-			"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807/CH14_CHANNEL14/master.m3u8"
+			"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807-b/CH14_CHANNEL14/master.m3u8"
 		},
 		"kabbalah": "http://kab.tv/api/streams",
 		"hidabroot": "https://www.hidabroot.org/live",
@@ -120,6 +120,12 @@
 			},
 			"10": {
 				"link": "https://r.il.cdn-redge.media/livehls/oil/calcala/live/channel10/live.livx/playlist.m3u8"
+			},
+			"14b": {
+				"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807/CH14_CHANNEL14/master.m3u8"
+			},
+			"14b2": {
+				"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807-b/CH14_CHANNEL14/master.m3u8"
 			}
 		}
 	},
@@ -232,6 +238,14 @@
 			},
 			"fm995": {
 				"link": "https://995.livecdn.biz/995fm",
+				"final": true
+			},
+			"noshmim_mizrahit": {
+				"link": "https://rs.mizrahit.fm:7777",
+				"final": true
+			},
+			"diki": {
+				"link": "https://diki.mediacast.co.il/diki",
 				"final": true
 			}
 		}

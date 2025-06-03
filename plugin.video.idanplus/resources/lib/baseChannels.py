@@ -12,6 +12,8 @@ TvChannels = [
 	{'ch':'ch_13b2', 'index': 3, 'nameID': 30644, 'channelID':'13b2', 'mode': 4, 'image':'13.jpg', 'module':'reshet', 'resKey':'ch_13b2_res', 'tvgID':'13', 'type':'tv'}, 
 	{'ch':'ch_13c', 'index': 3, 'nameID': 30631, 'channelID':'13c', 'mode': 4, 'image':'13.jpg', 'module':'reshet', 'resKey':'ch_13c_res', 'tvgID':'13', 'type':'tv'}, 
 	{'ch':'ch_14', 'index': 4, 'nameID': 30606, 'channelID':'14', 'mode': 10, 'image':'14tv.png', 'module':'14tv', 'resKey':'ch_14_res', 'tvgID':'14', 'type':'tv'}, 
+	{'ch':'ch_14b', 'index': 4, 'nameID': 30653, 'channelID':'14b', 'mode': 10, 'image':'14tv.png', 'module':'tv', 'resKey':'ch_14b_res', 'tvgID':'14', 'type':'tv'}, 
+	{'ch':'ch_14b2', 'index': 4, 'nameID': 30654, 'channelID':'14b2', 'mode': 10, 'image':'14tv.png', 'module':'tv', 'resKey':'ch_14b2_res', 'tvgID':'14', 'type':'tv'}, 
 	{'ch':'ch_10', 'index': 5, 'nameID': 30619, 'channelID':'10', 'mode': 10, 'image':'10tv.png', 'module':'tv', 'resKey':'ch_10_res', 'tvgID':'10', 'type':'tv'}, 
 	{'ch':'ch_23', 'index': 6, 'nameID': 30607, 'channelID':'23', 'mode': 10, 'image':'23tv.jpg', 'module':'kan', 'resKey':'ch_23_res', 'tvgID':'23', 'type':'tv'}, 
 	{'ch':'ch_23b', 'index': 6, 'nameID': 30639, 'channelID':'23b', 'mode': 10, 'image':'23tv.jpg', 'module':'tv', 'resKey':'', 'tvgID':'23', 'type':'tv'}, 
@@ -74,4 +76,6 @@ RadioChannels = [
 	{'ch':'rd_kolplay', 'index': 31, 'nameID': 30742, 'channelID':'kolplay', 'mode': 11, 'image':'kolplay.png', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
 	{'ch':'rd_gly', 'index': 32, 'nameID': 30743, 'channelID':'gly', 'mode': 11, 'image':'gly.jpg', 'module':'radio', 'tvgID':'gly', 'type':'radio'},
 	{'ch':'rd_fm995', 'index': 33, 'nameID': 30745, 'channelID':'fm995', 'mode': 11, 'image':'fm95.5.png', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
+	{'ch':'rd_noshmim_mizrahit', 'index': 34, 'nameID': 30746, 'channelID':'noshmim_mizrahit', 'mode': 11, 'image':'noshmim.jpg', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
+	{'ch':'rd_diki', 'index': 35, 'nameID': 30747, 'channelID':'diki', 'mode': 11, 'image':'diki.jpg', 'module':'radio', 'tvgID':'', 'type':'radio'}, 
 ]
