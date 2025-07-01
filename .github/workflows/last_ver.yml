@@ -2,8 +2,10 @@ name: Fetch and Unzip Latest Plugin
 
 on:
   push:
-    branches:
-      - main
+    branches: [ 'main' ]
+    paths-ignore:
+      - '.github/**'
+
   schedule:
     - cron: '0 */2 * * *'
 
