@@ -3,10 +3,12 @@ name: "Keep Actions alive"
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Fetch and Unzip Latest Plugin"]
-    types:
-      - completed
+#  workflow_run:
+#    workflows: ["Fetch and Unzip Latest Plugin"]
+#    types:
+#      - completed
+  schedule:
+  - cron: '0 0 */3 * *'
 
 jobs:
   keepalive:
