@@ -184,7 +184,7 @@ def GetEpisodes(posts, episodes, gridTitle, iconimage):
 				videoID = '{0}--brv--{1}==='.format(videoID, video['brv_videoID'])	
 			if videoID == '':
 				continue
-			icon = post.get('image', iconimage)
+			icon = video.get('poster', iconimage)
 			title = post.get('title')
 			if title == None:
 				title = ''
@@ -220,7 +220,7 @@ def GetLinks(url, result, iconimage):
 			except Exception as ex:
 				xbmc.log(str(ex), 3)
 	#'''
-	xbmc.log(str(seasons), 5)
+	#xbmc.log(str(seasons), 5)
 	pageTitle = common.encode(result.get('PageMeta', {}).get('title', '').strip(), 'utf-8')
 	for grid in result.get('Content', {}).get('PageGrid', {}):
 		if grid["grid_type"] == "seven_with_banner_or_iframe":
@@ -370,13 +370,16 @@ def GetNewsCategoriesList(iconimage):
 	grids = result.get('Content', {}).get('PageGrid', {})
 	for grid in grids:
 		gridType = grid.get('grid_type')
-		if gridType is None:
+		if gridType is None or gridType == 'SpecialRef' or gridType == 'six_with_banners_or_poster':
 			continue
 		gridTitle = grid.get('grid_title')
 		title = '' if gridTitle is None else common.GetLabelColor(common.UnEscapeXML(common.encode(gridTitle.get('text', '').strip(), 'utf-8')), keyColor="prColor", bold=True)
-		link = '' if gridTitle is None else '{0}{1}'.format(baseUrl, gridTitle.get('link', ''))
-		posts = grid.get('posts')
-		image = iconimage if posts is None or len(posts) < 1 else posts[0].get('image', '')
+		link = None if gridTitle is None else gridTitle.get('link')
+		if link is None or link == '':
+			continue
+		link = '{0}{1}'.format(baseUrl, link)
+		posts = grid.get('posts', [])
+		image = iconimage if posts is None or len(posts) < 1 else posts[0].get('imageObj', {}).get('d', '')
 		grids_arr.append((title, link, image, {"Title": title}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
