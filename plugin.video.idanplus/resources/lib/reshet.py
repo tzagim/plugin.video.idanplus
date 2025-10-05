@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcaddon
-import sys, re, json, collections, datetime, time
+import sys, re, json, collections, time
 import resources.lib.common as common
 from resources.lib import cache as  cache
 
@@ -8,6 +8,8 @@ Addon = xbmcaddon.Addon(common.AddonID)
 module = 'reshet'
 
 baseUrl = 'https://13tv.co.il'
+seriesUrl = 'https://13tv.co.il/_next/data/{0}/he/allshows/series/{1}.json?all=series&all={1}'
+seasonsUrl = 'https://13tv.co.il/_next/data/{0}/he/allshows/series/{1}/season/{2}.json?all=series&all={1}&all=season&all={2}'
 userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"
 brvApi = 'https://edge.api.brightcove.com/playback/v1/accounts/1551111274001/videos/'
 brvPk = 'application/json;pk=BCpkADawqM30eqkItS5d08jYUtMkbTKu99oEBllbfUaFKeknXu4iYsh75cRm2huJ_b1-pXEPuvItI-733TqJN1zENi-DcHlt7b4Dv6gCT8T3BS-ampD0XMnORQLoLvjvxD14AseHxvk0esW3'
@@ -19,7 +21,7 @@ def GetCategoriesList(iconimage):
 	name = "{0}: {1}".format(common.GetLocaleString(30001), common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003))
 	common.addDir(name, "toggleSortingMethod", 5, iconimage, {"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	name = common.GetLabelColor("כל התכניות", bold=True, color="none")
-	common.addDir(name, '{0}/all-shows/all-shows-list/'.format(baseUrl), 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות רשת 13"}, module=module)
+	common.addDir(name, '{0}/allshows/screen/1170108/'.format(baseUrl), 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות רשת 13"}, module=module)
 	name = common.GetLabelColor("חדשות 13", bold=True, color="none")
 	common.addDir(name, '', 10, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות חדשות 13"}, module=module)
 	name = common.GetLabelColor("ארכיון רשת 13", bold=True, color="none")
@@ -35,7 +37,6 @@ def GetUrlJson(url, root=False):
 		result = json.loads(props[0])
 		if root == False:
 			result = result['props']['pageProps']['page']
-		#xbmc.log(str(result), 5)
 	except Exception as ex:
 		xbmc.log(str(ex), 3)
 	return result
@@ -393,76 +394,54 @@ def GetSeriesList(url, iconimage):
 		result = cache.get(GetUrlJson, 0, url, root, table='pages')
 	if len(result) < 1:
 		return
-	result = result['props']['pageProps']['page']
+	common.SetAddonSetting("reshetSiteBuildID", result['buildId'])
 	grids_arr = []
-	grids = result.get('Content', {}).get('PageGrid', {})
-	for grid in grids:
-		for serie in grid.get('shows', {}):
-			try:
-				if serie['url'] == "":
-					if serie['id'] == '613':
-						serie['url'] = '/all-shows/vort/'
-					elif serie['id'] == '655':
-						serie['url'] = '/shows/patrick/'
-					else:
-						continue
-				name = common.encode(serie['title'], 'utf-8')
-				name = common.GetLabelColor(name, keyColor="prColor", bold=True)
-				grids_arr.append((name, serie['url'], serie['poster'], {"Title": name, "Plot": name,'mediatype': 'movie'}))
-			except Exception as ex:
-				xbmc.log('SerieID: {0}\n{1}'.format(serie['id'], str(ex)), 3)
+	grids = result['props']['pageProps']['leafs'][0]['child']
+	for serie in grids:
+		try:
+			name = common.encode(serie['name'], 'utf-8')
+			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
+			grids_arr.append((name, serie['metas']['SeriesID'], serie['images'][0]['url'], {"Title": name, "Plot": common.encode(serie['description'], 'utf-8'),'mediatype': 'movie'}))
+		except Exception as ex:
+			xbmc.log('SerieID: {0}\n{1}'.format(serie['metas']['SeriesID'], str(ex)), 3)
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
-		common.addDir(name, '{0}{1}'.format(baseUrl, link), 1, str(icon), infos=infos, module=module)
+		common.addDir(name, link, 1, str(icon), infos=infos, module=module)
 
-def GetSeasonList(url, iconimage):
-	if len(url) > 0 and url[-1] != '/':
-		url += '/'
-	serie = url[url.rfind('/', 0, len(url)-1)+1:-1]
+def GetPageJson(pageUrl, serieID, seasonNum=None):
 	buildId = common.GetAddonSetting("reshetSiteBuildID")
-	url = "{0}/_next/data/{1}/he/all-shows/{2}.json?all=all-shows&all={2}".format(baseUrl, buildId, serie)
+	url = pageUrl.format(buildId, serieID) if seasonNum is None else pageUrl.format(buildId, serieID, seasonNum)
 	result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
 	if result is None:
-		result = GetUrlJson('{0}/all-shows/all-shows-list/'.format(baseUrl), root=True)
+		result = GetUrlJson('{0}/allshows/'.format(baseUrl), root=True)
 		buildId = result['buildId']
 		common.SetAddonSetting("reshetSiteBuildID", buildId)
-		url = "{0}/_next/data/{1}/he/all-shows/{2}.json?all=all-shows&all={2}".format(baseUrl, buildId, serie)
+		url = pageUrl.format(buildId, serieID) if seasonNum is None else pageUrl.format(buildId, serieID, seasonNum)
 		result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
-	
-	grids = result['pageProps']['page']['Content']['PageGrid']
-	grids_arr = []
-	for grid in grids:
-		if grid["grid_type"] == "VodPlaylist":
-			if type(grid["episodesSeasonsMap"]) is dict:
-				for key, season in common.items(grid["episodesSeasonsMap"]):
-					name = common.GetLabelColor(season["name"], keyColor="timesColor", bold=True)
-					grids_arr.append((key, name, url, iconimage, {"Title": name, "Plot": name}))
-			else:
-				for season in grid["episodesSeasonsMap"]:
-					name = common.GetLabelColor(season["name"], keyColor="timesColor", bold=True)
-					grids_arr.append(("0", name, url, iconimage, {"Title": name, "Plot": name}))
-	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[1], reverse=True)
-	for key, name, link, icon, infos in grids_sorted:
-		common.addDir(name, link, 2, icon, infos={"Title": name}, moreData=key, module=module)
+	return result['pageProps']['program']
 
-def GetEpisodesList(url, iconimage, seasonNum):
-	result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
-	grids = result['pageProps']['page']['Content']['PageGrid']
+def GetSeasonList(serieID, iconimage):
+	result = GetPageJson(seriesUrl, serieID)
+	seasons = result["seasonsList"]
 	grids_arr = []
-	for grid in grids:
-		if grid["grid_type"] == "VodPlaylist":
-			season = grid["episodesSeasonsMap"][seasonNum] if type(grid["episodesSeasonsMap"]) is dict else grid["episodesSeasonsMap"][0]
-			for episode in season["episodes"]:
-				name = common.GetLabelColor(episode["title"], keyColor="chColor")
-				link = '--kaltura--{0}==='.format(episode["video"]['kalturaId'])
-				icon = episode["video"]["poster"]
-				air_date = ''
-				frmt = "%d/%m/%Y"
-				try:
-					air_date = datetime.datetime.strptime(episode["air_date"], frmt)
-				except TypeError:
-					air_date = datetime.datetime(*(time.strptime(episode["air_date"], frmt)[0:6]))
-				grids_arr.append((air_date, name, link, icon, {"Title": name, "Plot": episode["secondaryTitle"], "Aired": episode["air_date"]}))
+	for season in seasons:
+		name = common.GetLabelColor(season["name"], keyColor="timesColor", bold=True)
+		grids_arr.append((str(season["position"]), name))
+	#grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[1], reverse=True)
+	#for key, name, link, icon, infos in grids_sorted:
+	for seasonNum, name in grids_arr:
+		common.addDir(name, serieID, 2, iconimage, infos={"Title": name}, moreData=seasonNum, module=module)
+
+def GetEpisodesList(serieID, iconimage, seasonNum):
+	result = GetPageJson(seasonsUrl, serieID, seasonNum)
+	episodes = result["episodes"]
+	grids_arr = []
+	for episode in episodes:
+		name = common.GetLabelColor(episode["name"], keyColor="chColor")
+		link = '--kaltura--{0}==='.format(episode['entryId'])
+		icon = episode["images"][0]["url"]
+		air_date = time.strftime("%d/%m/%Y", time.localtime(episode["createDate"]))
+		grids_arr.append((episode["createDate"], name, link, icon, {"Title": name, "Plot": episode["description"], "Aired": air_date}))
 	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
 	for air_date, name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 3, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)

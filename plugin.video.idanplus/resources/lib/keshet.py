@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcplugin
-import sys, uuid, re, json
+import sys, uuid, re, json, time
 import resources.lib.common as common
 from resources.lib import cache as cache
 
@@ -9,10 +9,22 @@ moduleIcon = common.GetIconFullPath("mako.png")
 baseUrl = 'https://www.mako.co.il'
 endings = 'platform=responsive'
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
-UA = common.GetUserAgent()
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 def GetJson(url):
-	resultJSON = common.OpenURL(url, headers={"User-Agent": UA}, responseMethod='json')
+	headers = {
+		"User-Agent": UA,
+		"Accept": "application/json, text/plain, */*",
+		"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Referer": "https://www.mako.co.il/",
+		"Origin": "https://www.mako.co.il",
+		"Connection": "keep-alive",
+		"Sec-Fetch-Dest": "empty",
+		"Sec-Fetch-Mode": "cors",
+		"Sec-Fetch-Site": "same-origin"
+	}
+	resultJSON = common.OpenURL(url, headers=headers, responseMethod='json')
 	if resultJSON is None or len(resultJSON) < 1:
 		return None
 	if "root" in resultJSON:
@@ -22,12 +34,56 @@ def GetJson(url):
 
 
 def GetJsonSection(url):
-	html = common.OpenURL(url, headers={"User-Agent": UA})
-	match = re.compile('type="application/json">(.*?)</script>').findall(html)
-	return json.loads(match[0])
+	try:
+		# Add small delay to avoid being blocked
+		# time.sleep(0.5)
+		
+		headers = {
+			"User-Agent": UA,
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+			"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
+			"Accept-Encoding": "gzip, deflate, br",
+			"Referer": "https://www.mako.co.il/",
+			"Connection": "keep-alive",
+			"Upgrade-Insecure-Requests": "1",
+			"Sec-Fetch-Dest": "document",
+			"Sec-Fetch-Mode": "navigate",
+			"Sec-Fetch-Site": "same-origin"
+		}
+		html = common.OpenURL(url, headers=headers)
+		if html is None or html == "":
+			xbmc.log("GetJsonSection: No HTML content received from URL: {0}".format(url), 3)
+			return None
+		
+		# Try multiple regex patterns to find JSON data
+		patterns = [
+			r'type="application/json">(.*?)</script>',
+			r'"application/json">(.*?)</script>',
+			r'<script[^>]*type="application/json"[^>]*>(.*?)</script>',
+			r'<script[^>]*id="__NEXT_DATA__"[^>]*>(.*?)</script>'
+		]
+		
+		for pattern in patterns:
+			match = re.compile(pattern, re.DOTALL).findall(html)
+			if match and len(match) > 0:
+				try:
+					json_data = json.loads(match[0])
+					xbmc.log("GetJsonSection: Successfully parsed JSON from URL: {0}".format(url), 1)
+					return json_data
+				except json.JSONDecodeError as e:
+					xbmc.log("GetJsonSection: JSON decode error for pattern {0}: {1}".format(pattern, str(e)), 3)
+					continue
+		
+		xbmc.log("GetJsonSection: No valid JSON found in HTML from URL: {0}".format(url), 3)
+		return None
+		
+	except Exception as ex:
+		xbmc.log("GetJsonSection: Exception occurred: {0}".format(str(ex)), 3)
+		return None
 	
 def GetApiVer(url):
 	resultJSON = GetJsonSection(url)
+
 	if resultJSON is None or len(resultJSON) < 1:
 		return None
 	return resultJSON.get("buildId")
@@ -71,42 +127,86 @@ def GetSeriesList(url, iconimage):
 #'''
 
 def GetProgramUrl(url):
-	#urlParts = url[len(baseUrl)+1:].split("/")
-	i = url[8:].find("/")
-	urlParts = url.lower()[9+i:].split("/")
-	buildId = GetApiVer(url)
-	currentBuildId = common.GetAddonSetting("MakoBuildId")
-	if buildId is None:
-		buildId = currentBuildId
-	elif buildId != currentBuildId:
-		common.SetAddonSetting("MakoBuildId", buildId)
-	programUrl = "{0}/_next/data/{1}/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl, buildId)
-	return programUrl.format(urlParts[0], urlParts[1])
+	try:
+		#urlParts = url[len(baseUrl)+1:].split("/")
+		if len(url) < 9:
+			xbmc.log("GetProgramUrl: Invalid URL format: {0}".format(url), 3)
+			return None
+			
+		i = url[8:].find("/")
+		if i == -1:
+			xbmc.log("GetProgramUrl: Could not find path separator in URL: {0}".format(url), 3)
+			return None
+			
+		urlParts = url.lower()[9+i:].split("/")
+		if len(urlParts) < 2:
+			xbmc.log("GetProgramUrl: Invalid URL parts: {0}".format(urlParts), 3)
+			return None
+			
+		buildId = GetApiVer(url)
+		currentBuildId = common.GetAddonSetting("MakoBuildId")
+		if buildId is None:
+			buildId = currentBuildId
+			if buildId is None or buildId == "":
+				xbmc.log("GetProgramUrl: No build ID available for URL: {0}".format(url), 3)
+				return None
+		elif buildId != currentBuildId:
+			common.SetAddonSetting("MakoBuildId", buildId)
+			
+		programUrl = "{0}/_next/data/{1}/{{0}}/{{1}}.json?mako_vod_channel={{0}}&program={{1}}".format(baseUrl, buildId)
+		return programUrl.format(urlParts[0], urlParts[1])
+		
+	except Exception as ex:
+		xbmc.log("GetProgramUrl: Exception occurred: {0}".format(str(ex)), 3)
+		return None
 
 def GetSeasonsList(url, iconimage):
-	#data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
-	data = cache.get(GetJson, 24, GetProgramUrl(url), table='pages')["pageProps"]["data"]
-	if data==[]:
-		data = cache.get(GetJson, 0, GetProgramUrl(url), table='pages')["pageProps"]["data"]
-	#if iconimage == common.GetIconFullPath('search.jpg'):
-	iconimage = data["seo"]["image"]
-	seasons = data.get("seasons", [])
-	if len(seasons) < 1:
-		GetEpisodesList(url, iconimage, data)
-		return
-	grids_arr = []
-	index = 0
-	for season in seasons:
-		try:
-			name = common.GetLabelColor(common.encode(season.get('seasonTitle', ''), "utf-8"), keyColor="timesColor", bold=True)
-			url = "{0}{1}".format(baseUrl, season["pageUrl"])
-			grids_arr.append((index, name, url))
-			index += 1
-		except Exception as ex:
-			xbmc.log(str(ex), 3)
-	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
-	for index, name, link in grids_sorted:
-		common.addDir(name, link, 3, iconimage, infos={"Title": name, "Plot": name}, module=module)
+	try:
+		#data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
+		programUrl = GetProgramUrl(url)
+		if programUrl is None:
+			xbmc.log("GetSeasonsList: Failed to get program URL for: {0}".format(url), 3)
+			return
+			
+		cached_data = cache.get(GetJson, 24, programUrl, table='pages')
+		if cached_data is None or cached_data == []:
+			cached_data = cache.get(GetJson, 0, programUrl, table='pages')
+			if cached_data is None:
+				xbmc.log("GetSeasonsList: Failed to get data from cache for URL: {0}".format(programUrl), 3)
+				return
+		
+		if "pageProps" not in cached_data or "data" not in cached_data["pageProps"]:
+			xbmc.log("GetSeasonsList: Invalid data structure for URL: {0}".format(programUrl), 3)
+			return
+			
+		data = cached_data["pageProps"]["data"]
+		
+		#if iconimage == common.GetIconFullPath('search.jpg'):
+		if "seo" in data and "image" in data["seo"]:
+			iconimage = data["seo"]["image"]
+			
+		seasons = data.get("seasons", [])
+		if len(seasons) < 1:
+			GetEpisodesList(url, iconimage, data)
+			return
+			
+		grids_arr = []
+		index = 0
+		for season in seasons:
+			try:
+				name = common.GetLabelColor(common.encode(season.get('seasonTitle', ''), "utf-8"), keyColor="timesColor", bold=True)
+				url = "{0}{1}".format(baseUrl, season["pageUrl"])
+				grids_arr.append((index, name, url))
+				index += 1
+			except Exception as ex:
+				xbmc.log("GetSeasonsList: Error processing season: {0}".format(str(ex)), 3)
+				
+		grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
+		for index, name, link in grids_sorted:
+			common.addDir(name, link, 3, iconimage, infos={"Title": name, "Plot": name}, module=module)
+			
+	except Exception as ex:
+		xbmc.log("GetSeasonsList: Exception occurred: {0}".format(str(ex)), 3)
 
 def GetEpisodesList(url, icon, data=None):
 	if data is None:
@@ -152,7 +252,16 @@ def GetEpisodesList(url, icon, data=None):
 			common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage)))], moreData=bitrate, module='keshet', isFolder=False, isPlayable=True)
 
 def GetChannels(url, iconimage):
-	html = common.OpenURL(url, headers={"User-Agent": UA})
+	headers = {
+		"User-Agent": UA,
+		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+		"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Referer": "https://www.mako.co.il/",
+		"Connection": "keep-alive",
+		"Upgrade-Insecure-Requests": "1"
+	}
+	html = common.OpenURL(url, headers=headers)
 	if html == "":
 		return None
 	match = re.compile("var makoliveJson ='(.*?)';").findall(html)
@@ -185,7 +294,18 @@ def PlayItem(url, name='', iconimage='', quality='best', swichCdn=False):
 
 def Play(url, name='', iconimage='', quality='best', swichCdn=False):
 	common.DelCookies()
-	headers={"User-Agent": UA}
+	headers = {
+		"User-Agent": UA,
+		"Accept": "application/json, text/plain, */*",
+		"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Referer": "https://www.mako.co.il/",
+		"Origin": "https://www.mako.co.il",
+		"Connection": "keep-alive",
+		"Sec-Fetch-Dest": "empty",
+		"Sec-Fetch-Mode": "cors",
+		"Sec-Fetch-Site": "same-origin"
+	}
 	dv = url[url.find('vcmid=')+6: url.find('&videoChannelId=')]
 	ch = url[url.find('&videoChannelId=')+16:]
 	media = common.OpenURL('{0}/AjaxPage?jspName=playlist.jsp&vcmid={1}&videoChannelId={2}&galleryChannelId={1}&isGallery=false&consumer=web_html5&encryption=no'.format(baseUrl, dv, ch), headers=headers, responseMethod='json')['media']
@@ -228,7 +348,14 @@ def GetLink(media, cdn, dv, headers, quality):
 	return link, session.cookies
 
 def GetTicket(link, headers):
-	text = common.OpenURL(link, headers=headers)
+	# Add additional headers for ticket request
+	ticket_headers = headers.copy()
+	ticket_headers.update({
+		"Accept": "application/json, text/plain, */*",
+		"Referer": "https://www.mako.co.il/",
+		"Origin": "https://www.mako.co.il"
+	})
+	text = common.OpenURL(link, headers=ticket_headers)
 	result = json.loads(text)
 	if result['caseId'] == '4':
 		result = Login()
@@ -243,7 +370,15 @@ def GetTicket(link, headers):
 	return common.unquote_plus(result['tickets'][0]['ticket'])
 
 def Login():
-	headers={"User-Agent": UA}
+	headers = {
+		"User-Agent": UA,
+		"Accept": "application/json, text/plain, */*",
+		"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Referer": "https://www.mako.co.il/",
+		"Origin": "https://www.mako.co.il",
+		"Connection": "keep-alive"
+	}
 	text = common.OpenURL('{0}?eu={1}&da=6gkr2ks9-4610-392g-f4s8-d743gg4623k2&dwp={2}&et=ln&du={3}'.format(entitlementsServices, username, password, deviceID), headers=headers)
 	result = json.loads(text)
 	if result['caseId'] != '1':
