@@ -322,6 +322,7 @@ def Play(url, name='', iconimage='', quality='best', swichCdn=False):
 
 def GetLink(media, cdn, dv, headers, quality):
 	url = ''
+	media = sorted(media,key=lambda media: int(media["cdnLB"]), reverse=True)
 	for item in media:
 		if item['cdn'] == cdn.upper():
 			url = item['url']
