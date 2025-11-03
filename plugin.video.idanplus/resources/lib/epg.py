@@ -30,12 +30,12 @@ def ShowChannelEPG(channel, name='', iconimage='', provider='auto', days=2):
 		if startdate != day:
 			day = startdate
 			dayS = common.GetLabelColor(day, keyColor="prColor", bold=True)
-			common.addDir(dayS, 'epg', 99, iconimage, {"Title": dayS}, module=module, isFolder=False)
+			common.addDir(dayS, 'epg', 99, iconimage, {"title": dayS}, module=module, isFolder=False)
 		start_time = datetime.datetime.fromtimestamp(program["start"]).strftime('%H:%M')
 		end_time = datetime.datetime.fromtimestamp(program["end"]).strftime('%H:%M')
 		programName = GetDisplayName(common.GetLabelColor('[{0}-{1}]'.format(start_time, end_time), keyColor="timesColor"), common.GetLabelColor(common.encode(program["name"].strip(),'utf-8'), keyColor="prColor", bold=True), channelNameFormat)
 		description = common.encode(program["description"].strip(), 'utf-8')
-		common.addDir(programName, 'epg', 99, iconimage, {"Title": programName, "Plot": description}, module=module, isFolder=False)
+		common.addDir(programName, 'epg', 99, iconimage, {"title": programName, "plot": description}, module=module, isFolder=False)
 
 def GetNowEPG():
 	epgList = GetEPG()

@@ -14,11 +14,11 @@ moduleIcon = common.GetIconFullPath("Sport5.png")
 def GetMainList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
 	name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
-	common.addDir(name, "toggleSortingMethod", 6, iconimage, {"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
+	common.addDir(name, "toggleSortingMethod", 6, iconimage, {"title": name, "plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	name = common.GetLabelColor("כל התכניות", bold=True, color="none")
-	common.addDir(name, '', 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות מאתר ספורט 5"}, module=module)
+	common.addDir(name, '', 0, iconimage, infos={"title": name, "plot": "צפיה בתכניות מאתר ספורט 5"}, module=module)
 	name = common.GetLabelColor("תכניות רדיו", bold=True, color="none")
-	common.addDir(name, '', 20, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות רדיו מאתר ספורט 5"}, module=module)
+	common.addDir(name, '', 20, iconimage, infos={"title": name, "plot": "צפיה בתכניות רדיו מאתר ספורט 5"}, module=module)
 
 def GetCategories():
 	url = '{0}/HTML/External/VodCentertDS.txt'.format(vodUrl)
@@ -38,7 +38,7 @@ def GetCategoriesList(iconimage):
 		grids_arr.append((name, category['ID']))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, id in grids_sorted:
-		common.addDir(name, id, 1, iconimage, infos={"Title": name}, module=module)
+		common.addDir(name, id, 1, iconimage, infos={"title": name}, module=module)
 
 def GetCategory(id, categories):
 	if not isinstance(categories, list) and 'Category' in categories:
@@ -65,18 +65,18 @@ def GetSeasonList(id, iconimage):
 		catName = common.GetLabelColor(category['Name'], keyColor="prColor", bold=True)
 		if not isinstance(category['Category'], list):
 			name = '{0} - {1}'.format(catName, common.GetLabelColor(category['Category']['Name'], keyColor="timesColor", bold=True))
-			common.addDir(name, '{0};{1}'.format(id, category['Category']['ID']), 1, iconimage, infos={"Title": name}, module=module)
+			common.addDir(name, '{0};{1}'.format(id, category['Category']['ID']), 1, iconimage, infos={"title": name}, module=module)
 		else:
 			for season in category['Category']:
 				name = '{0} - {1}'.format(catName, common.GetLabelColor(season['Name'], keyColor="timesColor", bold=True))
-				common.addDir(name, '{0};{1}'.format(id, season['ID']), 1, iconimage, infos={"Title": name}, module=module)
+				common.addDir(name, '{0};{1}'.format(id, season['ID']), 1, iconimage, infos={"title": name}, module=module)
 	if len(ids) > 1:
 		category = GetSubCategory(category['ID'])
 	if 'Items' in category:
 		for item in category['Items']['Item']:
 			name = common.GetLabelColor(item['title'], keyColor="chColor", bold=True)
 			link = item['stream_url'] if 'http' in item['stream_url'] else item['stream_url_bak']
-			common.addDir(name, link, 4, item['img_upload'], infos={"Title": name, 'Plot': item['abstract']}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(item['img_upload']), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(item['img_upload']), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
+			common.addDir(name, link, 4, item['img_upload'], infos={"title": name, "plot": item['abstract']}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(item['img_upload']), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(item['img_upload']), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 
 def Play(name, url, iconimage, quality='best'):
 	link = referer = url
@@ -128,7 +128,7 @@ def GetRadioCategoriesList(iconimage):
 	for id in data['root']['children']:
 		category = data[id]
 		name = common.GetLabelColor(category['name'], keyColor="timesColor", bold=True)
-		grids_arr.append((name, id, '{0}/{1}'.format(radioUrl, radioIcon), {"Title": name}))
+		grids_arr.append((name, id, '{0}/{1}'.format(radioUrl, radioIcon), {"title": name}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 21, icon, infos=infos, module=module)
@@ -142,12 +142,12 @@ def GetRadioSeriesList(url):
 		iconimage = '{0}/{1}'.format(radioUrl, item.get('imageUrl', radioIcon))
 		if (item['type'] == 'folder'):
 			name = common.GetLabelColor(item['name'], keyColor="prColor", bold=True)
-			series_arr.append((name, id, iconimage, {"Title": name}))
+			series_arr.append((name, id, iconimage, {"title": name}))
 		else:
 			name = common.GetLabelColor(item['name'], keyColor="chColor")
 			desc = item.get('description', '')
 			link = item['url'].replace(u'\u200f', '')
-			episodes_arr.append((name, link, iconimage, {"Title": name, "Plot": desc, "Aired": item['time']}))
+			episodes_arr.append((name, link, iconimage, {"title": name, "plot": desc, "aired": item['time']}))
 	series_sorted = series_arr if sortBy == 0 else sorted(series_arr,key=lambda series_arr: series_arr[0])
 	for name, link, icon, infos in series_sorted:
 		common.addDir(name, link, 21, icon, infos=infos, module=module)

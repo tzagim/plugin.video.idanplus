@@ -14,7 +14,7 @@ def GetSeriesList(iconimage):
 		matches = re.compile('href="(.*?)".*?"background\-image: url\((.*?)\)".*?title="(.*?)".*?"program_tv_title">(.*?)</.*?<div>(.*?)</', re.S).findall(serie)
 		for link, image, actor, name, description in matches:
 			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
-			common.addDir(name, '{0}{1}'.format(baseUrl, link), 1, '{0}{1}'.format(baseUrl, image), infos={"Title": name, "Plot": description}, module=module)
+			common.addDir(name, '{0}{1}'.format(baseUrl, link), 1, '{0}{1}'.format(baseUrl, image), infos={"title": name, "plot": description}, module=module)
 
 def GetEpisodesList(url, progName=''):
 	text = common.OpenURL(url)
@@ -38,24 +38,24 @@ def GetEpisodesList(url, progName=''):
 	firstepisode = re.compile('poster: \'(.*?)\',.*?<div>(.*?)</div>.*?<div class="share_group".*?href="(.*?)"', re.S).findall(text)
 	for image, name, link in firstepisode:
 		name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="chColor")
-		common.addDir(name, 'http://{0}'.format(link), 2, '{0}{1}'.format(baseUrl, image), infos={"Title": name, "Plot": progName}, module=module, isFolder=False, isPlayable=True)
+		common.addDir(name, 'http://{0}'.format(link), 2, '{0}{1}'.format(baseUrl, image), infos={"title": name, "plot": progName}, module=module, isFolder=False, isPlayable=True)
 	
 	episodes = re.compile('<li class=".*?program">(.*?)</li>', re.S).findall(text)
 	for episode in episodes:
 		matches = re.compile('href="(.*?)".*?src="(.*?)".*?program_item_date">(.*?)</', re.S).findall(episode)
 		for link, image, name in matches:
 			name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="chColor")
-			common.addDir(name, '{0}{1}'.format(baseUrl, link), 2, '{0}{1}'.format(baseUrl, image), infos={"Title": name, "Plot": progName}, module=module, isFolder=False, isPlayable=True)
+			common.addDir(name, '{0}{1}'.format(baseUrl, link), 2, '{0}{1}'.format(baseUrl, image), infos={"title": name, "plot": progName}, module=module, isFolder=False, isPlayable=True)
 	
 	if page > 1:
 		name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
-		common.addDir(name, '{0}{1}'.format(_url, page-1), 1, image, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, '{0}{1}'.format(_url, page-1), 1, image, infos={"title": name, "plot": name}, module=module)
 	if pages > page:
 		name = common.GetLabelColor(common.GetLocaleString(30012), color="green")
-		common.addDir(name, '{0}{1}'.format(_url, page+1), 1, image, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, '{0}{1}'.format(_url, page+1), 1, image, infos={"title": name, "plot": name}, module=module)
 	if pages > 1:
 		name = common.GetLabelColor(common.GetLocaleString(30013), color="green")
-		common.addDir(name, '{0}?p={1}&pages={2}'.format(_url, page, pages), 3, image, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, '{0}?p={1}&pages={2}'.format(_url, page, pages), 3, image, infos={"title": name, "plot": name}, module=module)
 	
 def Play(name, url, iconimage, quality='best'):
 	userAgent = common.GetUserAgent()

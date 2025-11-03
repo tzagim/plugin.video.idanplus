@@ -18,7 +18,7 @@ def GetPodcatsList(iconimage, page='1'):
 	for link, icon, name, desc in podcasts:
 		name = common.GetLabelColor(common.UnEscapeXML(name), keyColor="prColor", bold=True)
 		desc = common.GetLabelColor(desc, keyColor="chColor")
-		common.addDir(name, '{0}{1}'.format(baseUrl, link), 2, icon, infos={"Plot": desc, "Title": name}, module=module, isFolder=False, isPlayable=True)
+		common.addDir(name, '{0}{1}'.format(baseUrl, link), 2, icon, infos={"plot": desc, "title": name}, module=module, isFolder=False, isPlayable=True)
 	pagination = re.compile('href=.*?page=(.*?)"', re.S).findall(pagination)
 	pages = page
 	for p in pagination:
@@ -26,13 +26,13 @@ def GetPodcatsList(iconimage, page='1'):
 			pages = int(p)
 	if page > 1:
 		name = common.GetLabelColor(common.GetLocaleString(30011), color="green")
-		common.addDir(name, str(page-1), 0, iconimage, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, str(page-1), 0, iconimage, infos={"title": name, "plot": name}, module=module)
 	if pages > page:
 		name = common.GetLabelColor(common.GetLocaleString(30012), color="green")
-		common.addDir(name, str(page+1), 0, iconimage, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, str(page+1), 0, iconimage, infos={"title": name, "plot": name}, module=module)
 	if pages > 1:
 		name = common.GetLabelColor(common.GetLocaleString(30013), color="green")
-		common.addDir(name, 'p={0}&pages={1}'.format(page, pages), 1, iconimage, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, 'p={0}&pages={1}'.format(page, pages), 1, iconimage, infos={"title": name, "plot": name}, module=module)
 
 def Play(name, url, iconimage, quality='best'):
 	text = common.OpenURL(url, headers=headers)

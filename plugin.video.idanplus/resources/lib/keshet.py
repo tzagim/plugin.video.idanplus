@@ -275,14 +275,16 @@ def GetChannels(url, iconimage):
 		iconimage = channel['picUrl']
 		common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage)))], moreData=bitrate, module='keshet', isFolder=False, isPlayable=True)
 
-def WatchLive(url, name='', iconimage='', quality='best'):
+def WatchLive(url, name='', iconimage='', quality='auto'):
+	if quality == 'best':
+		quality = 'auto'
 	channels = common.GetChannelsLinks("tv", module)
 	if url == '12b':
 		Play(channels[url], name, iconimage, quality, swichCdn=True)
 	else:
 		PlayItem(channels[url], name, iconimage, quality, swichCdn=True)
 
-def PlayItem(url, name='', iconimage='', quality='best', swichCdn=False):
+def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
 	prms = GetJson("{0}?{1}".format(url, endings))
 	if prms is None or len(prms) < 1:
 		return None
@@ -292,7 +294,7 @@ def PlayItem(url, name='', iconimage='', quality='best', swichCdn=False):
 	url = "vcmid={0}&videoChannelId={1}".format(vcmid,videoChannelId)
 	Play(url, name, iconimage, quality, swichCdn=swichCdn)
 
-def Play(url, name='', iconimage='', quality='best', swichCdn=False):
+def Play(url, name='', iconimage='', quality='auto', swichCdn=False):
 	common.DelCookies()
 	headers = {
 		"User-Agent": UA,
@@ -323,6 +325,7 @@ def Play(url, name='', iconimage='', quality='best', swichCdn=False):
 def GetLink(media, cdn, dv, headers, quality):
 	url = ''
 	media = sorted(media,key=lambda media: int(media["cdnLB"]), reverse=True)
+	#media = sorted(media,key=lambda media: int(media["cdnLB"]))
 	for item in media:
 		if item['cdn'] == cdn.upper():
 			url = item['url']
@@ -438,7 +441,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 		Play(url, name, iconimage, moreData)
 	elif mode == 5:	#------------- Playing item: -----------------
 		if moreData == '':
-			moreData = 'best'
+			moreData = 'auto'
 		PlayItem(url, name, iconimage, moreData)
 	elif mode == 6:	#------------- Search items: -----------------
 		Search(url, iconimage)

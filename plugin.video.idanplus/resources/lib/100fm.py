@@ -12,7 +12,7 @@ def GetCategories(iconimage):
 	]
 	for category in categories:
 		name = common.GetLabelColor(category['name'], keyColor="prColor", bold=True)
-		common.addDir(name, category['cat'], 1, iconimage, infos={"Title": name}, module=module)
+		common.addDir(name, category['cat'], 1, iconimage, infos={"title": name}, module=module)
 
 def GetPlaylists(cat):
 	userAgent = common.GetUserAgent()
@@ -31,7 +31,7 @@ def GetPlaylists(cat):
 			if item.get('tag', '') != 'content':
 				continue
 		name = common.GetLabelColor(item['name'], keyColor="chColor") 
-		common.addDir(name, item['audio'], 2, item['cover'], infos={"Title": name, "Plot": item['description']}, module=module, isFolder=False, isPlayable=True)
+		common.addDir(name, item['audio'], 2, item['cover'], infos={"title": name, "plot": item['description']}, module=module, isFolder=False, isPlayable=True)
 
 def Play(name, url, iconimage, quality='best'):
 	final = '{0}|User-Agent={1}'.format(url, common.GetUserAgent())

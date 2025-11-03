@@ -19,13 +19,13 @@ moduleIcon = common.GetIconFullPath("13.jpg")
 
 def GetCategoriesList(iconimage):
 	name = "{0}: {1}".format(common.GetLocaleString(30001), common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003))
-	common.addDir(name, "toggleSortingMethod", 5, iconimage, {"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
+	common.addDir(name, "toggleSortingMethod", 5, iconimage, {"title": name, "plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	name = common.GetLabelColor("כל התכניות", bold=True, color="none")
-	common.addDir(name, '{0}/allshows/screen/1170108/'.format(baseUrl), 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות רשת 13"}, module=module)
+	common.addDir(name, '{0}/allshows/screen/1170108/'.format(baseUrl), 0, iconimage, infos={"title": name, "plot": "צפיה בתכניות רשת 13"}, module=module)
 	name = common.GetLabelColor("חדשות 13", bold=True, color="none")
-	common.addDir(name, '', 10, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות חדשות 13"}, module=module)
+	common.addDir(name, '', 10, iconimage, infos={"title": name, "plot": "צפיה בתכניות חדשות 13"}, module=module)
 	name = common.GetLabelColor("ארכיון רשת 13", bold=True, color="none")
-	common.addDir(name, '{0}/general/programs/'.format(baseUrl), 20, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות מארכיון רשת 13"}, module=module)
+	common.addDir(name, '{0}/general/programs/'.format(baseUrl), 20, iconimage, infos={"title": name, "plot": "צפיה בתכניות מארכיון רשת 13"}, module=module)
 
 def GetUrlJson(url, root=False):
 	result = {}
@@ -92,9 +92,9 @@ def GetSeriesListOld(url, iconimage):
 				description = '' if pageTitle is None else common.encode(pageTitle, 'utf-8')
 				matches = [grids_arr.index(x) for x in grids_arr if link == x[1]]
 				if len(matches) == 1:
-					grids_arr[matches[0]] = (name, link, image, {"Title": name, "Plot": description,'mediatype': 'movie'})
+					grids_arr[matches[0]] = (name, link, image, {"title": name, "plot": description,'mediatype': 'movie'})
 				else:
-					grids_arr.append((name, link, image, {"Title": name, "Plot": description,'mediatype': 'movie'}))
+					grids_arr.append((name, link, image, {"title": name, "plot": description,'mediatype': 'movie'}))
 			except Exception as ex:
 				xbmc.log('SerieID: {0}\n{1}'.format(seriesID, str(ex)), 3)
 	mainMenus = result.get('Header', {}).get('mainMenu', [])
@@ -107,7 +107,7 @@ def GetSeriesListOld(url, iconimage):
 				if link == '' or link in series or link == '/vod/' or link == '/general/programs/signup-auditions/':
 					continue
 				series[link] = name
-				grids_arr.append((name, link, iconimage, {"Title": name}))
+				grids_arr.append((name, link, iconimage, {"title": name}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
 		common.addDir(name, '{0}{1}'.format(baseUrl, link), 21, str(icon), infos=infos, module=module)
@@ -119,7 +119,7 @@ def GetSeasonListOld(url, iconimage):
 	if len(seasons) > 0:
 		for link, title in common.items(seasons):
 			name = common.GetLabelColor(title, keyColor="timesColor", bold=True)
-			common.addDir(name, link, 21, iconimage, infos={"Title": name}, module=module)
+			common.addDir(name, link, 21, iconimage, infos={"title": name}, module=module)
 		if len(episodes) < 1:
 			return
 	ShowEpisodes(episodes, iconimage)
@@ -261,12 +261,12 @@ def GetLinks(url, result, iconimage):
 def ShowEpisodes(episodes, iconimage):
 	if len(episodes) < 1:
 		name = 'אין פרקים מלאים'
-		common.addDir(name, '', 99, iconimage, infos={"Title": name}, module=module, isFolder=False)
+		common.addDir(name, '', 99, iconimage, infos={"title": name}, module=module, isFolder=False)
 		return
 	for gridTitle, link, icon, title, subtitle, publishDate in episodes:
 		name = common.GetLabelColor(title, keyColor="chColor") if gridTitle is None or gridTitle == '' else common.getDisplayName(gridTitle, title, programNameFormat)
 		link = str(link)
-		common.addDir(name, link, 3, icon, infos={"Title": name, "Plot": subtitle, "Aired": publishDate}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
+		common.addDir(name, link, 3, icon, infos={"title": name, "plot": subtitle, "aired": publishDate}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 
 def ShowPaging(result, iconimage):
 	grids = result.get('Content', {}).get('PageGrid', {})
@@ -289,7 +289,7 @@ def ShowPaging(result, iconimage):
 		common.addDir(common.GetLabelColor(common.GetLocaleString(30012), color="green"), page_url + str(current_page+1) + '/', 22, iconimage, module=module)
 	if max_page > 2:
 		name = common.GetLabelColor(common.GetLocaleString(30013), color="green")
-		common.addDir(name, '{0}?p={1}&pages={2}'.format(page_url, current_page, max_page), 7, iconimage, infos={"Title": name, "Plot": name}, module=module)
+		common.addDir(name, '{0}?p={1}&pages={2}'.format(page_url, current_page, max_page), 7, iconimage, infos={"title": name, "plot": name}, module=module)
 
 def Play(video, name='', iconimage='', quality='best'):
 	try:
@@ -381,7 +381,7 @@ def GetNewsCategoriesList(iconimage):
 		link = '{0}{1}'.format(baseUrl, link)
 		posts = grid.get('posts', [])
 		image = iconimage if posts is None or len(posts) < 1 else posts[0].get('imageObj', {}).get('d', '')
-		grids_arr.append((title, link, image, {"Title": title}))
+		grids_arr.append((title, link, image, {"title": title}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 21, icon, infos=infos, module=module)
@@ -401,7 +401,7 @@ def GetSeriesList(url, iconimage):
 		try:
 			name = common.encode(serie['name'], 'utf-8')
 			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
-			grids_arr.append((name, serie['metas']['SeriesID'], serie['images'][0]['url'], {"Title": name, "Plot": common.encode(serie['description'], 'utf-8'),'mediatype': 'movie'}))
+			grids_arr.append((name, serie['metas']['SeriesID'], serie['images'][0]['url'], {"title": name, "plot": common.encode(serie['description'], 'utf-8'),'mediatype': 'movie'}))
 		except Exception as ex:
 			xbmc.log('SerieID: {0}\n{1}'.format(serie['metas']['SeriesID'], str(ex)), 3)
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
@@ -430,7 +430,7 @@ def GetSeasonList(serieID, iconimage):
 	#grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[1], reverse=True)
 	#for key, name, link, icon, infos in grids_sorted:
 	for seasonNum, name in grids_arr:
-		common.addDir(name, serieID, 2, iconimage, infos={"Title": name}, moreData=seasonNum, module=module)
+		common.addDir(name, serieID, 2, iconimage, infos={"title": name}, moreData=seasonNum, module=module)
 
 def GetEpisodesList(serieID, iconimage, seasonNum):
 	result = GetPageJson(seasonsUrl, serieID, seasonNum)
@@ -441,7 +441,7 @@ def GetEpisodesList(serieID, iconimage, seasonNum):
 		link = '--kaltura--{0}==='.format(episode['entryId'])
 		icon = episode["images"][0]["url"]
 		air_date = time.strftime("%d/%m/%Y", time.localtime(episode["createDate"]))
-		grids_arr.append((episode["createDate"], name, link, icon, {"Title": name, "Plot": episode["description"], "Aired": air_date}))
+		grids_arr.append((episode["createDate"], name, link, icon, {"title": name, "plot": episode["description"], "aired": air_date}))
 	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
 	for air_date, name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 3, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)

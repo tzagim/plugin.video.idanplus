@@ -301,7 +301,7 @@ def addDir(name, url, mode, iconimage='DefaultFolder.png', infos=None, contextMe
 	except:
 		listitem = xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
 	if infos is not None:
-		listitem.setInfo(type="Video", infoLabels=infos)
+		setInfo(listitem, infos)
 	if isPlayable:
 		listitem.setProperty("IsPlayable", "true")
 	for param in list(urlParamsData.keys()):
@@ -394,9 +394,6 @@ def GetStreams(url, headers={}, user_data=None, session=None, retries=1, quality
 	return link
 
 def PlayStream(url, quality='best', name='', iconimage=''):
-	plot = xbmc.getInfoLabel("ListItem.Plot")
-	year = xbmc.getInfoLabel("ListItem.Year")
-	infos = {"title": name, "plot": plot, "year": year,u'mpaa':'heb'}
 	if 'dailymotion' in url:
 		url = GetDailymotion(url)
 	try:
@@ -404,7 +401,12 @@ def PlayStream(url, quality='best', name='', iconimage=''):
 		listitem.setArt({'thumb' : iconimage, 'fanart': iconimage, 'icon': iconimage})
 	except:
 		listitem = xbmcgui.ListItem(name, path=url, iconImage=iconimage, thumbnailImage=iconimage)
-	listitem.setInfo(type="Video", infoLabels=infos)
+	plot = xbmc.getInfoLabel("ListItem.Plot")
+	year = xbmc.getInfoLabel("ListItem.Year")
+	infos = {"title": name, "plot": plot, u'mpaa': 'heb'}
+	if year != "":
+		infos["year"] = year
+	setInfo(listitem, infos)
 	if (quality == 'choose' or quality.startswith('set')) and '.m3u8' in url:
 		xbmc.Player().play(url, listitem)
 	else:
@@ -697,7 +699,7 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 			response = scraper.request('get', url)
 			if response.status_code == 403:
 				xbmc.sleep(1000)
-				xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), 3)
+				xbmc.log('CF - {0}  -  response {1}.'.format(url, response.status_code), 3)
 				continue
 			if responseMethod == 'json':
 				return response.json()
@@ -750,3 +752,10 @@ def slugify(value, allow_unicode=False):
 		value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
 	value = re.sub(r'[^\w\s-]', '', value.lower())
 	return re.sub(r'[-\s]+', '-', value).strip('-_')
+
+def setInfo(listitem, infos, type="Video"):
+	if GetKodiVer() >= 20:
+		from infotagger.listitem import set_info_tag
+		set_info_tag(listitem, infos)
+	else:
+		listitem.setInfo(type=type, infoLabels=infos)

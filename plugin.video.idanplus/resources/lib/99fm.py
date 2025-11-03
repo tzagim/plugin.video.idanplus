@@ -11,7 +11,7 @@ def GetCategories():
 	for item in rss['rss']['channel']['item']:
 		name = common.GetLabelColor(item['title'], keyColor="prColor", bold=True)
 		image = GetImage(re.compile("src='(.+?)'").findall(item['description'])[0])
-		common.addDir(name, item['link'], 1, image, infos={"Title": name, "Plot": item['itunes:summary']}, module=module)
+		common.addDir(name, item['link'], 1, image, infos={"title": name, "plot": item['itunes:summary']}, module=module)
 
 def GetPlaylists(url):
 	text = common.OpenURL(url)
@@ -19,7 +19,7 @@ def GetPlaylists(url):
 	for item in rss['rss']['channel']['item']:
 		name = common.GetLabelColor(item['title'], keyColor="chColor") 
 		image = GetImage(re.compile("src='(.+?)'").findall(item['description'])[0])
-		common.addDir(name, item['link'], 2, image, infos={"Title": name, "Plot": item['itunes:summary']}, module=module, isFolder=False, isPlayable=True)
+		common.addDir(name, item['link'], 2, image, infos={"title": name, "plot": item['itunes:summary']}, module=module, isFolder=False, isPlayable=True)
 
 def GetImage(image):
 	image = image.replace(u'\u200F', '')

@@ -34,9 +34,9 @@ apiHeaders = {
 def GetCategoriesList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
 	name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
-	common.addDir(name, "toggleSortingMethod", 4, iconimage, {"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
+	common.addDir(name, "toggleSortingMethod", 4, iconimage, {"title": name, "plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	name = common.GetLabelColor("כל התכניות", bold=True, color="none")
-	common.addDir(name, '', 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות ערוץ עכשיו 14"}, module=module)
+	common.addDir(name, '', 0, iconimage, infos={"title": name, "plot": "צפיה בתכניות ערוץ עכשיו 14"}, module=module)
 
 def GetSeriesList(iconimage):
 	text = cache.get(common.OpenURL, 24, '{0}pages/66d85aaa6e9a9c00237dec06'.format(apiUrl), apiHeaders, table='pages')
@@ -44,7 +44,7 @@ def GetSeriesList(iconimage):
 	grids_arr = []
 	for serie in series:
 		name = common.GetLabelColor(common.UnEscapeXML(serie["title"]), keyColor="prColor", bold=True)	
-		grids_arr.append((name, '{0}pages/series/{1}'.format(apiUrl, serie["id"]), serie["image"], {"Title": name, "Plot": serie.get("description", "")}))
+		grids_arr.append((name, '{0}pages/series/{1}'.format(apiUrl, serie["id"]), serie["image"], {"title": name, "plot": serie.get("description", "")}))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, image, infos in grids_sorted:
 		common.addDir(name, link, 5, common.encode(image, 'utf-8'), infos=infos, module=module)
@@ -54,7 +54,7 @@ def GetSeasonsList(url, image):
 	seasons = json.loads(text).get("seasons", [])
 	for season in seasons:
 		name = common.GetLabelColor(season["title"], keyColor="timesColor", bold=True)
-		common.addDir(name, url, 1, image, infos={"Title": name}, module=module, moreData=season["title"])
+		common.addDir(name, url, 1, image, infos={"title": name}, module=module, moreData=season["title"])
 
 def GetEpisodesList(url, image, seasonName):
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
@@ -70,7 +70,7 @@ def GetEpisodesList(url, image, seasonName):
 				aired = datetime.datetime.fromtimestamp(aired*0.001).strftime('%d/%m/%Y')
 			name = common.GetLabelColor('{0}{1}'.format(episode["title"], ' - {0}'.format(aired) if aired != None else ""), keyColor="chColor")
 			image = episode["image"]
-			common.addDir(name, episode["videoUrl"], 2, image, infos={"Title": name, "Plot": episode.get("keywords", ""), "Aired": aired}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=set_14tv_res&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
+			common.addDir(name, episode["videoUrl"], 2, image, infos={"title": name, "plot": episode.get("keywords", ""), "Aired": aired}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=set_14tv_res&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 		break
 
 def Play(name, url, iconimage, quality='best'):

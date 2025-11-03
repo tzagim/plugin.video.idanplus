@@ -10,9 +10,9 @@ moduleIcon = common.GetIconFullPath("sport1.jpg")
 def GetMainList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
 	name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
-	common.addDir(name, "toggleSortingMethod", 6, iconimage, {"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
+	common.addDir(name, "toggleSortingMethod", 6, iconimage, {"title": name, "plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	name = common.GetLabelColor("כל התכניות", bold=True, color="none")
-	common.addDir(name, '', 0, iconimage, infos={"Title": name, "Plot": "צפיה בתכניות מאתר ספורט 1"}, module=module)
+	common.addDir(name, '', 0, iconimage, infos={"title": name, "plot": "צפיה בתכניות מאתר ספורט 1"}, module=module)
 
 def GetCategoriesList(iconimage):
 	url = '{0}/vod/'.format(baseUrl)
@@ -28,7 +28,7 @@ def GetCategoriesList(iconimage):
 		grids_arr.append((name, link))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link in grids_sorted:
-		common.addDir(name, '{0}/vod/{1}'.format(baseUrl, link), 1, iconimage, infos={"Title": name}, module=module)
+		common.addDir(name, '{0}/vod/{1}'.format(baseUrl, link), 1, iconimage, infos={"title": name}, module=module)
 
 def GetEpisodes(text):
 	#raw_unicode_escape = False
@@ -55,7 +55,7 @@ def GetEpisodes(text):
 		icon = common.decode(icon, 'raw_unicode_escape', force=True)
 		name = common.GetLabelColor(common.UnEscapeXML(name.strip()), keyColor="chColor", bold=True)
 		try:
-			common.addDir(name, url.replace(baseUrl, ''), 4, icon, infos={"Title": name}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), name, common.quote_plus(icon), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(url), name, common.quote_plus(icon), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
+			common.addDir(name, url.replace(baseUrl, ''), 4, icon, infos={"title": name}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), name, common.quote_plus(icon), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(url), name, common.quote_plus(icon), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 		except Exception as ex:
 			xbmc.log(str(ex), 3)
 			
