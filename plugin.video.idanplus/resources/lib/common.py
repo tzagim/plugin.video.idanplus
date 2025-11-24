@@ -248,8 +248,8 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 	import requests
 	if headers.get('Accept-encoding', '') == '':
 		headers['Accept-encoding'] = 'gzip'
-	if headers.get('User-agent', '') == '':
-		headers['User-agent'] = userAgent
+	#if headers.get('User-agent', '') == '':
+	#	headers['User-agent'] = userAgent
 	if headers.get('User-Agent', '') == '':
 		headers['User-Agent'] = userAgent
 	for i in range(retries):
@@ -755,7 +755,21 @@ def slugify(value, allow_unicode=False):
 
 def setInfo(listitem, infos, type="Video"):
 	if GetKodiVer() >= 20:
-		from infotagger.listitem import set_info_tag
-		set_info_tag(listitem, infos)
+		vinfo = listitem.getVideoInfoTag()
+		for key, value in infos.items():
+			if key.lower() == 'title':
+				vinfo.setTitle(value)
+			elif key.lower() == 'plot':
+				vinfo.setPlot(value)
+			elif key.lower() == 'mediatype':
+				vinfo.setMediaType(value)
+			elif key.lower() == 'mpaa':
+				vinfo.setMpaa(value)
+			elif key.lower() == 'aired':
+				vinfo.setFirstAired(value)
+			elif key.lower() == 'year':
+				vinfo.setYear(int(value))
+			else:
+				xbmc.log('--------- {0} ---------'.format(key), 5)
 	else:
 		listitem.setInfo(type=type, infoLabels=infos)

@@ -7,11 +7,17 @@
 			"33": "https://makan.media.kan.org.il/hls/live/2024680/2024680/master.m3u8"
 		},
 		"keshet": {
-			"12": "https://www.mako.co.il/mako-vod-live-tv/VOD-6540b8dcb64fd31006.htm",
-			"12b": "vcmid=1e2258089b67f510VgnVCM2000002a0c10acRCRD&videoChannelId=d1d6f5dfc8517810VgnVCM100000700a10acRCRD",
-			"12c": "https://www.mako.co.il/mako-vod-live-tv/VOD-319a699f834e661006.htm",
-			"24": "https://www.mako.co.il/mako-vod-live-tv/VOD-b3480d2eff3fd31006.htm",
-			"2025": "https://www.mako.co.il/mako-vod-live-tv/VOD-7469dcd71dcb761006.htm"
+			"12": "/direct/hls/live/2033791/k12/index.m3u8?as=1", 
+			"12b": "/stream/hls/live/2033791/k12n12wad/index.m3u8?b-in-range=0-700",
+			"12b2": "/direct/hls/live/2033791/k12dvr/index.m3u8?b-in-range=800-2700",
+			"12b3": "/n12/hls/live/2103938/k12/index.m3u8?b-in-range=0-1100",
+			"12c": "/direct/hls/live/2035325/k12cc/index.m3u8?as=1",
+			"24": "/direct/hls/live/2035340/ch24live/index.m3u8?as=1",
+			"erets": "/free/hls/live/2111419/erets/index.m3u8?b-in-range=0-1800",
+			"savri": "/free/hls/live/2111419/savri/index.m3u8?b-in-range=0-1800",
+			"hatuna": "/free/hls/live/2111419/hatuna/index.m3u8?b-in-range=0-1800",
+			"kohav": "/free/hls/live/2111419/kohav/index.m3u8?b-in-range=0-1800",
+			"ninja": "/free/hls/live/2111419/ninja/index.m3u8?b-in-range=0-1800"
 		},
 		"reshet": {
 			"13": {
@@ -122,7 +128,7 @@
 				"link": "https://r.il.cdn-redge.media/livehls/oil/calcala-live/live/channel10/live.livx/playlist.m3u8"
 			},
 			"14b": {
-				"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807/CH14_CHANNEL14/master.m3u8"
+				"link": "https://r.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8"
 			},
 			"14b2": {
 				"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807-b/CH14_CHANNEL14/master.m3u8"

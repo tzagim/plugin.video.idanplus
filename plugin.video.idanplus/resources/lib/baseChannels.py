@@ -6,6 +6,8 @@ TvChannels = [
 	{'ch':'ch_11c', 'index': 1, 'nameID': 30637, 'channelID':'11c', 'mode': 10, 'image':'kan.jpg', 'module':'kan', 'resKey':'ch_11c_res', 'tvgID':'11', 'type':'tv'}, 
 	{'ch':'ch_12', 'index': 2, 'nameID': 30603, 'channelID':'12', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12_res', 'tvgID':'12', 'type':'tv'}, 
 	{'ch':'ch_12b', 'index': 2, 'nameID': 30605, 'channelID':'12b', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12b_res', 'tvgID':'12', 'type':'tv'}, 
+	{'ch':'ch_12b2', 'index': 2, 'nameID': 30655, 'channelID':'12b2', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12b2_res', 'tvgID':'12', 'type':'tv'}, 
+	{'ch':'ch_12b3', 'index': 2, 'nameID': 30656, 'channelID':'12b3', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12b3_res', 'tvgID':'12', 'type':'tv'}, 
 	{'ch':'ch_12c', 'index': 2, 'nameID': 30626, 'channelID':'12c', 'mode': 10, 'image':'keshet.jpg', 'module':'keshet', 'resKey':'ch_12c_res', 'tvgID':'12', 'type':'tv'}, 
 	{'ch':'ch_13', 'index': 3, 'nameID': 30604, 'channelID':'13', 'mode': 4, 'image':'13.jpg', 'module':'reshet', 'resKey':'ch_13_res', 'tvgID':'13', 'type':'tv'}, 
 	{'ch':'ch_13b', 'index': 3, 'nameID': 30634, 'channelID':'13b', 'mode': 4, 'image':'13.jpg', 'module':'reshet', 'resKey':'ch_13b_res', 'tvgID':'13', 'type':'tv'}, 
@@ -39,7 +41,12 @@ TvChannels = [
 	{'ch':'ch_i24newsar', 'index': 23, 'nameID': 30650, 'channelID':'i24newsar', 'mode': 10, 'image':'i24news.png', 'module':'tv', 'resKey':'ch_i24newsar_res', 'tvgID':'i24news', 'type':'tv'},
 	{'ch':'ch_13comedy', 'index': 24, 'nameID': 30645, 'channelID':'13comedy', 'mode': 4, 'image':'13comedy.jpg', 'module':'reshet', 'resKey':'ch_13comedy_res', 'tvgID':'13comedy', 'type':'tv'},
 	{'ch':'ch_13nofesh', 'index': 25, 'nameID': 30646, 'channelID':'13nofesh', 'mode': 4, 'image':'13nofesh.jpg', 'module':'reshet', 'resKey':'ch_13nofesh_res', 'tvgID':'13nofesh', 'type':'tv'},
-	{'ch':'ch_13reality', 'index': 26, 'nameID': 30647, 'channelID':'13reality', 'mode': 4, 'image':'13reality.jpg', 'module':'reshet', 'resKey':'ch_13reality_res', 'tvgID':'13reality', 'type':'tv'}
+	{'ch':'ch_13reality', 'index': 26, 'nameID': 30647, 'channelID':'13reality', 'mode': 4, 'image':'13reality.jpg', 'module':'reshet', 'resKey':'ch_13reality_res', 'tvgID':'13reality', 'type':'tv'},
+	{'ch':'ch_erets', 'index': 27, 'nameID': 30657, 'channelID':'erets', 'mode': 10, 'image':'erets.jpg', 'module':'keshet', 'resKey':'ch_erets_res', 'tvgID':'', 'type':'tv'},
+	{'ch':'ch_savri', 'index': 28, 'nameID': 30658, 'channelID':'savri', 'mode': 10, 'image':'savri.jpg', 'module':'keshet', 'resKey':'ch_savri_res', 'tvgID':'', 'type':'tv'},
+	{'ch':'ch_hatuna', 'index': 29, 'nameID': 30659, 'channelID':'hatuna', 'mode': 10, 'image':'hatuna.jpg', 'module':'keshet', 'resKey':'ch_hatuna_res', 'tvgID':'', 'type':'tv'},
+	{'ch':'ch_kohav', 'index': 30, 'nameID': 30660, 'channelID':'kohav', 'mode': 10, 'image':'kohav.jpg', 'module':'keshet', 'resKey':'ch_kohav_res', 'tvgID':'', 'type':'tv'},
+	{'ch':'ch_ninja', 'index': 31, 'nameID': 30661, 'channelID':'ninja', 'mode': 10, 'image':'ninja.jpg', 'module':'keshet', 'resKey':'ch_ninja_res', 'tvgID':'', 'type':'tv'}
 ]
 
 RadioChannels = [

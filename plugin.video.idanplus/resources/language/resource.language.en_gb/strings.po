@@ -239,6 +239,14 @@ msgctxt "#30605"
 msgid "קשת 12 - גיבוי"
 msgstr ""
 
+msgctxt "#30655"
+msgid "קשת 12 - גיבוי 2"
+msgstr ""
+
+msgctxt "#30656"
+msgid "קשת 12 - גיבוי 3"
+msgstr ""
+
 msgctxt "#30626"
 msgid "קשת 12 - לקויי שמיעה"
 msgstr ""
@@ -382,6 +390,26 @@ msgstr ""
 
 msgctxt "#30647"
 msgid "ערוץ הריאליטי"
+msgstr ""
+
+msgctxt "#30657"
+msgid "ערוץ ארץ נהדרת"
+msgstr ""
+
+msgctxt "#30658"
+msgid "ערוץ סברי מרנן"
+msgstr ""
+
+msgctxt "#30659"
+msgid "ערוץ חתונמי"
+msgstr ""
+
+msgctxt "#30660"
+msgid "ערוץ הכוכב הבא"
+msgstr ""
+
+msgctxt "#30661"
+msgid "ערוץ נינג'ה ישראל"
 msgstr ""
 
 msgctxt "#30651"

@@ -9,6 +9,7 @@ moduleIcon = common.GetIconFullPath("mako.png")
 baseUrl = 'https://www.mako.co.il'
 endings = 'platform=responsive'
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
+da = '6gkr2ks9-4610-392g-f4s8-d743gg4623k2'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 def GetJson(url):
@@ -31,7 +32,6 @@ def GetJson(url):
 		return resultJSON["root"]
 	else:
 		return resultJSON
-
 
 def GetJsonSection(url):
 	try:
@@ -236,7 +236,7 @@ def GetEpisodesList(url, icon, data=None):
 				url = "{0}/VodPlaylist?vcmid={1}&videoChannelId={2}".format(baseUrl, vcmid, videoChannelId)
 				iconimage = vod["pics"][0]["picUrl"]
 				infos = {"Title": name, "Plot": name}
-				common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage)))], moreData=bitrate, module='keshet', isFolder=False, isPlayable=True)
+				common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 			except Exception as ex:
 				xbmc.log(str(ex), 3)
 	if isEpisodes == False:
@@ -249,7 +249,7 @@ def GetEpisodesList(url, icon, data=None):
 			url = "{0}/VodPlaylist?vcmid={1}&videoChannelId={2}".format(baseUrl, vcmid, videoChannelId)
 			iconimage = data["seo"]["image"]
 			infos = {"Title": name, "Plot": name}
-			common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage)))], moreData=bitrate, module='keshet', isFolder=False, isPlayable=True)
+			common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 
 def GetChannels(url, iconimage):
 	headers = {
@@ -273,16 +273,23 @@ def GetChannels(url, iconimage):
 		infos = {"Title": name, "Plot": common.encode(channel['subtitle'], "utf-8")}
 		url = '{0}{1}'.format(baseUrl, channel['link'])
 		iconimage = channel['picUrl']
-		common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage)))], moreData=bitrate, module='keshet', isFolder=False, isPlayable=True)
+		common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 
 def WatchLive(url, name='', iconimage='', quality='auto'):
-	if quality == 'best':
-		quality = 'auto'
 	channels = common.GetChannelsLinks("tv", module)
-	if url == '12b':
-		Play(channels[url], name, iconimage, quality, swichCdn=True)
-	else:
-		PlayItem(channels[url], name, iconimage, quality, swichCdn=True)
+	headers = {
+		"User-Agent": UA
+	}
+	url = channels[url]
+	ticket = GetTicket('{0}?et=ngt&lp={1}&rv=AKAMAI'.format(entitlementsServices, url), headers)
+	pos = url.find('?');
+	if pos > 0:
+		url = url[:pos]
+	link = 'https://mako-streaming.akamaized.net{0}?{1}'.format(url, ticket)
+	if quality != 'auto':
+		link = common.GetStreams(link, headers=headers, quality=quality)
+	final = '{0}|User-Agent={1}'.format(link, UA)
+	common.PlayStream(final, quality, name, iconimage)
 
 def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
 	prms = GetJson("{0}?{1}".format(url, endings))
@@ -339,16 +346,14 @@ def GetLink(media, cdn, dv, headers, quality):
 	if username.strip() == '':
 		l = '{0}?et=gt&lp={1}&rv={2}'.format(entitlementsServices, url, cdn)
 	else:
-		l = '{0}?et=gt&na=2.0&da=6gkr2ks9-4610-392g-f4s8-d743gg4623k2&du={1}&dv={2}&rv={3}&lp={4}'.format(entitlementsServices, deviceID, dv, cdn, url)
+		l = '{0}?et=gt&na=2.0&da{1}=&du={2}&dv={3}&rv={4}&lp={5}'.format(entitlementsServices, da, deviceID, dv, cdn, url)
 	ticket = GetTicket(l, headers)
 	if url.startswith('//'):
 		url = 'https:{0}'.format(url) 
-	#xbmc.log('{0}?{1}'.format(url, ticket), 5)
 	if quality == 'auto':
 		return '{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), None		   
 	session = common.GetSession()
 	link = common.GetStreams('{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), headers=headers, session=session, quality=quality)
-	#xbmc.log(link, 5)
 	return link, session.cookies
 
 def GetTicket(link, headers):
@@ -383,11 +388,11 @@ def Login():
 		"Origin": "https://www.mako.co.il",
 		"Connection": "keep-alive"
 	}
-	text = common.OpenURL('{0}?eu={1}&da=6gkr2ks9-4610-392g-f4s8-d743gg4623k2&dwp={2}&et=ln&du={3}'.format(entitlementsServices, username, password, deviceID), headers=headers)
+	text = common.OpenURL('{0}?eu={1}&da={2}&dwp={3}&et=ln&du={4}'.format(entitlementsServices, username, da, password, deviceID), headers=headers)
 	result = json.loads(text)
 	if result['caseId'] != '1':
 		return result
-	text = common.OpenURL('{0}?da=6gkr2ks9-4610-392g-f4s8-d743gg4623k2&et=gds&du={1}'.format(entitlementsServices, deviceID), headers=headers)
+	text = common.OpenURL('{0}?da={1}&et=gds&du={2}'.format(entitlementsServices, da, deviceID), headers=headers)
 	return json.loads(text)
 
 def Search(url, iconimage):
@@ -405,7 +410,7 @@ def Search(url, iconimage):
 			infos={"Title": name, "Plot": name}
 			if "VOD-" in data[i]:
 				name = common.GetLabelColor(name, keyColor="chColor")
-				common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module=keshet)'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage)))], moreData=bitrate, module='keshet', isFolder=False, isPlayable=True)
+				common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 			else:
 				name = common.GetLabelColor(name, keyColor="prColor", bold=True)
 				common.addDir(name, url, 2, iconimage, infos, module=module)
@@ -414,7 +419,7 @@ def Search(url, iconimage):
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy, bitrate, programNameFormat, deviceID, username, password, makoShowShortSubtitle
-	sortBy = int(common.GetAddonSetting('makoSortBy'.format(module)))
+	sortBy = int(common.GetAddonSetting('makoSortBy'))
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
 	programNameFormat = int(common.GetAddonSetting("programNameFormat"))
 	#deviceID = common.GetAddonSetting("makoDeviceID")
