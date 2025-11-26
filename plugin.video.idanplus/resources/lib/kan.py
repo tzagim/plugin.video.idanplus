@@ -15,7 +15,7 @@ mobapi = 'https://mobapi.kan.org.il/api/mobile/subClass'
 userAgent = common.GetUserAgent()
 headers={"User-Agent": userAgent}
 kanSeriesFile = os.path.join(common.profileDir, 'kanSeries.json')
-kanSeriesURL = 'https://bit.ly/kanSeries'
+kanSeriesURL = 'https://github.com/Fishenzon/repo/raw/refs/heads/master/zips/plugin.video.idanplus/kanSeries.json.zip'
 
 saveKanImages = common.Addon.getSettingBool('saveKanImages')
 logosDir = os.path.join(common.profileDir, 'logos', 'kan')
@@ -198,6 +198,7 @@ def GetSeriesList(url, iconimage, catName):
                 name = common.GetLabelColor(name, keyColor="prColor", bold=True)
                 common.addDir(name, link, 7, image, infos={"title": name, "plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
             return
+			
 def GetSubCategories(url, iconimage, catName):
     text = cache.get(common.GetCF, 24, url, userAgent, table='pages')
     if text==[]:
@@ -821,7 +822,7 @@ def DeleteImages():
             if os.path.isfile(file_path):
                 os.unlink(file_path)
         except Exception as ex:
-            xbmc.log("{0}".format(ex), 3)
+            xbmc.log("{0}".format(ex), xbmc.LOGERROR)
             
 def Run(name, url, mode, iconimage='', moreData=''):
     global sortBy, bitrate, pagesPerList

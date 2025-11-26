@@ -38,7 +38,7 @@ def GetUrlJson(url, root=False):
 		if root == False:
 			result = result['props']['pageProps']['page']
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	return result
 
 def GetSeriesListOld(url, iconimage):
@@ -96,7 +96,7 @@ def GetSeriesListOld(url, iconimage):
 				else:
 					grids_arr.append((name, link, image, {"title": name, "plot": description,'mediatype': 'movie'}))
 			except Exception as ex:
-				xbmc.log('SerieID: {0}\n{1}'.format(seriesID, str(ex)), 3)
+				xbmc.log('SerieID: {0}\n{1}'.format(seriesID, str(ex)), xbmc.LOGERROR)
 	mainMenus = result.get('Header', {}).get('mainMenu', [])
 	for mainMenu in mainMenus:
 		if mainMenu['url'] == '/vod/':
@@ -152,19 +152,16 @@ def GetTitleAndLink(element, t, l):
 	return title, link
 
 def GetSeasons(url, pageTitle, seasons, gridTitle, gridLink):
-	#xbmc.log('-- {0} - {1} --'.format(gridLink, gridTitle), 5)
 	if len(gridLink) > 0 and gridLink[-1] != '/':
 		gridLink += '/'
 	ending = gridLink[gridLink.rfind('/', 0, len(gridLink)-1):]
 	if ('episodes' in ending or 'season' in ending) and IsLinkNotExist(url, gridLink, seasons):
-	#	xbmc.log('-- {0} - {1} --'.format(ending, gridTitle), 5)
 	#if 'episodes' in gridLink and IsLinkNotExist(url, gridLink, seasons):
 		#gridLink = GetLink(gridLink)
 		seasons[gridLink] = gridTitle if gridTitle != '' else pageTitle
 	elif gridLink != '' and gridTitle != '' and IsLinkNotExist(url, gridLink, seasons):
 		gridLink = gridLink.replace('/episodes/', '')
 		seasons[gridLink] = gridTitle
-	#xbmc.log(str(len(seasons)), 5)
 	return seasons
 
 def GetEpisodes(posts, episodes, gridTitle, iconimage):
@@ -194,13 +191,12 @@ def GetEpisodes(posts, episodes, gridTitle, iconimage):
 				secondaryTitle = ''
 			episodes.append((gridTitle, videoID, icon, common.encode(title.strip(), 'utf-8'), common.encode(secondaryTitle.strip(), 'utf-8'), post.get('publishDate')))
 		except Exception as ex:
-			xbmc.log(str(ex), 3)
+			xbmc.log(str(ex), xbmc.LOGERROR)
 	return episodes
 
 def GetLinks(url, result, iconimage):
 	seasons = collections.OrderedDict() if common.NewerThanPyVer('2.6.99') else {}
 	episodes = []
-	#'''
 	subMenus = result.get('Header', {}).get('subMenu', {})
 	if subMenus:
 		for subMenu in subMenus:
@@ -211,17 +207,12 @@ def GetLinks(url, result, iconimage):
 					link += '/'
 				ending = link[link.rfind('/', 0, len(link)-1):]
 				link = '{0}{1}'.format(baseUrl, link)
-				#xbmc.log('{0} - {1}'.format(link, title), 5)
 				if ('episodes' in ending or 'season' in ending) and IsLinkNotExist(url, link, seasons):
 				#if IsLinkNotExist(url, link, seasons):
 					#link = GetLink(link)
-					#xbmc.log('added', 5)
 					seasons[link] = common.encode(title.strip(), 'utf-8')
-					#xbmc.log('!! {0} - {1} !!'.format(link, seasons[link]), 5)
 			except Exception as ex:
-				xbmc.log(str(ex), 3)
-	#'''
-	#xbmc.log(str(seasons), 5)
+				xbmc.log(str(ex), xbmc.LOGERROR)
 	pageTitle = common.encode(result.get('PageMeta', {}).get('title', '').strip(), 'utf-8')
 	for grid in result.get('Content', {}).get('PageGrid', {}):
 		if grid["grid_type"] == "seven_with_banner_or_iframe":
@@ -315,7 +306,6 @@ def Play(video, name='', iconimage='', quality='best'):
 			if result is not None:
 				source = json.loads(result)[0]
 				link = '{0}{1}{2}{3}{4}.mp4{5}{6}'.format(source['ProtocolType'], source['ServerAddress'], source['MediaRoot'], source['MediaFile'][:source['MediaFile'].find('.mp4')], source['Bitrates'], source['StreamingType'], source['Token'])
-				#xbmc.log(link, 5)
 				session = common.GetSession()
 				link = common.GetStreams(link, headers=headers, session=session, quality=quality)
 				final = '{0}|User-Agent={1}'.format(link, userAgent)
@@ -339,13 +329,12 @@ def Play(video, name='', iconimage='', quality='best'):
 							if source['avg_bitrate'] > avg_bitrate:
 								link = source['src']
 								avg_bitrate = source['avg_bitrate']
-								#xbmc.log('[{0}]  {1}'.format(avg_bitrate, link), 5)
 				final = '{0}|User-Agent={1}'.format(link, userAgent)
 		
 		final = '{0}|User-Agent={1}'.format(link, userAgent)
 		common.PlayStream(final, quality, name, iconimage)
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 
 def WatchLive(url, name='', iconimage='', quality='best'):
 	channels = common.GetChannelsLinks("tv", module)
@@ -356,7 +345,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 			headers['referer'] = referer
 		link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	if referer:
 		final = '{0}&Referer={1}'.format(final, referer)
@@ -403,7 +392,7 @@ def GetSeriesList(url, iconimage):
 			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
 			grids_arr.append((name, serie['metas']['SeriesID'], serie['images'][0]['url'], {"title": name, "plot": common.encode(serie['description'], 'utf-8'),'mediatype': 'movie'}))
 		except Exception as ex:
-			xbmc.log('SerieID: {0}\n{1}'.format(serie['metas']['SeriesID'], str(ex)), 3)
+			xbmc.log('SerieID: {0}\n{1}'.format(serie['metas']['SeriesID'], str(ex)), xbmc.LOGERROR)
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
 	for name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 1, str(icon), infos=infos, module=module)

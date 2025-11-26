@@ -217,7 +217,7 @@ def ReadList(fileName):
 		with io.open(fileName, 'r', encoding='utf-8') as f:
 			content = json.load(f, object_pairs_hook=collections.OrderedDict) if NewerThanPyVer('2.6.99') else json.load(f)
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 		content=[]
 	return content
 
@@ -227,7 +227,7 @@ def WriteList(filename, list):
 			f.write(uni_code(json.dumps(list, indent=2, ensure_ascii=False)))
 		success = True
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 		success = False
 	return success
 
@@ -266,8 +266,8 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 					response = session.post(url, data=user_data, headers=headers, cookies=cookies, verify=verify)
 			if responseMethod == 'text':
 				if int(response.status_code) > 400:
-					xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), 3)
-					xbmc.log(response.text, 3)
+					xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), xbmc.LOGERROR)
+					xbmc.log(response.text, xbmc.LOGERROR)
 					continue
 				link = response.text
 			elif responseMethod == 'content':
@@ -276,7 +276,7 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 				link = response.json()
 			break
 		except Exception as ex:
-			xbmc.log(str(ex), 3)
+			xbmc.log(str(ex), xbmc.LOGERROR)
 			return None
 	return link
 
@@ -289,7 +289,7 @@ def GetRedirect(url, headers={}):
 		if response.status_code >= 400 and response.status_code < 500:
 			url = None
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	return url
 
 def addDir(name, url, mode, iconimage='DefaultFolder.png', infos=None, contextMenu=None, module='', moreData='', totalItems=None, isFolder=True, isPlayable=False, addFav=True, urlParamsData={}):
@@ -333,7 +333,7 @@ def DelFile(aFile):
 		if os.path.isfile(aFile):
 			os.unlink(aFile)
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 
 def DelCookies():
 	tempDir = decode(translatePath('special://temp/'), "utf-8")
@@ -533,7 +533,7 @@ def GetUpdatedList(listFile, listUrl, headers={}, deltaInSec=86400, isZip=False,
 				xbmc.executebuiltin("Extract({0}, {1})".format(aFile, profileDir), True)
 				DelFile(aFile)
 		except Exception as ex:
-			xbmc.log("{0}".format(ex), 3)
+			xbmc.log("{0}".format(ex), xbmc.LOGERROR)
 	items = ReadList(listFile)
 	return sorted(items,key=lambda items: items['name']) if sort else items
 
@@ -640,7 +640,7 @@ def GetKaltura(entryId, partnerId, baseUrl, userAgent, quality='best'):
 				break
 		link = GetStreams(link, quality=quality)
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	return link
 
 def s(elem):
@@ -699,7 +699,7 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 			response = scraper.request('get', url)
 			if response.status_code == 403:
 				xbmc.sleep(1000)
-				xbmc.log('CF - {0}  -  response {1}.'.format(url, response.status_code), 3)
+				xbmc.log('CF - {0}  -  response {1}.'.format(url, response.status_code), xbmc.LOGINFO)
 				continue
 			if responseMethod == 'json':
 				return response.json()
@@ -708,7 +708,7 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 			else:
 				return response.text
 		except Exception as ex:
-			xbmc.log(str(ex), 3)
+			xbmc.log(str(ex), xbmc.LOGERROR)
 			return None
 	return ''
 
@@ -720,11 +720,11 @@ def GetCFheaders(url, ua=None, retries=10):
 			response = scraper.request('get', url)
 			if response.status_code == 403:
 				xbmc.sleep(1000)
-				xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), 3)
+				xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), xbmc.LOGINFO)
 				continue
 			return response.headers
 		except Exception as ex:
-			xbmc.log(str(ex), 3)
+			xbmc.log(str(ex), xbmc.LOGERROR)
 			#return None
 	return ''
 
@@ -734,7 +734,7 @@ def SaveImage(logoUrl, logoFile):
 			import threading
 			threading.Thread(target=GetImageLinkBackground, args=(logoUrl, logoFile, )).start()
 	except Exception as ex:
-		xbmc.log("{0}".format(ex), 3)
+		xbmc.log("{0}".format(ex), xbmc.LOGERROR)
 	
 def GetImageLinkBackground(logoUrl, logoFile):
 	response = GetCF(logoUrl, responseMethod='full')
@@ -769,7 +769,9 @@ def setInfo(listitem, infos, type="Video"):
 				vinfo.setFirstAired(value)
 			elif key.lower() == 'year':
 				vinfo.setYear(int(value))
+			elif key.lower() == 'duration':
+				vinfo.setDuration(int(value))
 			else:
-				xbmc.log('--------- {0} ---------'.format(key), 5)
+				xbmc.log('--------- {0} ---------'.format(key), xbmc.LOGWARNING)
 	else:
 		listitem.setInfo(type=type, infoLabels=infos)

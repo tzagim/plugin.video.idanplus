@@ -62,9 +62,8 @@
 		},
 		"14tv": {
 			"ch": "https://insight-api-channel14.univtec.com/cms/interface/channels/play?relations=true&filter=guid||$eq||b676b906-5625-48af-a331-11a5d22e151b",
-			"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807-b/CH14_CHANNEL14/master.m3u8"
+			"link": "https://ch14channel14.encoders.immergo.tv/app/2/streamPlaylist.m3u8"
 		},
-		"kabbalah": "http://kab.tv/api/streams",
 		"hidabroot": "https://www.hidabroot.org/live",
 		"knesset": {
 			"99": "https://kneset.gostreaming.tv/p2-kneset/_definst_/myStream/index.m3u8",
@@ -75,9 +74,6 @@
 				"ch": "studioUrl",
 				"link": "https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlist.m3u8"
 			}
-		},
-		"walla": {
-			"link": "https://amg01742-walla-wallanews-ono-btlna.amagi.tv/playlist/amg01742-walla-wallanews-ono/playlist.m3u8"
 		},
 		"tv": {
 			"891fm": {
@@ -128,10 +124,19 @@
 				"link": "https://r.il.cdn-redge.media/livehls/oil/calcala-live/live/channel10/live.livx/playlist.m3u8"
 			},
 			"14b": {
-				"link": "https://r.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8"
+				"link": "https://ch14channel14.encoders.immergo.tv/app/2/streamPlaylist.m3u8"
 			},
 			"14b2": {
-				"link": "https://ch14-channel14-content.akamaized.net/hls/live/2104807-b/CH14_CHANNEL14/master.m3u8"
+				"link": "https://r.il.cdn-redge.media/livehls/oil/ch14/live/ch14/live.livx/playlist.m3u8"
+			},
+			"kabbalah_heb": {
+				"link": "https://edge2.il.kab.tv/live/tv66-heb-high/playlist.m3u8"
+			},
+			"kabbalah_rus": {
+				"link": "https://edge2.il.kab.tv/live/tv66-rus-high/playlist.m3u8"
+			},
+			"walla": {
+				"link": "https://amg01742-walla-wallanews-ono-btlna.amagi.tv/playlist/amg01742-walla-wallanews-ono/playlist.m3u8"
 			}
 		}
 	},

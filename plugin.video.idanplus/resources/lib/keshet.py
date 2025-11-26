@@ -52,7 +52,7 @@ def GetJsonSection(url):
 		}
 		html = common.OpenURL(url, headers=headers)
 		if html is None or html == "":
-			xbmc.log("GetJsonSection: No HTML content received from URL: {0}".format(url), 3)
+			xbmc.log("GetJsonSection: No HTML content received from URL: {0}".format(url), xbmc.LOGERROR)
 			return None
 		
 		# Try multiple regex patterns to find JSON data
@@ -71,14 +71,14 @@ def GetJsonSection(url):
 					xbmc.log("GetJsonSection: Successfully parsed JSON from URL: {0}".format(url), 1)
 					return json_data
 				except json.JSONDecodeError as e:
-					xbmc.log("GetJsonSection: JSON decode error for pattern {0}: {1}".format(pattern, str(e)), 3)
+					xbmc.log("GetJsonSection: JSON decode error for pattern {0}: {1}".format(pattern, str(e)), xbmc.LOGERROR)
 					continue
 		
-		xbmc.log("GetJsonSection: No valid JSON found in HTML from URL: {0}".format(url), 3)
+		xbmc.log("GetJsonSection: No valid JSON found in HTML from URL: {0}".format(url), xbmc.LOGERROR)
 		return None
 		
 	except Exception as ex:
-		xbmc.log("GetJsonSection: Exception occurred: {0}".format(str(ex)), 3)
+		xbmc.log("GetJsonSection: Exception occurred: {0}".format(str(ex)), xbmc.LOGERROR)
 		return None
 	
 def GetApiVer(url):
@@ -121,7 +121,7 @@ def GetSeriesList(url, iconimage):
 			infos = {"Title": title, "Plot": title, 'mediatype': 'movie'}
 			common.addDir(title, url, 2, icon, infos, module=module, totalItems=seriesCount)
 		except Exception as ex:
-			xbmc.log(str(ex), 3)
+			xbmc.log(str(ex), xbmc.LOGERROR)
 	if sortBy == 1:
 		xbmcplugin.addSortMethod(common.GetHandle(), xbmcplugin.SORT_METHOD_LABEL)
 #'''
@@ -130,17 +130,17 @@ def GetProgramUrl(url):
 	try:
 		#urlParts = url[len(baseUrl)+1:].split("/")
 		if len(url) < 9:
-			xbmc.log("GetProgramUrl: Invalid URL format: {0}".format(url), 3)
+			xbmc.log("GetProgramUrl: Invalid URL format: {0}".format(url), xbmc.LOGERROR)
 			return None
 			
 		i = url[8:].find("/")
 		if i == -1:
-			xbmc.log("GetProgramUrl: Could not find path separator in URL: {0}".format(url), 3)
+			xbmc.log("GetProgramUrl: Could not find path separator in URL: {0}".format(url), xbmc.LOGERROR)
 			return None
 			
 		urlParts = url.lower()[9+i:].split("/")
 		if len(urlParts) < 2:
-			xbmc.log("GetProgramUrl: Invalid URL parts: {0}".format(urlParts), 3)
+			xbmc.log("GetProgramUrl: Invalid URL parts: {0}".format(urlParts), xbmc.LOGERROR)
 			return None
 			
 		buildId = GetApiVer(url)
@@ -148,7 +148,7 @@ def GetProgramUrl(url):
 		if buildId is None:
 			buildId = currentBuildId
 			if buildId is None or buildId == "":
-				xbmc.log("GetProgramUrl: No build ID available for URL: {0}".format(url), 3)
+				xbmc.log("GetProgramUrl: No build ID available for URL: {0}".format(url), xbmc.LOGERROR)
 				return None
 		elif buildId != currentBuildId:
 			common.SetAddonSetting("MakoBuildId", buildId)
@@ -157,7 +157,7 @@ def GetProgramUrl(url):
 		return programUrl.format(urlParts[0], urlParts[1])
 		
 	except Exception as ex:
-		xbmc.log("GetProgramUrl: Exception occurred: {0}".format(str(ex)), 3)
+		xbmc.log("GetProgramUrl: Exception occurred: {0}".format(str(ex)), xbmc.LOGERROR)
 		return None
 
 def GetSeasonsList(url, iconimage):
@@ -165,18 +165,18 @@ def GetSeasonsList(url, iconimage):
 		#data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
 		programUrl = GetProgramUrl(url)
 		if programUrl is None:
-			xbmc.log("GetSeasonsList: Failed to get program URL for: {0}".format(url), 3)
+			xbmc.log("GetSeasonsList: Failed to get program URL for: {0}".format(url), xbmc.LOGERROR)
 			return
 			
 		cached_data = cache.get(GetJson, 24, programUrl, table='pages')
 		if cached_data is None or cached_data == []:
 			cached_data = cache.get(GetJson, 0, programUrl, table='pages')
 			if cached_data is None:
-				xbmc.log("GetSeasonsList: Failed to get data from cache for URL: {0}".format(programUrl), 3)
+				xbmc.log("GetSeasonsList: Failed to get data from cache for URL: {0}".format(programUrl), xbmc.LOGERROR)
 				return
 		
 		if "pageProps" not in cached_data or "data" not in cached_data["pageProps"]:
-			xbmc.log("GetSeasonsList: Invalid data structure for URL: {0}".format(programUrl), 3)
+			xbmc.log("GetSeasonsList: Invalid data structure for URL: {0}".format(programUrl), xbmc.LOGERROR)
 			return
 			
 		data = cached_data["pageProps"]["data"]
@@ -199,14 +199,14 @@ def GetSeasonsList(url, iconimage):
 				grids_arr.append((index, name, url))
 				index += 1
 			except Exception as ex:
-				xbmc.log("GetSeasonsList: Error processing season: {0}".format(str(ex)), 3)
+				xbmc.log("GetSeasonsList: Error processing season: {0}".format(str(ex)), xbmc.LOGERROR)
 				
 		grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
 		for index, name, link in grids_sorted:
 			common.addDir(name, link, 3, iconimage, infos={"Title": name, "Plot": name}, module=module)
 			
 	except Exception as ex:
-		xbmc.log("GetSeasonsList: Exception occurred: {0}".format(str(ex)), 3)
+		xbmc.log("GetSeasonsList: Exception occurred: {0}".format(str(ex)), xbmc.LOGERROR)
 
 def GetEpisodesList(url, icon, data=None):
 	if data is None:
@@ -238,7 +238,7 @@ def GetEpisodesList(url, icon, data=None):
 				infos = {"Title": name, "Plot": name}
 				common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 			except Exception as ex:
-				xbmc.log(str(ex), 3)
+				xbmc.log(str(ex), xbmc.LOGERROR)
 	if isEpisodes == False:
 		vod = data.get("vod") 
 		if vod != None:
