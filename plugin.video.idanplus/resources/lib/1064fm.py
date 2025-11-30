@@ -11,7 +11,6 @@ headers = {"User-Agent": userAgent}
 def GetPodcatsList(iconimage, page='1'):
 	page = int(page)
 	url = '{0}/podcasts?category=&person=&show=&order=updated--dn&page={{0}}'.format(baseUrl)
-	xbmc.log(url.format(page), 5)
 	text = common.OpenURL(url.format(page), headers=headers)
 	podcasts, pagination = re.compile('container container--big(.*?)class="pagination">(.*?)</section>', re.S).findall(text)[0]
 	podcasts = re.compile('<a href="(.*?)".*?data-src="(.*?)".*?podcastCard__title">(.*?)</div>.*?podcastCard__description">(.*?)</div>', re.S).findall(podcasts)
@@ -48,7 +47,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		link = re.compile('"webapp\.broadcast_link":"(.*?)"').findall(text)[0]
 		link = link.replace('\\u002F', '/')
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 
 	link = common.GetStreams(link, headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)

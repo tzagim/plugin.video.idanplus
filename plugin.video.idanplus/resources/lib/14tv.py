@@ -85,7 +85,7 @@ def Watch(name, iconimage, quality='best'):
 		data = common.OpenURL(channels['ch'], headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
 		link = data.get('vod').get('hlsStream')
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	Play(name, link, iconimage, quality)
 
 def Run(name, url, mode, iconimage='', moreData=''):

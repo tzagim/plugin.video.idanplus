@@ -57,7 +57,7 @@ def GetEpisodes(text):
 		try:
 			common.addDir(name, url.replace(baseUrl, ''), 4, icon, infos={"title": name}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), name, common.quote_plus(icon), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(url), name, common.quote_plus(icon), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 		except Exception as ex:
-			xbmc.log(str(ex), 3)
+			xbmc.log(str(ex), xbmc.LOGERROR)
 			
 def GetEpisodesList(url, iconimage):
 	text = common.OpenURL(url)
@@ -85,7 +85,7 @@ def Play(url, name='', iconimage='', quality='best'):
 		final = '{0}|User-Agent={1}'.format(link, userAgent)
 		common.PlayStream(final, quality, name, iconimage)
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy, bitrate

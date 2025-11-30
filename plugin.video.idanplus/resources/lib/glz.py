@@ -31,7 +31,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 			if liveBroadcast is not None:
 				link = liveBroadcast
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 

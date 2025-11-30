@@ -115,7 +115,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 	try:
 		link = GetRadioData(channels[url]['ch']).replace('https://nekot.sport5.co.il:10000?', '')
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	link1 = common.GetStreams(link, headers=headers, quality=quality)
 	if link1 == link:
 		link1 = channels[url]['link']

@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin
 import re, json, os
+from urllib.parse import quote
 import resources.lib.common as common
 from resources.lib import cache as cache
 
@@ -15,7 +16,7 @@ mobapi = 'https://mobapi.kan.org.il/api/mobile/subClass'
 userAgent = common.GetUserAgent()
 headers={"User-Agent": userAgent}
 kanSeriesFile = os.path.join(common.profileDir, 'kanSeries.json')
-kanSeriesURL = 'https://github.com/Fishenzon/repo/raw/refs/heads/master/zips/plugin.video.idanplus/kanSeries.json.zip'
+kanSeriesURL = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/kanSeries.json.zip'
 
 saveKanImages = common.Addon.getSettingBool('saveKanImages')
 logosDir = os.path.join(common.profileDir, 'logos', 'kan')
@@ -39,8 +40,8 @@ def GetCategoriesList(iconimage):
     sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
     name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
     common.addDir(name, "toggleSortingMethod", 4, iconimage, {"title": name, "plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
-    name = common.GetLabelColor("כל התוכניות - קטגוריות", bold=True, color="none")
-    common.addDir(name, '{0}/lobby/kan-box'.format(baseUrl), 1, iconimage, infos={"title": name}, module=module, moreData=common.GetLocaleString(30602))
+    #name = common.GetLabelColor("כל התוכניות - קטגוריות", bold=True, color="none")
+    #common.addDir(name, '{0}/lobby/kan-box'.format(baseUrl), 1, iconimage, infos={"title": name}, module=module, moreData=common.GetLocaleString(30602))
     name = common.GetLabelColor("כל התוכניות", bold=True, color="none")
     common.addDir(name, '{0}/lobby/kan11'.format(baseUrl), 1, iconimage, infos={"title": name}, module=module, moreData='{0}__4444'.format(common.GetLocaleString(30602)))
     name = common.GetLabelColor("תוכניות אקטואליה", bold=True, color="none")
@@ -57,8 +58,6 @@ def GetCategoriesList(iconimage):
     common.addDir(name, '4451', 31, iconimage, infos={"title": name}, module=module)
     name = common.GetLabelColor("פודקאסטים לילדים", bold=True, color="none")
     common.addDir(name, '{0}/lobby-kids/podcasts-kids/'.format(baseKidsUrl), 33, common.GetIconFullPath("23tv.jpg"), infos={"title": name}, module=module)
-import json
-from urllib.parse import quote
 
 UA = userAgent  # אם יש לך משתנה קיים ל-UA
 REF = 'https://www.kan.org.il/'
@@ -338,10 +337,10 @@ def GetEpisodesList(url, iconimage, moreData=''):
         if len(matches1) > 0:
             matches = re.compile('desktop-vod-bg-image: url\(\'(.*?)\'\).*?"title.*?>(.*?)</h(.*?"info-description">(.*?)</div>.*?|.*?)<a href="(.*?)"', re.S).findall(matches1[0])
             if len(matches) < 1:
-                matches = re.compile('desktop-vod-bg-image: url\(\'(.*?)\'\).*?"d-md-none.*?>(.*?)</.*?(.*?"info-description">(.*?)</div>.*?|.*?)<a href="(.*?)"', re.S).findall(matches1[0])
+                matches = re.compile('desktop-vod-bg-image: url\(\'(.*?)\'\).*?info-name.*?title="(.*?)"(.*?"info-description">(.*?)</div>.*?|.*?)<a href="(.*?)"', re.S).findall(matches1[0])
             name = common.UnEscapeXML(matches[0][1].strip())
             image = GetImageLink(common.quoteNonASCII(matches[0][0]), name)
-            name = common.GetLabelColor(common.UnEscapeXML(matches[0][1].strip()), keyColor="chColor")
+            name = common.GetLabelColor(name, keyColor="chColor")
             description = common.UnEscapeXML(matches[0][3].strip())# if len(matches[0]) > 4 ''
             link = '{0}/{1}'.format(domain, matches[0][4])# if len(matches[0]) > 4 else '{0}/{1}'.format(domain, matches[0][2])
             common.addDir(name, link, 3, image, infos={"title": name, "plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
@@ -462,9 +461,6 @@ def GetRadioEpisodesList(data, iconimage, catName):
             name = common.GetLabelColor(common.GetLocaleString(30012), color="green")
             common.addDir(name, '{0};{1}'.format(progUrl, page), 23, iconimage, infos={"title": name, "plot": name}, module=module, urlParamsData={'catName': catName})
             break
-import xbmc
-
-
 
 def Play(url, name='', iconimage='', quality='best'):
     u = url.split('|||')
@@ -512,7 +508,6 @@ def Play(url, name='', iconimage='', quality='best'):
     xbmcplugin.setResolvedUrl(handle=common.GetHandle(), succeeded=True, listitem=listitem)
 
 def GetPlayerKanUrl(url, headers={}, quality='best'):
-    import re, json
     from urllib.parse import urlsplit, urlunsplit, quote
 
     def _normalize_master(u):

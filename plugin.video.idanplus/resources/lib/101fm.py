@@ -17,7 +17,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		data = common.OpenURL(url, headers=headers, responseMethod='json')
 		link = data['body']['url']
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 		
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)

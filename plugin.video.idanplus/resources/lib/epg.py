@@ -1,12 +1,11 @@
 ﻿# -*- coding: utf-8 -*-
-import xbmc
-import time, datetime, random
+import time, datetime#, random
 import resources.lib.common as common
 import resources.lib.iptv as iptv
 
 module = 'epg'
 profileDir = common.profileDir
-epgURLs = ['http://bit.ly/epgfish', 'http://bit.ly/epgzip']
+epgURL = 'https://raw.githubusercontent.com/fishenzon-epg/EPG/main/epg.json.zip'
 
 now = int(time.time())
 
@@ -57,8 +56,8 @@ def GetNowEPG():
 	return epgList
 
 def GetEPG(deltaInSec=86400):
-	epgURL = random.choice(epgURLs)
-	epgList = common.GetUpdatedList(common.epgFile, epgURL, headers={'Referer': 'http://idan-{0}.Kodi-{1}.fish'.format(common.AddonVer, common.GetKodiVer())}, deltaInSec=deltaInSec, isZip=True)
+	#epgURL = random.choice(epgURLs)
+	epgList = common.GetUpdatedList(common.epgFile, epgURL, deltaInSec=deltaInSec, isZip=True)
 	return epgList if len(epgList) > 0 else {}
 
 def Run(name, url, mode, iconimage='', moreData=''):

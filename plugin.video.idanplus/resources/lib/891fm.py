@@ -1,5 +1,4 @@
 ﻿# -*- coding: utf-8 -*-
-import xbmc, xbmcaddon
 import re, json
 import resources.lib.common as common
 

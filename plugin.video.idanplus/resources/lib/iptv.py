@@ -29,7 +29,7 @@ def MakeIPTVlist(channels):
 			url = '{0}?mode=5&url={1}'.format(sys.argv[0], channel['ch'])
 			iptvList += '{0}\n#EXTINF:-1 tvg-id="{1}"{2} tvg-logo="{3}"{4},{5}\n{6}\n'.format(timeshift, tvg_id, group, tvg_logo, radio, view_name, url)
 		except Exception as ex:
-			xbmc.log("{0}".format(ex), 3)
+			xbmc.log("{0}".format(ex), xbmc.LOGERROR)
 	iptvListOld = ''
 	if os.path.isfile(m3uFile):
 		with io.open(m3uFile, 'r', encoding="utf-8") as f:
@@ -85,7 +85,7 @@ def EnableIptvClient():
 			common.EnableAddon('pvr.iptvsimple')
 		return True
 	except Exception as ex:
-		xbmc.log("{0}".format(ex), 3)
+		xbmc.log("{0}".format(ex), xbmc.LOGERROR)
 	return False
 
 def OpenIptvClientSettings():

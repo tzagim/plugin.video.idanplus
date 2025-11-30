@@ -46,7 +46,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		playlist = common.OpenURL(channels['ch'], headers={"User-Agent": userAgent}, responseMethod='json')
 		link = playlist['stations'][0]['audio']
 	except Exception as ex:
-		xbmc.log(str(ex), 3)
+		xbmc.log(str(ex), xbmc.LOGERROR)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
