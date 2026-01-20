@@ -368,6 +368,26 @@ def PlayVideo(video_id, video_name):
     xbmc.log("i24news: Playing stream: {0}".format(stream_url[:100]), xbmc.LOGINFO)
     common.PlayStream(stream_url, 'best', video_name, common.GetIconFullPath('i24news.png'))
 
+def WatchLive(url, name='', iconimage='', quality='best'):
+    channels = common.GetChannelsLinks("tv", module)
+    channel = channels[url]
+    stream_url = channel['link']
+    try:
+        channelUrl = channel['ch']
+        media_url = '{0}/contents/brightcove/channels/{1}'.format(API_BASE, channelUrl)
+        xbmc.log("i24news: channelUrl {0}".format(media_url), xbmc.LOGERROR)
+        headers = GetHeaders(with_auth=True)
+        session = common.GetSession()
+        response = session.get(media_url, headers=headers, timeout=10)
+        if response.status_code != 200:
+            xbmc.log("i24news: Media API error {0}".format(response.status_code), xbmc.LOGERROR)
+            #return None
+        data = response.json()
+        stream_url = data.get('url')
+    except Exception as e:
+        xbmc.log("i24news: Error getting URL: {0}".format(str(e)), xbmc.LOGERROR)
+    #stream_url = common.GetStreams(stream_url, quality=quality)
+    common.PlayStream(stream_url, quality, name, iconimage, adaptive=True)
 
 # ============================================================================
 # MAIN ROUTER
@@ -412,6 +432,8 @@ def Run(name='', url='', mode=-1, iconimage='', moreData=''):
         )
     elif action == 'play':
         PlayVideo(params.get('video_id', ''), params.get('video_name', ''))
+    elif action == 'live':
+        WatchLive(params.get('id', 'he'), name, iconimage, moreData)
     else:
         # Default to language menu (main entry point)
         ShowLanguages()
