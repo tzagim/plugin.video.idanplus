@@ -500,12 +500,8 @@ def Play(url, name='', iconimage='', quality='best'):
         link = common.GetKaltura(url.replace('kaltura:', ''), 2717431, baseUrl, userAgent, quality=quality)
         final = '{0}|User-Agent={1}'.format(link, userAgent)
     else:
-        
-        final = GetPlayerKanUrl(url, headers=headers, quality=quality)
-        
-    listitem = xbmcgui.ListItem(path=final)
-    common.setInfo(listitem, {"title": name})
-    xbmcplugin.setResolvedUrl(handle=common.GetHandle(), succeeded=True, listitem=listitem)
+        final = GetPlayerKanUrl(url, headers=headers, quality=quality)  
+    common.PlayStream(final, quality, name, iconimage, adaptive=True)
 
 def GetPlayerKanUrl(url, headers={}, quality='best'):
     from urllib.parse import urlsplit, urlunsplit, quote
@@ -553,6 +549,9 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
     dash_match = re.search(r'data-dash-url="([^"]+)"', text)
     if hls_match or dash_match:
         master_raw = (hls_match.group(1) if hls_match else dash_match.group(1)).strip()
+        #if master_raw.startswith('//'):
+        #    master_raw = 'https:' + master_raw
+        #return master_raw
         master_base, master_with_query = _normalize_master(master_raw)
         # החזר את ה-master המקורי (למשל עם ?fmp4) כדי למנוע כפילות פרמטרים
         return _pipe_headers(master_with_query, userAgent, ref)

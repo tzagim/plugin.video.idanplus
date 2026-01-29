@@ -137,9 +137,6 @@
 			"kabbalah_rus": {
 				"link": "https://edge2.il.kab.tv/live/tv66-rus-high/playlist.m3u8"
 			},
-			"walla": {
-				"link": "https://amg01742-walla-wallanews-ono-btlna.amagi.tv/playlist/amg01742-walla-wallanews-ono/playlist.m3u8"
-			},
 			"99": {
 				"link": "https://kneset.gostreaming.tv/p2-kneset/_definst_/myStream/index.m3u8"
 			},

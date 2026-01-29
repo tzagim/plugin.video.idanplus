@@ -316,10 +316,6 @@ msgctxt "#30623"
 msgid "כאן 4K"
 msgstr ""
 
-msgctxt "#30624"
-msgid "וואלה+"
-msgstr ""
-
 msgctxt "#30629"
 msgid "קבלה - רוסית"
 msgstr ""
