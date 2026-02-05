@@ -372,6 +372,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
     channels = common.GetChannelsLinks("tv", module)
     channel = channels[url]
     stream_url = channel['link']
+    manifest_type = channels.get('manifest_type', 'hls')
     try:
         channelUrl = channel['ch']
         media_url = '{0}/contents/brightcove/channels/{1}'.format(API_BASE, channelUrl)
@@ -387,7 +388,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
     except Exception as e:
         xbmc.log("i24news: Error getting URL: {0}".format(str(e)), xbmc.LOGERROR)
     #stream_url = common.GetStreams(stream_url, quality=quality)
-    common.PlayStream(stream_url, quality, name, iconimage, adaptive=True)
+    common.PlayStream(stream_url, quality, name, iconimage, adaptive=True, manifest_type=manifest_type)
 
 # ============================================================================
 # MAIN ROUTER

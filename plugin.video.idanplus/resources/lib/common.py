@@ -393,7 +393,7 @@ def GetStreams(url, headers={}, user_data=None, session=None, retries=1, quality
 		link = '{0}?{1}'.format(link, base.query)
 	return link
 
-def PlayStream(url, quality='best', name='', iconimage='', adaptive=False):
+def PlayStream(url, quality='best', name='', iconimage='', adaptive=False, manifest_type='hls'):
 	if 'dailymotion' in url:
 		url = GetDailymotion(url)
 	try:
@@ -409,7 +409,7 @@ def PlayStream(url, quality='best', name='', iconimage='', adaptive=False):
 	setInfo(listitem, infos)
 	if adaptive:
 		listitem.setProperty('inputstream', 'inputstream.adaptive')
-		listitem.setProperty('inputstream.adaptive.manifest_type', 'hls') # Or 'hls', 'smoothstream'
+		listitem.setProperty('inputstream.adaptive.manifest_type', manifest_type) # Or 'hls', 'smoothstream'
 	if (quality == 'choose' or quality.startswith('set')) and '.m3u8' in url:
 		xbmc.Player().play(url, listitem)
 	else:

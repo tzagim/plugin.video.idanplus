@@ -603,9 +603,13 @@ def WatchLive(url, name='', iconimage='', quality='best', type='video'):
     channels = common.GetChannelsLinks("tv", module)
     radioChannelsLinks = common.GetChannelsLinks("radio", module)
     channels.update(radioChannelsLinks)
-    channelUrl = channels[url]
-    link = common.GetStreams(channelUrl, quality=quality)
-    common.PlayStream(link, quality, name, iconimage)
+    link = channels[url]['link']
+    manifest_type = channels[url].get('manifest_type')
+    if manifest_type is None:
+        link = common.GetStreams(link, quality=quality)
+        common.PlayStream(link, quality, name, iconimage)
+    else:
+        common.PlayStream(link, quality, name, iconimage, adaptive=True, manifest_type=manifest_type)
 
 def GetPodcastsList(id=None):
     if id:
