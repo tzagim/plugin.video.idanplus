@@ -8,6 +8,7 @@
 		<setting id="startup_ch" type="text" default="ללא" enable="false"/>
 		<setting id="is_startup_rd" type="bool" label="32002" default="false" enable="!eq(-2,true)"/>
 		<setting id="startup_rd" type="text" default="ללא" enable="false"/>
+		<setting id="actDelUserChannels" type="action" label="32011" action="RunPlugin(plugin://plugin.video.idanplus/?mode=22)" option="close" />
 	</category>
 	<category label="30800">
 		<setting id="useIPTV" type="bool" label="30801" default="true" />

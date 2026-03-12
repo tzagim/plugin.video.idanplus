@@ -420,6 +420,8 @@ def route(query):
 			ArrangeLiveChannels(moreData)
 		elif mode == 21:
 			ChangeChannelIndex(url)
+		elif mode == 22:
+			common.DelFile(common.displayChannelsFile)
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
 	else:
