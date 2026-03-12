@@ -18,7 +18,7 @@ def MakeIPTVlist(channels):
 			if type != 'radio' and type != 'tv':
 				continue
 			tvg_id = channel["tvgID"]
-			view_name = common.GetLocaleString(channel['nameID'])
+			view_name = channel['name']
 			tvg_logo = 'special://home/addons/{0}/resources/images/{1}'.format(common.AddonID, channel['image'])
 			if type == 'radio':
 				radio = ' radio="true"'
@@ -26,7 +26,7 @@ def MakeIPTVlist(channels):
 			elif type == 'tv': 
 				radio = ''
 				group = ' group-title="TV"'
-			url = '{0}?mode=5&url={1}'.format(sys.argv[0], channel['ch'])
+			url = '{0}?mode=5&url={1}'.format(sys.argv[0], channel['channelID'])
 			iptvList += '{0}\n#EXTINF:-1 tvg-id="{1}"{2} tvg-logo="{3}"{4},{5}\n{6}\n'.format(timeshift, tvg_id, group, tvg_logo, radio, view_name, url)
 		except Exception as ex:
 			xbmc.log("{0}".format(ex), xbmc.LOGERROR)

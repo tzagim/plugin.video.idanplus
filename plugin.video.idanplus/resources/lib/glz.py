@@ -6,10 +6,10 @@ module = 'glz'
 apiUrl = 'https://glz.co.il/umbraco/api/'
 userAgent = common.GetUserAgent()
 headers = {"User-Agent": userAgent}
-channels = common.GetChannelsLinks("radio", module)
 
 def GetPlaylists(url):
-	url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, channels[url]['rootId'])
+	channel = common.GetChannelLinkDetails(url)
+	url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, channel['rootId'])
 	playlist = common.OpenURL(url, headers=headers, responseMethod='json')
 	for item in playlist['musicChannels']:
 		name = common.GetLabelColor(item['name'], keyColor="chColor") 
@@ -21,9 +21,10 @@ def Play(name, url, iconimage, quality='best'):
 	common.PlayStream(final, quality, name, iconimage)
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	link = channels[url]['live']
+	channel = common.GetChannelLinkDetails(url)
+	link = channel['live']
 	try:
-		url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, channels[url]['rootId'])
+		url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, channel['rootId'])
 		data = common.OpenURL(url, headers=headers, responseMethod='json')
 		liveBroadcast = data['liveBroadcast']['fileUrl']
 		if liveBroadcast is not None:

@@ -78,11 +78,11 @@ def Play(name, url, iconimage, quality='best'):
 	final = '{0}|Referer=https://vod.c14.co.il/&User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
-def Watch(name, iconimage, quality='best'):
-	channels = common.GetChannelsLinks("tv", module)
-	link = channels['link']
+def Watch(url, name, iconimage, quality='best'):
+	linkDetails = common.GetChannelLinkDetails(url)
+	link = linkDetails['link']
 	try:
-		data = common.OpenURL(channels['ch'], headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
+		data = common.OpenURL(linkDetails['ch'], headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
 		link = data.get('vod').get('hlsStream')
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
@@ -111,6 +111,6 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 4:		#------------- Toggle Lists' sorting method -----
 		common.ToggleSortMethod('14tvSortBy', sortBy)
 	elif mode == 10:	#------------- Watch live channel  -------
-		Watch(name, iconimage, moreData)
+		Watch(url, name, iconimage, moreData)
 		
 	common.SetViewMode('episodes')

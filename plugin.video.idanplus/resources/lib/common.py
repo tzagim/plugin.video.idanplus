@@ -37,15 +37,17 @@ def translatePath(path):
 		text = xbmcvfs.translatePath(path)
 	return text
 
+resourcesDir = decode(translatePath(os.path.join(Addon.getAddonInfo('path'), 'resources')), "utf-8")
 profileDir = decode(translatePath(Addon.getAddonInfo("profile")), "utf-8")
 if not os.path.exists(profileDir):
 	os.makedirs(profileDir)
 
-imagesDir = decode(translatePath(os.path.join(Addon.getAddonInfo('path'), 'resources', 'images')), "utf-8")
+imagesDir = os.path.join(resourcesDir, 'images')
 epgFile = os.path.join(profileDir, 'epg.json')
 seriesFile = os.path.join(profileDir, 'series.json')
 seriesUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/series.json.zip'
 youtubePlugin = 'plugin://plugin.video.youtube'
+displayChannelsFile = os.path.join(profileDir, 'displayChannels.json')
 
 userAgents = [
 	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.',
@@ -156,12 +158,7 @@ def GetAddon():
 	return Addon
 
 def GetAddonSetting(key):
-	Addon = xbmcaddon.Addon(AddonID)
-	value = Addon.getSetting(key)
-	if '_res' in key:
-		if value == '':
-			value = 'best'
-	return value
+	return Addon.getSetting(key)
 
 def SetAddonSetting(key, value):
 	Addon.setSetting(key, value)
@@ -224,7 +221,7 @@ def ReadList(fileName):
 def WriteList(filename, list):
 	try:
 		with io.open(filename, 'w', encoding='utf-8') as f:
-			f.write(uni_code(json.dumps(list, indent=2, ensure_ascii=False)))
+			f.write(uni_code(json.dumps(list, indent='\t', ensure_ascii=False)))
 		success = True
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
@@ -314,12 +311,11 @@ def addDir(name, url, mode, iconimage='DefaultFolder.png', infos=None, contextMe
 			contextMenu = [item]
 		else:
 			contextMenu.append(item)
-	item2 = (GetLocaleString(32004), 'RunPlugin({0}?mode=16)'.format(sys.argv[0]))
-
+	item = (GetLocaleString(32004), 'RunPlugin({0}?mode=16)'.format(sys.argv[0]))
 	if contextMenu is None:
-		contextMenu = [item2]
+		contextMenu = [item]
 	else:
-		contextMenu.append(item2)
+		contextMenu.append(item)
 	if contextMenu is not None:
 		listitem.addContextMenuItems(items=contextMenu)
 	handle = GetHandle()
@@ -377,7 +373,7 @@ def GetStreams(url, headers={}, user_data=None, session=None, retries=1, quality
 		qualityInd = xbmcgui.Dialog().select(GetLocaleString(30005), resNames)
 		if qualityInd > -1:
 			if quality == 'set':
-				Addon.setSetting(addonKey, '' if qualityInd == 0 else resolutions[qualityInd][0])
+				SetChannel(addonKey, 'my_bitrate', '' if qualityInd == 0 else resolutions[qualityInd][0])
 			link = resolutions[qualityInd][2]
 	else:
 		quality = int(quality)
@@ -488,11 +484,6 @@ def ToggleSortMethod(id, sortBy):
 		Addon.setSetting(id, "0")
 	xbmc.executebuiltin("Container.Refresh()")
 
-def GetIntSetting(k, v=0):
-	if not Addon.getSetting(k).isdigit():
-		Addon.setSetting(k, str(v))
-	return int(Addon.getSetting(k))
-
 def MoveInList(index, step, listFile):
 	theList = ReadList(listFile)
 	if index + step >= len(theList) or index + step < 0:
@@ -517,7 +508,7 @@ def GetNumFromUser(title, defaultt=''):
 
 def GetIndexFromUser(title, listLen):
 	location = GetNumFromUser('{0} (1-{1})'.format(title, listLen))
-	return 0 if location is None or location > listLen or location <= 0 else location
+	return -1 if location is None or location > listLen or location <= 0 else location
 
 def GetUpdatedList(listFile, listUrl, headers={}, deltaInSec=86400, isZip=False, sort=False, decode_text=None):
 	if isFileOld(listFile, deltaInSec=deltaInSec):
@@ -540,17 +531,80 @@ def GetUpdatedList(listFile, listUrl, headers={}, deltaInSec=86400, isZip=False,
 	items = ReadList(listFile)
 	return sorted(items,key=lambda items: items['name']) if sort else items
 
-def GetChannelsLinks(kind, module, downloadOnly=False):
-	channelsFile = os.path.join(profileDir, 'channels.json')
-	channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/channels.json.zip'
+def GetDisplayChannels(displayChannelsFile):
+	if not os.path.isfile(displayChannelsFile):
+		WriteList(displayChannelsFile, {})
+	return ReadList(displayChannelsFile)
+
+def GetChannels(type=None, downloadOnly=False):
 	deltaInSec = 0 if downloadOnly else Addon.getSettingInt("updateChannelsLinksInterval")*3600
-	channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=deltaInSec, isZip=True)
+	if downloadOnly or isFileOld(displayChannelsFile, deltaInSec=deltaInSec):
+		fileName = 'channels.json'
+		channelsFile = os.path.join(profileDir, fileName)
+		channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/{0}'.format(fileName)
+		channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=deltaInSec)
+		if len(channels) == 0:
+			channels = ReadList(os.path.join(resourcesDir, fileName))
+			if len(channels) == 0:
+				return {}
+		displayChannels = GetDisplayChannels(displayChannelsFile)
+		for channelID, channel in items(channels):
+			displayChannel = displayChannels.get(channelID)
+			if displayChannel is None:
+				displayChannels[channelID] = channel
+			else:
+				for key, value in channel.items():
+					#if displayChannels[channelID].get(key) != value:
+					displayChannels[channelID][key] = value
+		WriteList(displayChannelsFile, displayChannels)
+	if (downloadOnly):
+		return
+	displayChannels = GetDisplayChannels(displayChannelsFile)
+	if type is None:
+		return displayChannels
+	return [[chID, item] for chID, item in items(displayChannels) if item['type'] == type]
+
+'''
+def GetChannels(type=None, downloadOnly=False):
+	fileName = 'channels.json'
+	channelsFile = os.path.join(profileDir, fileName)
+	channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/{0}'.format(fileName)
+	deltaInSec = 0 if downloadOnly else Addon.getSettingInt("updateChannelsLinksInterval")*3600
+	channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=deltaInSec)
+	if len(channels) > 0 and (downloadOnly or isFileOld(channelsFile, deltaInSec=deltaInSec)):
+		displayChannels = ReadList(displayChannelsFile)
+		for channelID, channel in items(channels):
+			displayChannel = displayChannels.get(channelID)
+			if displayChannel is None:
+				displayChannels[channelID] = channel
+
+		WriteList(displayChannelsFile, displayChannels)
 	if (downloadOnly):
 		return
 	if len(channels) == 0:
-		resourcesDir = decode(translatePath(os.path.join(Addon.getAddonInfo('path'), 'resources')), "utf-8")
-		channels = ReadList(os.path.join(resourcesDir, 'channels.json'))
-	return channels.get(kind, {}).get(module, {}) if len(channels) > 0 else {}
+		channels = ReadList(os.path.join(resourcesDir, fileName))
+	if len(channels) == 0:
+		return {}
+	if type is None:
+		return channels
+	return [[chID, item] for chID, item in items(channels) if item['type'] == type]
+'''
+
+def GetChannel(channelID):
+	channels = GetChannels()
+	return channels.get(channelID)
+	
+def GetChannelLinkDetails(channelID):
+	channels = GetChannels()
+	return channels.get(channelID, {}).get('linkDetails')
+
+def SetChannel(channelID, key, value):
+	displayChannels = GetChannels()
+	displayChannel = displayChannels.get(channelID)
+	if displayChannel is None:
+		return
+	displayChannels[channelID][key] = value
+	WriteList(displayChannelsFile, displayChannels)
 
 def GetKeyboardText(title = '', defaultText = ''):
 	keyboard = xbmc.Keyboard(defaultText, title)

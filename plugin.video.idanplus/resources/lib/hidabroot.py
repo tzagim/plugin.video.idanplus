@@ -4,10 +4,11 @@ import resources.lib.common as common
 
 module = 'hidabroot'
 
-def WatchLive(name='', iconimage='', quality='best'):
+def WatchLive(url, name='', iconimage='', quality='best'):
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
-	url = common.GetChannelsLinks("tv", module)
+	linkDetails = common.GetChannelLinkDetails(url)
+	url = linkDetails['link']
 	text = common.OpenURL(url, headers=headers)
 	match = re.compile('<source\s*?src="(.*?)"', re.S).findall(text)
 	#text = common.OpenURL('https://go.shidur.net/player/testlive.php', headers=headers)
@@ -18,6 +19,6 @@ def WatchLive(name='', iconimage='', quality='best'):
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 10:
-		WatchLive(name, iconimage, moreData)
+		WatchLive(url, name, iconimage, moreData)
 		
 	common.SetViewMode('episodes')

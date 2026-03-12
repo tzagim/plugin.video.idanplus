@@ -5,33 +5,32 @@ import resources.lib.common as common
 module = 'tv'
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = common.GetChannelsLinks("tv", module)
+	linkDetails = common.GetChannelLinkDetails(url)
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
-	channel = channels[url]
-	regex = channel.get('regex')
-	link = channel['link']
+	regex = linkDetails.get('regex')
+	link = linkDetails['link']
 	if regex:
 		text = common.OpenURL(link, headers=headers)
-		link = re.compile(regex, channel.get('flags', 0)).findall(text)
+		link = re.compile(regex, linkDetails.get('flags', 0)).findall(text)
 		if len(link) > 0:
 			link = link[0]
 		else:
-			link = channel['direct']
+			link = linkDetails['direct']
 
 	if link.startswith('//'):
 		link = 'http:{0}'.format(link)
-	referer = channel.get('referer')
+	referer = linkDetails.get('referer')
 	if referer:
 		headers['referer'] = referer
-	if not channel.get('final') == True:
+	if not linkDetails.get('final') == True:
 		link = common.GetStreams(link, headers=headers, quality=quality)
 	
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	if referer:
 		final = '{0}&Referer={1}'.format(final, referer)
 
-	manifest_type = channel.get('manifest_type')
+	manifest_type = linkDetails.get('manifest_type')
 	if manifest_type is None:
 		common.PlayStream(final, quality, name, iconimage)
 	else:

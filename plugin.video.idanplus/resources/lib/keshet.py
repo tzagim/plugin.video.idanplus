@@ -276,11 +276,11 @@ def GetChannels(url, iconimage):
 		common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 
 def WatchLive(url, name='', iconimage='', quality='auto'):
-	channels = common.GetChannelsLinks("tv", module)
+	linkDetails = common.GetChannelLinkDetails(url)
 	headers = {
 		"User-Agent": UA
 	}
-	url = channels[url]
+	url = linkDetails['link']
 	ticket = GetTicket('{0}?et=ngt&lp={1}&rv=AKAMAI'.format(entitlementsServices, url), headers)
 	pos = url.find('?');
 	if pos > 0:

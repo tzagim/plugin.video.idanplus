@@ -40,10 +40,10 @@ def Play(name, url, iconimage, quality='best'):
 	common.PlayStream(final, quality, name, iconimage)
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = common.GetChannelsLinks("radio", module)
-	link = channels['link']
+	linkDetails = common.GetChannelLinkDetails(url)
+	link = linkDetails['link']
 	try:
-		text = common.OpenURL(channels['ch'], headers=headers)
+		text = common.OpenURL(linkDetails['ch'], headers=headers)
 		link = re.compile('"webapp\.broadcast_link":"(.*?)"').findall(text)[0]
 		link = link.replace('\\u002F', '/')
 	except Exception as ex:

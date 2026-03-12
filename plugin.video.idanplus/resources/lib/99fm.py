@@ -30,8 +30,9 @@ def Play(name, url, iconimage, quality='best'):
 	final = '{0}|User-Agent={1}'.format(playlist['item']['url'], userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
-def WatchLive(name='', iconimage='', quality='best'):
-	link = common.GetChannelsLinks("radio", module)
+def WatchLive(url, name='', iconimage='', quality='best'):
+	linkDetails = common.GetChannelLinkDetails(url)
+	link = linkDetails['link']
 	final = '{0}|User-Agent={1}'.format(link, common.GetUserAgent())
 	common.PlayStream(final, quality, name, iconimage)
 
@@ -43,6 +44,6 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 2:		#------------- Playing episode  ----------
 		Play(name, url, iconimage, moreData)
 	if mode == 11:
-		WatchLive(name, iconimage, moreData)
+		WatchLive(url, name, iconimage, moreData)
 		
 	common.SetViewMode('episodes')

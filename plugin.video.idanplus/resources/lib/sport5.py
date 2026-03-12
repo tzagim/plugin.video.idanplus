@@ -108,17 +108,15 @@ def GetRadioData(node='data'):
 	return result[node]
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = common.GetChannelsLinks("tv", module)
-	radioChannelsLinks = common.GetChannelsLinks("radio", module)
-	channels.update(radioChannelsLinks)
-	link = channels[url]['link']
+	linkDetails = common.GetChannelLinkDetails(url)
+	link = linkDetails['link']
 	try:
-		link = GetRadioData(channels[url]['ch']).replace('https://nekot.sport5.co.il:10000?', '')
+		link = GetRadioData(linkDetails['ch']).replace('https://nekot.sport5.co.il:10000?', '')
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
 	link1 = common.GetStreams(link, headers=headers, quality=quality)
 	if link1 == link:
-		link1 = channels[url]['link']
+		link1 = linkDetails['link']
 	final = '{0}|User-Agent={1}&Referer={2}'.format(link1, userAgent, radioUrl)
 	common.PlayStream(final, quality, name, iconimage)
 

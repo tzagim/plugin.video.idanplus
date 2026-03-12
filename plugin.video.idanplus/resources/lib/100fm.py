@@ -40,10 +40,10 @@ def Play(name, url, iconimage, quality='best'):
 def WatchLive(url, name='', iconimage='', quality='best'):
 	userAgent = common.GetUserAgent()
 	headers = {"User-Agent": userAgent}
-	channels = common.GetChannelsLinks("radio", module)
-	link = channels['link']
+	linkDetails = common.GetChannelLinkDetails(url)
+	link = linkDetails['link']
 	try:
-		playlist = common.OpenURL(channels['ch'], headers={"User-Agent": userAgent}, responseMethod='json')
+		playlist = common.OpenURL(linkDetails['ch'], headers={"User-Agent": userAgent}, responseMethod='json')
 		link = playlist['stations'][0]['audio']
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)

@@ -337,13 +337,13 @@ def Play(video, name='', iconimage='', quality='best'):
 		xbmc.log(str(ex), xbmc.LOGERROR)
 
 def WatchLive(url, name='', iconimage='', quality='best'):
-	channels = common.GetChannelsLinks("tv", module)
-	referer = channels[url].get('referer')
+	linkDetails = common.GetChannelLinkDetails(url)
+	referer = linkDetails.get('referer')
 	try:
 		headers={"User-Agent": userAgent}
 		if referer:
 			headers['referer'] = referer
-		link = common.GetStreams(channels[url]['link'], headers=headers, quality=quality)
+		link = common.GetStreams(linkDetails['link'], headers=headers, quality=quality)
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
@@ -461,7 +461,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 		urlp = common.url_parse(url)
 		prms = common.parse_qs(urlp.query)
 		page = common.GetIndexFromUser(name, int(prms['pages'][0]))
-		if page == 0:
+		if page < 0:
 			page = int(prms['p'][0])
 		url = '{0}{1}{2}/'.format(baseUrl, urlp.path, page)
 		GetEpisodesListOld(url, iconimage)

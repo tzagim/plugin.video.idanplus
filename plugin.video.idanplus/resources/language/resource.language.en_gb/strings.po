@@ -224,7 +224,11 @@ msgid "טלויזיה"
 msgstr ""
 
 msgctxt "#30601"
-msgid "מיקום ערוצים (0 להסתרה)"
+msgid "שינוי סדר רשימת ערוצי טלויזיה"
+msgstr ""
+
+msgctxt "#30605"
+msgid "בחירת מיקום חדש. נוכחי {0}, להסתרה 0."
 msgstr ""
 
 msgctxt "#30602"
@@ -235,37 +239,12 @@ msgctxt "#30603"
 msgid "קשת 12"
 msgstr ""
 
-msgctxt "#30605"
-msgid "קשת 12 - גיבוי"
-msgstr ""
-
-msgctxt "#30655"
-msgid "קשת 12 - גיבוי 2"
-msgstr ""
-
-msgctxt "#30656"
-msgid "קשת 12 - גיבוי 3"
-msgstr ""
-
-msgctxt "#30626"
-msgid "קשת 12 - לקויי שמיעה"
-msgstr ""
-
 msgctxt "#30604"
 msgid "רשת 13"
 msgstr ""
 
 msgctxt "#30606"
 msgid "עכשיו 14"
-msgstr ""
-
-
-msgctxt "#30653"
-msgid "עכשיו 14 - גיבוי"
-msgstr ""
-
-msgctxt "#30654"
-msgid "עכשיו 14 - גיבוי 2"
 msgstr ""
 
 msgctxt "#30607"
@@ -276,140 +255,16 @@ msgctxt "#30608"
 msgid "ערוץ 24 החדש"
 msgstr ""
 
-msgctxt "#30609"
-msgid "מכאן 33"
-msgstr ""
-
-msgctxt "#30610"
-msgid "קבלה 66"
-msgstr ""
-
-msgctxt "#30612"
-msgid "הידברות 97"
-msgstr ""
-
-msgctxt "#30613"
-msgid "כנסת 99"
-msgstr ""
-
-msgctxt "#30614"
-msgid "כנסת 99 - לקויי שמיעה"
-msgstr ""
-
-msgctxt "#30619"
-msgid "כלכלה 10"
-msgstr ""
-
-msgctxt "#30621"
-msgid "האח הגדול 26"
-msgstr ""
-
-msgctxt "#30625"
-msgid "האח הגדול 26 - גיבוי"
-msgstr ""
-
-msgctxt "#30622"
-msgid "Ynet Live"
-msgstr ""
-
-msgctxt "#30623"
-msgid "כאן 4K"
-msgstr ""
-
-msgctxt "#30629"
-msgid "קבלה - רוסית"
-msgstr ""
-
 msgctxt "#30630"
 msgid "ערוץ 9"
-msgstr ""
-
-msgctxt "#30631"
-msgid "רשת 13 - לקויי שמיעה"
 msgstr ""
 
 msgctxt "#30632"
 msgid "ספורט 5 אתר"
 msgstr ""
 
-msgctxt "#30633"
-msgid "כאן 11 - גיבוי"
-msgstr ""
-
-msgctxt "#30634"
-msgid "רשת 13 - גיבוי"
-msgstr ""
-
-msgctxt "#30644"
-msgid "רשת 13 - גיבוי 2"
-msgstr ""
-
-msgctxt "#30635"
-msgid "מוסיוף"
-msgstr ""
-
-msgctxt "#30637"
-msgid "כאן 11 - לקויי שמיעה"
-msgstr ""
-
-msgctxt "#30639"
-msgid "כאן חינוכית 23 - גיבוי"
-msgstr ""
-
-msgctxt "#30641"
-msgid "מכאן 33 - גיבוי"
-msgstr ""
-
 msgctxt "#30643"
 msgid "i24news"
-msgstr ""
-
-msgctxt "#30648"
-msgid "i24news en"
-msgstr ""
-
-msgctxt "#30649"
-msgid "i24news fr"
-msgstr ""
-
-msgctxt "#30650"
-msgid "i24news ar"
-msgstr ""
-
-msgctxt "#30645"
-msgid "13 ערוץ הקומדיות"
-msgstr ""
-
-msgctxt "#30646"
-msgid "ערוץ הנופש"
-msgstr ""
-
-msgctxt "#30647"
-msgid "ערוץ הריאליטי"
-msgstr ""
-
-msgctxt "#30657"
-msgid "ערוץ ארץ נהדרת"
-msgstr ""
-
-msgctxt "#30658"
-msgid "ערוץ סברי מרנן"
-msgstr ""
-
-msgctxt "#30659"
-msgid "ערוץ חתונמי"
-msgstr ""
-
-msgctxt "#30660"
-msgid "ערוץ הכוכב הבא"
-msgstr ""
-
-msgctxt "#30661"
-msgid "ערוץ נינג'ה ישראל"
-msgstr ""
-
-msgctxt "#30651"
-msgid "איכות שידור (ריק לאיכות מירבית)"
 msgstr ""
 
 msgctxt "#30652"
@@ -421,7 +276,7 @@ msgid "רדיו"
 msgstr ""
 
 msgctxt "#30701"
-msgid "מיקום תחנות (0 להסתרה)"
+msgid "שינוי סדר רשימת תחנות רדיו"
 msgstr ""
 
 msgctxt "#30702"
@@ -436,138 +291,21 @@ msgctxt "#30704"
 msgid "ECO 99FM"
 msgstr ""
 
-msgctxt "#30705"
-msgid "102FM רדיו תל אביב"
-msgstr ""
-
-msgctxt "#30706"
-msgid "103FM רדיו ללא הפסקה"
-msgstr ""
-
 msgctxt "#30707"
 msgid "גלי צה\"ל"
-msgstr ""
-
-msgctxt "#30708"
-msgid "כאן ב"
-msgstr ""
-
-msgctxt "#30709"
-msgid "כאן גימל"
-msgstr ""
-
-msgctxt "#30710"
-msgid "כאן תרבות"
-msgstr ""
-
-msgctxt "#30711"
-msgid "כאן קול המוסיקה"
-msgstr ""
-
-msgctxt "#30712"
-msgid "כאן מורשת"
 msgstr ""
 
 msgctxt "#30738"
 msgid "כאן ילדים"
 msgstr ""
 
-msgctxt "#30713"
-msgid "כאן Reka"
-msgstr ""
-
-msgctxt "#30714"
-msgid "כאן مكان"
-msgstr ""
-
-msgctxt "#30724"
-msgid "90FM רדיו תשעים"
-msgstr ""
-
-msgctxt "#30725"
-msgid "97FM רדיו דרום"
-msgstr ""
-
-msgctxt "#30726"
-msgid "100FM רדיוס"
-msgstr ""
-
-msgctxt "#30727"
-msgid "101FM רדיו ירושלים"
-msgstr ""
-
-msgctxt "#30728"
-msgid "101.5FM רדיו דרום"
-msgstr ""
-
-msgctxt "#30729"
-msgid "102FM רדיו קול הים האדום"
-msgstr ""
-
-msgctxt "#30730"
-msgid "104.5FM רדיו צפון"
-msgstr ""
-
-msgctxt "#30731"
-msgid "107.5FM רדיו חיפה"
-msgstr ""
-
 msgctxt "#30732"
 msgid "רדיו בלקוח טלויזיה חיה"
-msgstr ""
-
-msgctxt "#30733"
-msgid "קול הים התיכון"
-msgstr ""
-
-msgctxt "#30734"
-msgid "Первое Радио 89.1FM"
-msgstr ""
-
-msgctxt "#30737"
-msgid "Лучшее Радио 106.4FM"
 msgstr ""
 
 msgctxt "#30735"
 msgid "ספורט 5 אתר"
 msgstr ""
-
-msgctxt "#30736"
-msgid "91FM רדיו לב המדינה"
-msgstr ""
-
-msgctxt "#30739"
-msgid "93FM קול חי"
-msgstr ""
-
-msgctxt "#30740"
-msgid "קול חי מיוזיק"
-msgstr ""
-
-msgctxt "#30741"
-msgid "קול ברמה"
-msgstr ""
-
-msgctxt "#30742"
-msgid "קול Play"
-msgstr ""
-
-msgctxt "#30743"
-msgid "גלי ישראל"
-msgstr ""
-
-msgctxt "#30745"
-msgid "95.5FM רדיו"
-msgstr ""
-
-msgctxt "#30746"
-msgid "רדיו נושמים מזרחית"
-msgstr ""
-
-msgctxt "#30747"
-msgid "רדיו שירי דיכאון"
-msgstr ""
-
 
 msgctxt "#30800"
 msgid "טלויזיה חיה"

@@ -600,11 +600,9 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
 
 
 def WatchLive(url, name='', iconimage='', quality='best', type='video'):
-    channels = common.GetChannelsLinks("tv", module)
-    radioChannelsLinks = common.GetChannelsLinks("radio", module)
-    channels.update(radioChannelsLinks)
-    link = channels[url]['link']
-    manifest_type = channels[url].get('manifest_type')
+    linkDetails = common.GetChannelLinkDetails(url)
+    link = linkDetails['link']
+    manifest_type = linkDetails.get('manifest_type')
     if manifest_type is None:
         link = common.GetStreams(link, quality=quality)
         common.PlayStream(link, quality, name, iconimage)
