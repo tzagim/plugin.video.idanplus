@@ -158,7 +158,11 @@ def GetAddon():
 	return Addon
 
 def GetAddonSetting(key):
-	return Addon.getSetting(key)
+	value = Addon.getSetting(key)
+	if '_res' in key:
+		if value == '':
+			value = 'best'
+	return value
 
 def SetAddonSetting(key, value):
 	Addon.setSetting(key, value)

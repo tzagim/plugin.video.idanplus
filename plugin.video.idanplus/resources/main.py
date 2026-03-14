@@ -79,18 +79,18 @@ def LiveChannel(name, url, mode, iconimage, module, contextMenu=[], choose=True,
 		contextMenu.insert(0, (common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode={3}&iconimage={4}&moredata=choose&module={5})'.format(sys.argv[0], url, common.quote_plus(displayName), mode, common.quote_plus(iconimage), module)))
 	if type is not None:
 		if type == 'tv':
-			is_startup_ch = True
+			startup_id = 'startup_ch'
+			is_startup_id = 'is_startup_ch'
 			arrange_string_id = 30601
 		else:
-			is_startup_ch = False
+			startup_id = 'startup_rd'
+			is_startup_id = 'is_startup_rd'
 			arrange_string_id = 30701
-		startup_id = 'startup_ch' if is_startup_ch else 'startup_rd'
-		is_startup_id = 'is_startup_ch' if type == 'tv' else 'is_startup_rd'
-		if common.Addon.getSettingBool(is_startup_id) and common.Addon.getSettingString(startup_id) == name:
-			startup_string_id = 32007 if is_startup_ch else 32008
+		if common.Addon.getSettingBool(is_startup_id) and common.Addon.getSettingString(startup_id) == url:
+			startup_string_id = 32007 if type == 'tv' else 32008
 			add_remove_startup = 18
 		else:
-			startup_string_id = 32001 if is_startup_ch else 32002
+			startup_string_id = 32001 if type == 'tv' else 32002
 			add_remove_startup = 17
 		contextMenu.insert(0, (common.GetLocaleString(startup_string_id), 'RunPlugin({0}?url={1}&mode={2}&moredata={3})'.format(sys.argv[0], url, add_remove_startup, type)))
 		contextMenu.insert(0, (common.GetLocaleString(arrange_string_id), 'Container.Update({0}?mode=20&moredata={1})'.format(sys.argv[0], type)))
@@ -421,6 +421,7 @@ def route(query):
 		elif mode == 21:
 			ChangeChannelIndex(url)
 		elif mode == 22:
+			common.GetChannels(downloadOnly=True)
 			common.DelFile(common.displayChannelsFile)
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
