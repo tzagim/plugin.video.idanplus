@@ -89,8 +89,8 @@ jobs:
     - name: Commit and push unzipped files
       if: env.BUILD_STATUS != 'none' && github.ref == 'refs/heads/main'
       run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'actions@github.com'
+        git config --global user.name 'tzagim'
+        git config --global user.email 'tzagim@users.noreply.github.com'
         git add .
         git commit -m "${{ env.LATEST_VERSION }}"
         git push
