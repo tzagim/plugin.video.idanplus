@@ -397,25 +397,24 @@ def Login():
 
 def Search(url, iconimage):
 	search_entered = common.GetKeyboardText('מילים לחיפוש', '')
-	if search_entered != '':
-		url = url.format(search_entered.replace(' ', '%20'))
-		params = GetJson(url)
-		suggestions = params["suggestions"]
-		data = params["data"]
-		for i in range(len(suggestions)):
-			if "mako-vod-channel2-news" in data[i]:
-				continue
-			url = "{0}{1}".format(baseUrl, data[i])
-			name = common.UnEscapeXML(common.encode(suggestions[i], "utf-8"))
-			infos={"Title": name, "Plot": name}
-			if "VOD-" in data[i]:
-				name = common.GetLabelColor(name, keyColor="chColor")
-				common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
-			else:
-				name = common.GetLabelColor(name, keyColor="prColor", bold=True)
-				common.addDir(name, url, 2, iconimage, infos, module=module)
-	else:
+	if searchText == None or searchText == '':
 		return
+	url = url.format(search_entered.replace(' ', '%20'))
+	params = GetJson(url)
+	suggestions = params["suggestions"]
+	data = params["data"]
+	for i in range(len(suggestions)):
+		if "mako-vod-channel2-news" in data[i]:
+			continue
+		url = "{0}{1}".format(baseUrl, data[i])
+		name = common.UnEscapeXML(common.encode(suggestions[i], "utf-8"))
+		infos={"Title": name, "Plot": name}
+		if "VOD-" in data[i]:
+			name = common.GetLabelColor(name, keyColor="chColor")
+			common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
+		else:
+			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
+			common.addDir(name, url, 2, iconimage, infos, module=module)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy, bitrate, programNameFormat, deviceID, username, password, makoShowShortSubtitle

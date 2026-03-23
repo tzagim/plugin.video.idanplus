@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys, os, datetime, json
+import sys, os, datetime, json, re
 import xbmc, xbmcplugin, xbmcaddon
 import resources.lib.common as common
 import resources.lib.epg as epg
@@ -65,12 +65,15 @@ def LiveChannels():
 	channels = GetUserChannels(type='tv')
 	for channel in channels:
 		programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
-		LiveChannel(channel['name'], channel['channelID'], channel['mode'], channel['image'], channel['module'], bitrate=channel.get('my_bitrate',''), programs=programs, tvgID=channel['tvgID'], type='tv')
+		iconimage = common.GetChannelIconFullPath(channel) 
+		LiveChannel(common.GetChannelName(channel), channel['channelID'], channel['mode'], iconimage, channel['module'], bitrate=channel.get('my_bitrate',''), programs=programs, tvgID=channel['tvgID'], type='tv')
 
-def LiveChannel(name, url, mode, iconimage, module, contextMenu=[], choose=True, bitrate='', programs=[], tvgID='', addFav=True, type=None):
+def LiveChannel(name, url, mode, iconimage, module, contextMenu=None, choose=True, bitrate='', programs=[], tvgID='', addFav=True, type=None):
+	if contextMenu == None:
+		contextMenu = []
 	displayName = common.GetLabelColor(name, keyColor="chColor", bold=True)
 	description = ''
-	iconimage = common.GetIconFullPath(iconimage)
+	#iconimage = common.GetIconFullPath(iconimage)
 	if bitrate == '':
 		bitrate = 'best'
 	if addFav:
@@ -111,21 +114,59 @@ def LiveChannel(name, url, mode, iconimage, module, contextMenu=[], choose=True,
 def ArrangeLiveChannels(type):
 	channels = GetUserChannels(type=type, showHidden=True)
 	for channel in channels:
-		name = common.GetLabelColor(channel['name'], keyColor="chColor", bold=True)
+		name = common.GetLabelColor(common.GetChannelName(channel), keyColor="chColor", bold=True)
 		index = common.GetLabelColor(channel['index'], color="white", bold=True)
 		displayName = '{0} - {1}'.format(index, name)
-		iconimage = common.GetIconFullPath(channel['image'])
+		iconimage = common.GetChannelIconFullPath(channel)
 		contextMenu = [(common.GetLocaleString(30034), 'RunPlugin({0}?mode=21&url={1})'.format(sys.argv[0], channel['channelID']))]
-		common.addDir(displayName, channel['channelID'], channel['mode'], iconimage, infos={"title": displayName, "plot": displayName,' mediatype': 'movie'}, contextMenu=contextMenu, moreData=channel.get('my_bitrate',''), module=channel['module'], isFolder=False, isPlayable=False, addFav=False, urlParamsData={})
+		contextMenu.append((common.GetLocaleString(30039), 'RunPlugin({0}?mode=23&url={1})'.format(sys.argv[0], channel['channelID'])))
+		contextMenu.append((common.GetLocaleString(30045), 'RunPlugin({0}?mode=24&url={1})'.format(sys.argv[0], channel['channelID'])))
+		common.addDir(displayName, channel['channelID'], channel['mode'], iconimage, infos={"title": displayName, "plot": displayName,'mediatype': 'movie'}, contextMenu=contextMenu, moreData=channel.get('my_bitrate',''), module=channel['module'], isFolder=False, isPlayable=False, addFav=False, urlParamsData={})
 
 def ChangeChannelIndex(channelID):
 	channels = common.GetChannels()
 	channel = channels.get(channelID)
 	index = channel.get('my_index', channel.get('index', 0))
-	newIndex = common.GetNumFromUser(common.GetLocaleString(30605).format(index))
-	if newIndex is None or newIndex < 0:
+	new_index = common.GetNumFromUser(common.GetLocaleString(30605).format(index))
+	if new_index is None or new_index < 0:
 		return
-	channels[channelID]['my_index'] = newIndex
+	channels[channelID]['my_index'] = new_index
+	common.WriteList(common.displayChannelsFile, channels)
+	xbmc.executebuiltin("Container.Refresh()")
+
+def ChangeChannelName(channelID):
+	channels = common.GetChannels()
+	channel = channels.get(channelID)
+	name = common.GetChannelName(channel)
+	new_name = None
+	method = common.GetSourceLocation(common.GetLocaleString(30045), [common.GetLocaleString(30043), common.GetLocaleString(30044)])
+	if method == 0:
+		new_name = ''
+	elif method == 1:
+		new_name = common.GetKeyboardText(common.GetLocaleString(30044), name)
+	if new_name == None:
+		return
+	channels[channelID]['my_name'] = new_name
+	common.WriteList(common.displayChannelsFile, channels)
+	xbmc.executebuiltin("Container.Refresh()")
+
+def ChangeChannelLogo(channelID):
+	channels = common.GetChannels()
+	channel = channels.get(channelID)
+	image = channel.get('my_image', '')
+	new_image = common.GetChoice(30039, 30040, 30040, 30041, 30042, choiceNone=30043, fileType=2)
+	if new_image == None:
+		return
+	if image != '':
+		for f in os.listdir(common.channelsLogosDir):
+			if re.search('{0}_*'.format(channelID), f):
+				common.DelFile(os.path.join(common.channelsLogosDir, f))
+		#common.DelFile(os.path.join(common.channelsLogosDir, image))
+	if new_image == '':
+		channels[channelID]['my_image'] = ''
+	else:
+		logoFile = common.SaveLogo(new_image, common.channelsLogosDir, channelID, isFromUrl=new_image.startswith('http'))
+		channels[channelID]['my_image'] = logoFile
 	common.WriteList(common.displayChannelsFile, channels)
 	xbmc.executebuiltin("Container.Refresh()")
 
@@ -179,7 +220,8 @@ def Radios():
 	channels = GetUserChannels(type='radio') 
 	for channel in channels:
 		programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
-		LiveChannel(channel['name'], channel['channelID'], channel['mode'], channel['image'], channel['module'], contextMenu=[], choose=False, programs=programs, tvgID=channel['tvgID'], type='radio')
+		iconimage = common.GetChannelIconFullPath(channel) 
+		LiveChannel(common.GetChannelName(channel), channel['channelID'], channel['mode'], iconimage, channel['module'], contextMenu=[], choose=False, programs=programs, tvgID=channel['tvgID'], type='radio')
 
 def RadioVODs():
 	name = common.GetLabelColor("תכניות רדיו - כאן", bold=True, color="none")
@@ -298,21 +340,24 @@ def Search(searchText=''):
 	filteredSeries = []
 	seriesLinks = []
 	if searchText == '':
-		searchText = common.GetKeyboardText('מילים לחיפוש', '').strip().lower()
-	if searchText != '':
-		for serie in series:
-			if serie['name'].lower().startswith(searchText):
-				filteredSeries.append(serie)
-				seriesLinks.append(serie['name'])
-		for serie in series:
-			if searchText in serie['name'].lower() and serie['name'] not in seriesLinks:
-				filteredSeries.append(serie)
-				seriesLinks.append(serie['name'])
+		searchText = common.GetKeyboardText('מילים לחיפוש', '')
+	if searchText == None or searchText == ''.strip():
+		return
+	searchText = searchText.strip().lower()
+	for serie in series:
+		if serie['name'].lower().startswith(searchText):
+			filteredSeries.append(serie)
+			seriesLinks.append(serie['name'])
+	for serie in series:
+		if searchText in serie['name'].lower() and serie['name'] not in seriesLinks:
+			filteredSeries.append(serie)
+			seriesLinks.append(serie['name'])
 	programNameFormat = int(common.GetAddonSetting("programNameFormat"))
 	for serie in filteredSeries:
 		serieMoreData = serie.get('moreData', '')
 		serieCatName = serie.get('catName', '')
 		serieName = serie['name']
+		#image = GetImageLink(common.quoteNonASCII(serie['image']), serie['name'])
 		moduleName = GetModuleName(serie['module'], serie['mode'], serieMoreData, serieCatName)
 		name = common.getDisplayName(serieName, moduleName, programNameFormat, bold=True)
 		infos = {"title": name, "plot": serie['desc']}
@@ -325,9 +370,8 @@ def PlayLive(channelID):
 		return
 	nowEPG = epg.GetNowEPG()
 	programs = [] if channel.get('tvgID', '') == '' else nowEPG.get(channel['tvgID'], [])
-	displayName = common.GetLabelColor(channel['name'], keyColor="chColor", bold=True)
-	iconimage = common.GetIconFullPath(channel['image'])
-	
+	displayName = common.GetLabelColor(common.GetChannelName(channel), keyColor="chColor", bold=True)
+	iconimage = common.GetChannelIconFullPath(channel)
 	if len(programs) > 0:
 		programTime = common.GetLabelColor("[{0}-{1}]".format(datetime.datetime.fromtimestamp(programs[0]["start"]).strftime('%H:%M'), datetime.datetime.fromtimestamp(programs[0]["end"]).strftime('%H:%M')), keyColor="timesColor")
 		programName = common.GetLabelColor(common.encode(programs[0]["name"], 'utf-8'), keyColor="prColor", bold=True)
@@ -423,6 +467,10 @@ def route(query):
 		elif mode == 22:
 			common.GetChannels(downloadOnly=True)
 			common.DelFile(common.displayChannelsFile)
+		elif mode == 23:
+			ChangeChannelLogo(url)
+		elif mode == 24:
+			ChangeChannelName(url)
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
 	else:

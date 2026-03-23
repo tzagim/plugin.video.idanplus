@@ -171,6 +171,34 @@ msgctxt "#30038"
 msgid "הצגת בחירת שיטת מיון"
 msgstr ""
 
+msgctxt "#30039"
+msgid "שינוי לוגו"
+msgstr ""
+
+msgctxt "#30040"
+msgid "בחירת לוגו"
+msgstr ""
+
+msgctxt "#30041"
+msgid "מכתובת"
+msgstr ""
+
+msgctxt "#30042"
+msgid "מקובץ"
+msgstr ""
+
+msgctxt "#30043"
+msgid "המקורי"
+msgstr ""
+
+msgctxt "#30044"
+msgid "בחירת שם"
+msgstr ""
+
+msgctxt "#30045"
+msgid "שינוי שם"
+msgstr ""
+
 msgctxt "#30100"
 msgid "מאקו"
 msgstr ""
@@ -224,7 +252,7 @@ msgid "טלויזיה"
 msgstr ""
 
 msgctxt "#30601"
-msgid "שינוי סדר רשימת ערוצי טלויזיה"
+msgid "עריכת רשימת ערוצי טלויזיה"
 msgstr ""
 
 msgctxt "#30605"
@@ -276,7 +304,7 @@ msgid "רדיו"
 msgstr ""
 
 msgctxt "#30701"
-msgid "שינוי סדר רשימת תחנות רדיו"
+msgid "עריכת רשימת תחנות רדיו"
 msgstr ""
 
 msgctxt "#30702"

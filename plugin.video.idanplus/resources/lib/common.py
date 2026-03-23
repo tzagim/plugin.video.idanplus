@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
-import sys, os, io, random, re, json, urllib
+import sys, os, io, random, re, json, urllib, shutil, time
 
 try:
 	# For Python 3.0 and later
@@ -48,6 +48,9 @@ seriesFile = os.path.join(profileDir, 'series.json')
 seriesUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/series.json.zip'
 youtubePlugin = 'plugin://plugin.video.youtube'
 displayChannelsFile = os.path.join(profileDir, 'displayChannels.json')
+channelsLogosDir = os.path.join(profileDir, 'logos', 'channels')
+if not os.path.exists(channelsLogosDir):
+    os.makedirs(channelsLogosDir)
 
 userAgents = [
 	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.',
@@ -249,8 +252,6 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 	import requests
 	if headers.get('Accept-encoding', '') == '':
 		headers['Accept-encoding'] = 'gzip'
-	#if headers.get('User-agent', '') == '':
-	#	headers['User-agent'] = userAgent
 	if headers.get('User-Agent', '') == '':
 		headers['User-Agent'] = userAgent
 	for i in range(retries):
@@ -568,32 +569,6 @@ def GetChannels(type=None, downloadOnly=False):
 		return displayChannels
 	return [[chID, item] for chID, item in items(displayChannels) if item['type'] == type]
 
-'''
-def GetChannels(type=None, downloadOnly=False):
-	fileName = 'channels.json'
-	channelsFile = os.path.join(profileDir, fileName)
-	channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/{0}'.format(fileName)
-	deltaInSec = 0 if downloadOnly else Addon.getSettingInt("updateChannelsLinksInterval")*3600
-	channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=deltaInSec)
-	if len(channels) > 0 and (downloadOnly or isFileOld(channelsFile, deltaInSec=deltaInSec)):
-		displayChannels = ReadList(displayChannelsFile)
-		for channelID, channel in items(channels):
-			displayChannel = displayChannels.get(channelID)
-			if displayChannel is None:
-				displayChannels[channelID] = channel
-
-		WriteList(displayChannelsFile, displayChannels)
-	if (downloadOnly):
-		return
-	if len(channels) == 0:
-		channels = ReadList(os.path.join(resourcesDir, fileName))
-	if len(channels) == 0:
-		return {}
-	if type is None:
-		return channels
-	return [[chID, item] for chID, item in items(channels) if item['type'] == type]
-'''
-
 def GetChannel(channelID):
 	channels = GetChannels()
 	return channels.get(channelID)
@@ -613,7 +588,54 @@ def SetChannel(channelID, key, value):
 def GetKeyboardText(title = '', defaultText = ''):
 	keyboard = xbmc.Keyboard(defaultText, title)
 	keyboard.doModal()
-	return '' if not keyboard.isConfirmed() else keyboard.getText()
+	return None if not keyboard.isConfirmed() else keyboard.getText()
+
+def GetSourceLocation(title, choiceList):
+	return xbmcgui.Dialog().select(title, choiceList)
+
+def GetChoice(choiceTitle, fileTitle, urlTitle, choiceFile, choiceUrl, choiceNone=None, fileType=1, fileMask=None, defaultText=None):
+	choice = None	# None - for choice cancel
+	choiceList = [GetLocaleString(choiceFile), GetLocaleString(choiceUrl)]
+	if choiceNone != None:
+		choiceList = [GetLocaleString(choiceNone)] + choiceList
+	method = GetSourceLocation(GetLocaleString(choiceTitle), choiceList)
+	if choiceNone != None and method == 0:
+		choice = ''
+	elif choiceNone == None and method == 0 or choiceNone != None and method == 1:
+		if defaultText != None and not defaultText.startswith('http'):
+			defaultText = ''
+		choice = GetKeyboardText(GetLocaleString(fileTitle), defaultText)
+		if choice != None:
+			choice = choice.strip()
+	elif choiceNone == None and method == 1 or choiceNone != None and method == 2:
+		if defaultText != None and defaultText.startswith('http'):
+			defaultText = ''
+		choice = xbmcgui.Dialog().browse(fileType, GetLocaleString(urlTitle), '', fileMask, False, False, defaultText)
+		if choice == '':
+			choice = None
+	return choice
+
+def SaveLogo(logoSource, logoDir, filename, isFromUrl):
+	logoPath = url_parse(logoSource).path if isFromUrl else logoSource
+	root, extension = os.path.splitext(logoPath)
+	logoFullName = '{0}_{1}{2}'.format(filename, int(time.time()), extension)
+	logoFile = os.path.join(logoDir, logoFullName)
+	if isFromUrl:
+		data = OpenURL(logoSource, responseMethod='content')
+		with io.open(logoFile, 'wb') as f:
+			f.write(data)
+	else:
+		shutil.copyfile(logoSource, logoFile)
+	return logoFullName
+
+def GetChannelIconFullPath(channel):
+	if channel.get('my_image', '') == '':
+		return os.path.join(imagesDir, channel['image'])
+	else:
+		return os.path.join(channelsLogosDir, channel['my_image'])
+
+def GetChannelName(channel):
+	return channel['name'] if channel.get('my_name', '') == '' else channel['my_name']
 
 def quote(text):
 	if py2:
