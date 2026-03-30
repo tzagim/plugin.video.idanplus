@@ -275,8 +275,10 @@ def GetChannels(url, iconimage):
 		iconimage = channel['picUrl']
 		common.addDir(name, url, 5, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=5&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
 
-def WatchLive(url, name='', iconimage='', quality='auto'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='auto'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	headers = {
 		"User-Agent": UA
 	}
@@ -289,7 +291,7 @@ def WatchLive(url, name='', iconimage='', quality='auto'):
 	if quality != 'auto':
 		link = common.GetStreams(link, headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, UA)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
 	prms = GetJson("{0}?{1}".format(url, endings))

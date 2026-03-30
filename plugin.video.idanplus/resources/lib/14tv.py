@@ -73,20 +73,22 @@ def GetEpisodesList(url, image, seasonName):
 			common.addDir(name, episode["videoUrl"], 2, image, infos={"title": name, "plot": episode.get("keywords", ""), "Aired": aired}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=set_14tv_res&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 		break
 
-def Play(name, url, iconimage, quality='best'):
+def Play(name, url, iconimage, quality='best', isAdaptive=False):
 	link = common.GetStreams(url, headers={"referer": "https://vod.c14.co.il/", "User-Agent": userAgent}, quality=quality)
 	final = '{0}|Referer=https://vod.c14.co.il/&User-Agent={1}'.format(link, userAgent)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
-def Watch(url, name, iconimage, quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def Watch(channelID, name, iconimage, quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	link = linkDetails['link']
 	try:
 		data = common.OpenURL(linkDetails['ch'], headers={"x-tenant-id": "channel14", "user-agent": userAgent}, responseMethod='json')
 		link = data.get('vod').get('hlsStream')
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
-	Play(name, link, iconimage, quality)
+	Play(name, link, iconimage, quality, isAdaptive=isAdaptive)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy

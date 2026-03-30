@@ -20,11 +20,13 @@ def Play(name, url, iconimage, quality='best'):
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	channel = common.GetChannelLinkDetails(url)
-	link = channel['live']
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
+	link = linkDetails['live']
 	try:
-		url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, channel['rootId'])
+		url = '{0}player/getplayerdata?rootId={1}'.format(apiUrl, linkDetails['rootId'])
 		data = common.OpenURL(url, headers=headers, responseMethod='json')
 		liveBroadcast = data['liveBroadcast']['fileUrl']
 		if liveBroadcast is not None:
@@ -34,7 +36,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 1:		#------------- Episodes: -----------------

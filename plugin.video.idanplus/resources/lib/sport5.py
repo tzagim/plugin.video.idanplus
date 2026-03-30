@@ -107,8 +107,10 @@ def GetRadioData(node='data'):
 		return {}
 	return result[node]
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	link = linkDetails['link']
 	try:
 		link = GetRadioData(linkDetails['ch']).replace('https://nekot.sport5.co.il:10000?', '')
@@ -118,7 +120,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 	if link1 == link:
 		link1 = linkDetails['link']
 	final = '{0}|User-Agent={1}&Referer={2}'.format(link1, userAgent, radioUrl)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def GetRadioCategoriesList(iconimage):
 	grids_arr = []

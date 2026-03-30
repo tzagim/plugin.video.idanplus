@@ -394,7 +394,7 @@ def GetStreams(url, headers={}, user_data=None, session=None, retries=1, quality
 		link = '{0}?{1}'.format(link, base.query)
 	return link
 
-def PlayStream(url, quality='best', name='', iconimage='', adaptive=False, manifest_type='hls'):
+def PlayStream(url, quality='best', name='', iconimage='', adaptive=False):
 	if 'dailymotion' in url:
 		url = GetDailymotion(url)
 	try:
@@ -410,7 +410,6 @@ def PlayStream(url, quality='best', name='', iconimage='', adaptive=False, manif
 	setInfo(listitem, infos)
 	if adaptive:
 		listitem.setProperty('inputstream', 'inputstream.adaptive')
-		listitem.setProperty('inputstream.adaptive.manifest_type', manifest_type) # Or 'hls', 'smoothstream'
 	if (quality == 'choose' or quality.startswith('set')) and '.m3u8' in url:
 		xbmc.Player().play(url, listitem)
 	else:
@@ -561,6 +560,12 @@ def GetChannels(type=None, downloadOnly=False):
 				for key, value in channel.items():
 					#if displayChannels[channelID].get(key) != value:
 					displayChannels[channelID][key] = value
+		channelsToDel = []
+		for channelID, channel in items(displayChannels):
+			if channels.get(channelID) is None:
+				channelsToDel.append(channelID)
+		for channelID in channelsToDel:
+			displayChannels.pop(channelID, None)
 		WriteList(displayChannelsFile, displayChannels)
 	if (downloadOnly):
 		return
@@ -636,6 +641,12 @@ def GetChannelIconFullPath(channel):
 
 def GetChannelName(channel):
 	return channel['name'] if channel.get('my_name', '') == '' else channel['my_name']
+
+def GetChannelTvgId(channel):
+	return channel['tvgID'] if channel.get('my_tvgID', '') == '' else channel['my_tvgID']
+
+def GetChannelAdaptive(channel):
+	return channel['linkDetails'].get('adaptive', False) if channel.get('my_adaptive', '') == '' else channel['my_adaptive']
 
 def quote(text):
 	if py2:

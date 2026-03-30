@@ -37,10 +37,12 @@ def Play(name, url, iconimage, quality='best'):
 	final = '{0}|User-Agent={1}'.format(url, common.GetUserAgent())
 	common.PlayStream(final, quality, name, iconimage)
 
-def WatchLive(url, name='', iconimage='', quality='best'):
+def WatchLive(channelID, name='', iconimage='', quality='best'):
 	userAgent = common.GetUserAgent()
 	headers = {"User-Agent": userAgent}
-	linkDetails = common.GetChannelLinkDetails(url)
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	link = linkDetails['link']
 	try:
 		playlist = common.OpenURL(linkDetails['ch'], headers={"User-Agent": userAgent}, responseMethod='json')
@@ -48,7 +50,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 0:		#------------- Series: ---------------

@@ -39,8 +39,10 @@ def Play(name, url, iconimage, quality='best'):
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	link = linkDetails['link']
 	try:
 		text = common.OpenURL(linkDetails['ch'], headers=headers)
@@ -51,7 +53,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 
 	link = common.GetStreams(link, headers=headers, quality=quality)
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 	
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 0:		#------------- Podcats: ---------------

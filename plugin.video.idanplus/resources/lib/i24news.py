@@ -368,10 +368,11 @@ def PlayVideo(video_id, video_name):
     xbmc.log("i24news: Playing stream: {0}".format(stream_url[:100]), xbmc.LOGINFO)
     common.PlayStream(stream_url, 'best', video_name, common.GetIconFullPath('i24news.png'))
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-    linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+    channel = common.GetChannel(channelID)
+    isAdaptive = common.GetChannelAdaptive(channel)
+    linkDetails = channel.get('linkDetails')
     stream_url = linkDetails['link']
-    manifest_type = linkDetails.get('manifest_type', 'hls')
     try:
         channelUrl = linkDetails['ch']
         media_url = '{0}/contents/brightcove/channels/{1}'.format(API_BASE, channelUrl)
@@ -387,7 +388,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
     except Exception as e:
         xbmc.log("i24news: Error getting URL: {0}".format(str(e)), xbmc.LOGERROR)
     #stream_url = common.GetStreams(stream_url, quality=quality)
-    common.PlayStream(stream_url, quality, name, iconimage, adaptive=True, manifest_type=manifest_type)
+    common.PlayStream(stream_url, quality, name, iconimage, adaptive=isAdaptive)
 
 # ============================================================================
 # MAIN ROUTER

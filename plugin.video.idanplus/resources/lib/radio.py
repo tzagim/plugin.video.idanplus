@@ -4,8 +4,10 @@ import resources.lib.common as common
 
 module = 'radio'
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
 	regex = linkDetails.get('regex')
@@ -18,11 +20,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		link = 'http://' + link
 	
 	final = '{0}|User-Agent={1}&verifypeer=false'.format(link, userAgent)
-	manifest_type = linkDetails.get('manifest_type')
-	if manifest_type is None:
-		common.PlayStream(final, quality, name, iconimage)
-	else:
-		common.PlayStream(final, quality, name, iconimage, adaptive=True, manifest_type=manifest_type)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 11:

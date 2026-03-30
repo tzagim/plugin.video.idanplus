@@ -30,11 +30,13 @@ def Play(name, url, iconimage, quality='best'):
 	final = '{0}|User-Agent={1}'.format(playlist['item']['url'], userAgent)
 	common.PlayStream(final, quality, name, iconimage)
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	link = linkDetails['link']
 	final = '{0}|User-Agent={1}'.format(link, common.GetUserAgent())
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 0:		#------------- Series: ---------------

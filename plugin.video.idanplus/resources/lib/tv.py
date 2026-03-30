@@ -4,8 +4,10 @@ import resources.lib.common as common
 
 module = 'tv'
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	userAgent = common.GetUserAgent()
 	headers={"User-Agent": userAgent}
 	regex = linkDetails.get('regex')
@@ -17,7 +19,6 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 			link = link[0]
 		else:
 			link = linkDetails['direct']
-
 	if link.startswith('//'):
 		link = 'http:{0}'.format(link)
 	referer = linkDetails.get('referer')
@@ -25,16 +26,10 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 		headers['referer'] = referer
 	if not linkDetails.get('final') == True:
 		link = common.GetStreams(link, headers=headers, quality=quality)
-	
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	if referer:
 		final = '{0}&Referer={1}'.format(final, referer)
-
-	manifest_type = linkDetails.get('manifest_type')
-	if manifest_type is None:
-		common.PlayStream(final, quality, name, iconimage)
-	else:
-		common.PlayStream(final, quality, name, iconimage, adaptive=True, manifest_type=manifest_type)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	if mode == 10:

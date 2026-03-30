@@ -597,17 +597,12 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
     raise Exception('Unable to resolve playable URL from page')
 
 
-
-
-def WatchLive(url, name='', iconimage='', quality='best', type='video'):
-    linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best', type='video'):
+    channel = common.GetChannel(channelID)
+    isAdaptive = common.GetChannelAdaptive(channel)
+    linkDetails = channel.get('linkDetails')
     link = linkDetails['link']
-    manifest_type = linkDetails.get('manifest_type')
-    if manifest_type is None:
-        link = common.GetStreams(link, quality=quality)
-        common.PlayStream(link, quality, name, iconimage)
-    else:
-        common.PlayStream(link, quality, name, iconimage, adaptive=True, manifest_type=manifest_type)
+    common.PlayStream(link, quality, name, iconimage, adaptive=isAdaptive)
 
 def GetPodcastsList(id=None):
     if id:

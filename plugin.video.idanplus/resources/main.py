@@ -64,16 +64,17 @@ def LiveChannels():
 	nowEPG = epg.GetNowEPG()
 	channels = GetUserChannels(type='tv')
 	for channel in channels:
-		programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
-		iconimage = common.GetChannelIconFullPath(channel) 
-		LiveChannel(common.GetChannelName(channel), channel['channelID'], channel['mode'], iconimage, channel['module'], bitrate=channel.get('my_bitrate',''), programs=programs, tvgID=channel['tvgID'], type='tv')
+		tvgID = common.GetChannelTvgId(channel)
+		programs = [] if tvgID == '' else nowEPG.get(tvgID, [])
+		iconimage = common.GetChannelIconFullPath(channel)
+		name = common.GetChannelName(channel)
+		LiveChannel(name, channel['channelID'], channel['mode'], iconimage, channel['module'], bitrate=channel.get('my_bitrate',''), programs=programs, tvgID=tvgID, type='tv')
 
 def LiveChannel(name, url, mode, iconimage, module, contextMenu=None, choose=True, bitrate='', programs=[], tvgID='', addFav=True, type=None):
 	if contextMenu == None:
 		contextMenu = []
 	displayName = common.GetLabelColor(name, keyColor="chColor", bold=True)
 	description = ''
-	#iconimage = common.GetIconFullPath(iconimage)
 	if bitrate == '':
 		bitrate = 'best'
 	if addFav:
@@ -121,6 +122,8 @@ def ArrangeLiveChannels(type):
 		contextMenu = [(common.GetLocaleString(30034), 'RunPlugin({0}?mode=21&url={1})'.format(sys.argv[0], channel['channelID']))]
 		contextMenu.append((common.GetLocaleString(30039), 'RunPlugin({0}?mode=23&url={1})'.format(sys.argv[0], channel['channelID'])))
 		contextMenu.append((common.GetLocaleString(30045), 'RunPlugin({0}?mode=24&url={1})'.format(sys.argv[0], channel['channelID'])))
+		contextMenu.append((common.GetLocaleString(30048), 'RunPlugin({0}?mode=26&url={1})'.format(sys.argv[0], channel['channelID'])))
+		contextMenu.append((common.GetLocaleString(30046), 'RunPlugin({0}?mode=25&url={1})'.format(sys.argv[0], channel['channelID'])))
 		common.addDir(displayName, channel['channelID'], channel['mode'], iconimage, infos={"title": displayName, "plot": displayName,'mediatype': 'movie'}, contextMenu=contextMenu, moreData=channel.get('my_bitrate',''), module=channel['module'], isFolder=False, isPlayable=False, addFav=False, urlParamsData={})
 
 def ChangeChannelIndex(channelID):
@@ -161,12 +164,46 @@ def ChangeChannelLogo(channelID):
 		for f in os.listdir(common.channelsLogosDir):
 			if re.search('{0}_*'.format(channelID), f):
 				common.DelFile(os.path.join(common.channelsLogosDir, f))
-		#common.DelFile(os.path.join(common.channelsLogosDir, image))
 	if new_image == '':
 		channels[channelID]['my_image'] = ''
 	else:
 		logoFile = common.SaveLogo(new_image, common.channelsLogosDir, channelID, isFromUrl=new_image.startswith('http'))
 		channels[channelID]['my_image'] = logoFile
+	common.WriteList(common.displayChannelsFile, channels)
+	xbmc.executebuiltin("Container.Refresh()")
+
+def ChangeChannelTvgId(channelID):
+	channels = common.GetChannels()
+	channel = channels.get(channelID)
+	tvgID = common.GetChannelTvgId(channel)
+	new_tvgID = None
+	method = common.GetSourceLocation(common.GetLocaleString(30046), [common.GetLocaleString(30043), common.GetLocaleString(30044)])
+	if method == 0:
+		new_tvgID = ''
+	elif method == 1:
+		new_tvgID = common.GetKeyboardText(common.GetLocaleString(30047), tvgID)
+	if new_tvgID == None:
+		return
+	channels[channelID]['my_tvgID'] = new_tvgID
+	common.WriteList(common.displayChannelsFile, channels)
+	xbmc.executebuiltin("Container.Refresh()")
+
+def ChangeChannelAdaptive(channelID):
+	channels = common.GetChannels()
+	channel = channels.get(channelID)
+	adaptive = common.GetChannelAdaptive(channel)
+	adaptiveString = '{0} - נוכחי {1}'.format(common.GetLocaleString(30048), 'מופעל' if adaptive else 'מבוטל')
+	new_adaptive = None
+	method = common.GetSourceLocation(adaptiveString, [common.GetLocaleString(30043), common.GetLocaleString(30049), common.GetLocaleString(30050)])
+	if method == 0:
+		new_adaptive = ''
+	elif method == 1:
+		new_adaptive = True
+	elif method == 2:
+		new_adaptive = False
+	if new_adaptive == None:
+		return
+	channels[channelID]['my_adaptive'] = new_adaptive
 	common.WriteList(common.displayChannelsFile, channels)
 	xbmc.executebuiltin("Container.Refresh()")
 
@@ -219,9 +256,10 @@ def Radios():
 	nowEPG = epg.GetNowEPG()
 	channels = GetUserChannels(type='radio') 
 	for channel in channels:
-		programs = [] if channel['tvgID'] == '' else nowEPG.get(channel['tvgID'], [])
+		tvgID = common.GetChannelTvgId(channel)
+		programs = [] if tvgID == '' else nowEPG.get(tvgID, [])
 		iconimage = common.GetChannelIconFullPath(channel) 
-		LiveChannel(common.GetChannelName(channel), channel['channelID'], channel['mode'], iconimage, channel['module'], contextMenu=[], choose=False, programs=programs, tvgID=channel['tvgID'], type='radio')
+		LiveChannel(common.GetChannelName(channel), channel['channelID'], channel['mode'], iconimage, channel['module'], contextMenu=[], choose=False, programs=programs, tvgID=tvgID, type='radio')
 
 def RadioVODs():
 	name = common.GetLabelColor("תכניות רדיו - כאן", bold=True, color="none")
@@ -368,8 +406,9 @@ def PlayLive(channelID):
 	channel = common.GetChannel(channelID)
 	if channel is None:
 		return
+	tvgID = common.GetChannelTvgId(channel)
 	nowEPG = epg.GetNowEPG()
-	programs = [] if channel.get('tvgID', '') == '' else nowEPG.get(channel['tvgID'], [])
+	programs = [] if tvgID == '' else nowEPG.get(tvgID, [])
 	displayName = common.GetLabelColor(common.GetChannelName(channel), keyColor="chColor", bold=True)
 	iconimage = common.GetChannelIconFullPath(channel)
 	if len(programs) > 0:
@@ -460,6 +499,7 @@ def route(query):
 			DisableAutoPlayChannel(moreData)
 		elif mode == 19:
 			common.GetChannels(downloadOnly=True)
+			xbmc.executebuiltin("Container.Refresh()")
 		elif mode == 20:
 			ArrangeLiveChannels(moreData)
 		elif mode == 21:
@@ -471,6 +511,10 @@ def route(query):
 			ChangeChannelLogo(url)
 		elif mode == 24:
 			ChangeChannelName(url)
+		elif mode == 25:
+			ChangeChannelTvgId(url)
+		elif mode == 26:
+			ChangeChannelAdaptive(url)
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
 	else:

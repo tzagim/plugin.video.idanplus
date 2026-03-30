@@ -199,6 +199,26 @@ msgctxt "#30045"
 msgid "שינוי שם"
 msgstr ""
 
+msgctxt "#30046"
+msgid "שינוי מזהה לוח שידורים"
+msgstr ""
+
+msgctxt "#30047"
+msgid "בחירת מזהה לוח שידורים"
+msgstr ""
+
+msgctxt "#30048"
+msgid "בחירה/ ביטול ניגון באמצעות inputstream.adaptive"
+msgstr ""
+
+msgctxt "#30049"
+msgid "ניגון באמצעות inputstream.adaptive"
+msgstr ""
+
+msgctxt "#30050"
+msgid "ביטול ניגון באמצעות inputstream.adaptive"
+msgstr ""
+
 msgctxt "#30100"
 msgid "מאקו"
 msgstr ""

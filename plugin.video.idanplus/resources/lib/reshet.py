@@ -336,8 +336,10 @@ def Play(video, name='', iconimage='', quality='best'):
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
 
-def WatchLive(url, name='', iconimage='', quality='best'):
-	linkDetails = common.GetChannelLinkDetails(url)
+def WatchLive(channelID, name='', iconimage='', quality='best'):
+	channel = common.GetChannel(channelID)
+	isAdaptive = common.GetChannelAdaptive(channel)
+	linkDetails = channel.get('linkDetails')
 	referer = linkDetails.get('referer')
 	try:
 		headers={"User-Agent": userAgent}
@@ -349,7 +351,7 @@ def WatchLive(url, name='', iconimage='', quality='best'):
 	final = '{0}|User-Agent={1}'.format(link, userAgent)
 	if referer:
 		final = '{0}&Referer={1}'.format(final, referer)
-	common.PlayStream(final, quality, name, iconimage)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def GetNewsCategoriesList(iconimage):
 	url = '{0}/news/13-programs/'.format(baseUrl)
