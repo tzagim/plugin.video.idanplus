@@ -25,6 +25,11 @@ import resources.lib.common as common
 
 module = 'i24news'
 API_BASE = 'https://api.i24news.wiztivi.io'
+UNIVTEC_API_BASE = 'https://insight-api-shared.univtec.com/interface'
+UNIVTEC_TENANT_ID = 'i24israel'
+UNIVTEC_REGION_HE = 'hebrew'
+UNIVTEC_HE_PROGRAMS_SECTION_ID = '69f32640685110647a4267c6'
+UNIVTEC_PLAY_MODE = 12
 
 # Language configuration with catalog IDs
 LANGUAGES = {
@@ -153,6 +158,229 @@ def GetAPIData(endpoint, params=None):
         return None
 
 
+def GetUnivtecHeaders(region=UNIVTEC_REGION_HE):
+    """Build headers for the current i24NEWS VOD website API."""
+    return {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+        'origin': 'https://video.i24news.tv',
+        'referer': 'https://video.i24news.tv/',
+        'platform': 'web',
+        'x-device-type': 'web',
+        'x-tenant-id': UNIVTEC_TENANT_ID,
+        'regioncode': region,
+        'x-no-verbose-items': 'ok'
+    }
+
+
+def GetUnivtecData(endpoint, params=None, region=UNIVTEC_REGION_HE):
+    """Fetch data from the Univtec/Insight API used by video.i24news.tv."""
+    try:
+        url = '{0}/{1}'.format(UNIVTEC_API_BASE, endpoint)
+        if params:
+            param_str = '&'.join(['{0}={1}'.format(k, common.quote_plus(str(v))) for k, v in params.items()])
+            url = '{0}?{1}'.format(url, param_str)
+
+        xbmc.log("i24news: Univtec API call: {0}".format(url), xbmc.LOGINFO)
+        data = common.OpenURL(url, headers=GetUnivtecHeaders(region), responseMethod='json')
+        if not data or data.get('statusCode', 0) >= 400:
+            xbmc.log("i24news: Univtec API returned no data", xbmc.LOGERROR)
+            return None
+        return data
+    except Exception as e:
+        xbmc.log("i24news: Univtec API exception: {0}".format(str(e)), xbmc.LOGERROR)
+        return None
+
+
+def ParseDurationSeconds(duration):
+    """Convert Univtec duration strings (HH:MM:SS) to seconds for Kodi."""
+    if not duration:
+        return 0
+    if isinstance(duration, (int, float)):
+        return int(duration)
+    try:
+        parts = str(duration).strip().split(':')
+        if len(parts) == 3:
+            hours, minutes, seconds = [int(part) for part in parts]
+            return hours * 3600 + minutes * 60 + seconds
+        if len(parts) == 2:
+            minutes, seconds = [int(part) for part in parts]
+            return minutes * 60 + seconds
+        return int(duration)
+    except:
+        return 0
+
+
+def GetUnivtecImage(item, default_icon=None):
+    """Pick the best image field from a Univtec item."""
+    if default_icon is None:
+        default_icon = common.GetIconFullPath('i24news.png')
+    return item.get('optimizedImage') or item.get('optimizedPoster') or item.get('image') or item.get('poster') or default_icon
+
+
+def ShowCatalogUnivtec(language='he'):
+    """Display Hebrew TV shows from the current i24NEWS website API."""
+    if language != 'he':
+        return False
+
+    data = GetUnivtecData(
+        'pages/section/{0}'.format(UNIVTEC_HE_PROGRAMS_SECTION_ID),
+        {'page': 1, 'limit': 100}
+    )
+
+    items = data.get('items', []) if data else []
+    if not items:
+        xbmc.log("i24news: Univtec catalog is empty", xbmc.LOGERROR)
+        return False
+
+    iconimage = common.GetIconFullPath('i24news.png')
+    for show in items:
+        show_id = show.get('id', '')
+        show_name = show.get('title') or show.get('name') or 'Unknown'
+        show_desc = show.get('description') or ''
+
+        if not show_id:
+            continue
+
+        url = 'action=seasons_univtec&series_id={0}&show_name={1}'.format(
+            show_id,
+            common.quote_plus(show_name)
+        )
+
+        common.addDir(
+            name=common.GetLabelColor(show_name, keyColor="prColor", bold=True),
+            url=url,
+            mode=-1,
+            iconimage=GetUnivtecImage(show, iconimage),
+            infos={'Title': show_name, 'Plot': show_desc},
+            module=module,
+            isFolder=True
+        )
+
+    return True
+
+
+def GetUnivtecSeriesData(series_id):
+    """Load a Univtec series payload with null-safe season/episode lists."""
+    data = GetUnivtecData('pages/series/{0}'.format(series_id))
+    if not data:
+        return None
+
+    seasons = []
+    for season in data.get('seasons') or []:
+        episodes = season.get('episodes') or []
+        if episodes:
+            seasons.append({
+                'title': season.get('title') or '',
+                'episodes': episodes
+            })
+    data['seasons'] = seasons
+    return data
+
+
+def ShowSeasonsUnivtec(series_id, show_name=''):
+    """Display seasons for a Univtec series."""
+    xbmc.log("i24news: Loading Univtec seasons for '{0}'".format(show_name or series_id), xbmc.LOGINFO)
+
+    data = GetUnivtecSeriesData(series_id)
+    seasons = data.get('seasons', []) if data else []
+    if not seasons:
+        xbmcgui.Dialog().notification('i24NEWS', 'No episodes found', xbmcgui.NOTIFICATION_WARNING, 3000)
+        return
+
+    iconimage = common.GetIconFullPath('i24news.png')
+    if len(seasons) == 1:
+        ShowEpisodesUnivtec(series_id, show_name, seasons[0].get('title', ''))
+        return
+
+    for season in seasons:
+        season_title = season.get('title') or 'Unknown'
+        url = 'action=episodes_univtec&series_id={0}&show_name={1}&season_title={2}'.format(
+            series_id,
+            common.quote_plus(show_name),
+            common.quote_plus(season_title)
+        )
+        common.addDir(
+            name=common.GetLabelColor(season_title, keyColor="timesColor", bold=True),
+            url=url,
+            mode=-1,
+            iconimage=iconimage,
+            infos={'Title': season_title, 'Plot': show_name},
+            module=module,
+            isFolder=True
+        )
+
+
+def ShowEpisodesUnivtec(series_id, show_name='', season_title=''):
+    """Display episodes for a Univtec series id."""
+    xbmc.log("i24news: Loading Univtec episodes for '{0}'".format(show_name or series_id), xbmc.LOGINFO)
+
+    data = GetUnivtecSeriesData(series_id)
+    if not data:
+        xbmcgui.Dialog().notification('i24NEWS', 'No episodes found', xbmcgui.NOTIFICATION_WARNING, 3000)
+        return
+
+    episodes = []
+    seasons = data.get('seasons', [])
+    if season_title:
+        for season in seasons:
+            if season.get('title') == season_title:
+                episodes = list(season.get('episodes', []))
+                break
+    else:
+        for season in seasons:
+            episodes.extend(season.get('episodes', []))
+
+    if not episodes:
+        xbmcgui.Dialog().notification('i24NEWS', 'No episodes found', xbmcgui.NOTIFICATION_WARNING, 3000)
+        return
+
+    try:
+        episodes = sorted(episodes, key=lambda e: e.get('date', 0) or 0, reverse=True)
+    except:
+        pass
+
+    iconimage = common.GetIconFullPath('i24news.png')
+    for episode in episodes:
+        video_url = episode.get('videoUrl') or episode.get('contentUrl') or ''
+        title = episode.get('title') or episode.get('name') or 'Unknown'
+        if not video_url:
+            continue
+
+        duration_seconds = ParseDurationSeconds(episode.get('duration'))
+        infos = {
+            'Title': title,
+            'Plot': episode.get('description') or ''
+        }
+        if duration_seconds > 0:
+            infos['Duration'] = duration_seconds
+
+        common.addDir(
+            name=common.GetLabelColor(title, keyColor="chColor"),
+            url=video_url,
+            mode=UNIVTEC_PLAY_MODE,
+            iconimage=GetUnivtecImage(episode, iconimage),
+            infos=infos,
+            module=module,
+            isFolder=False,
+            isPlayable=True
+        )
+
+
+def PlayUnivtec(video_url, video_name):
+    """Play a Univtec HLS URL directly."""
+    if not video_url:
+        xbmcgui.Dialog().notification('i24NEWS', 'Failed to get video stream', xbmcgui.NOTIFICATION_ERROR, 3000)
+        return
+
+    stream_url = video_url
+    if '|' not in stream_url:
+        stream_url = '{0}|Referer=https://video.i24news.tv/&User-Agent=Mozilla/5.0'.format(stream_url)
+
+    xbmc.log("i24news: Playing Univtec stream: {0}".format(video_url[:100]), xbmc.LOGINFO)
+    common.PlayStream(stream_url, 'best', video_name, common.GetIconFullPath('i24news.png'))
+
+
 # ============================================================================
 # NAVIGATION MENUS
 # ============================================================================
@@ -184,6 +412,9 @@ def ShowCatalog(language):
     """Display TV shows for selected language"""
     lang_info = LANGUAGES.get(language)
     if not lang_info:
+        return
+
+    if language == 'he' and ShowCatalogUnivtec(language):
         return
     
     xbmc.log("i24news: Loading {0} catalog".format(lang_info['name']), xbmc.LOGINFO)
@@ -425,6 +656,22 @@ def Run(name='', url='', mode=-1, iconimage='', moreData=''):
     
     if action == 'catalog':
         ShowCatalog(params.get('language', 'en'))
+    elif action == 'seasons_univtec':
+        ShowSeasonsUnivtec(
+            params.get('series_id', ''),
+            params.get('show_name', '')
+        )
+    elif action == 'episodes_univtec':
+        ShowEpisodesUnivtec(
+            params.get('series_id', ''),
+            params.get('show_name', ''),
+            params.get('season_title', '')
+        )
+    elif action == 'play_univtec':
+        PlayUnivtec(
+            params.get('video_url', ''),
+            params.get('video_name', '')
+        )
     elif action == 'episodes':
         ShowEpisodes(
             params.get('show_name', ''),
@@ -435,6 +682,10 @@ def Run(name='', url='', mode=-1, iconimage='', moreData=''):
         PlayVideo(params.get('video_id', ''), params.get('video_name', ''))
     elif mode == 10:
         WatchLive(url, name, iconimage, moreData)
+    elif mode == UNIVTEC_PLAY_MODE:
+        PlayUnivtec(url, name)
     else:
         # Default to language menu (main entry point)
         ShowLanguages()
+
+    common.SetViewMode('episodes')

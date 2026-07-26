@@ -30,15 +30,40 @@ def GetCategories():
 		return {}
 	return data.get('Category', {}).get('Category', {})
 	
+def GetCategoryImage(category, fallback=''):
+	"""Use the first available item thumbnail as the category/series image."""
+	if not isinstance(category, dict):
+		return fallback
+	items = category.get('Items')
+	if items:
+		item = items.get('Item')
+		if isinstance(item, dict):
+			item = [item]
+		if isinstance(item, list):
+			for it in item:
+				img = it.get('img_upload') or it.get('img')
+				if img:
+					return img
+	sub = category.get('Category')
+	if isinstance(sub, dict):
+		sub = [sub]
+	if isinstance(sub, list):
+		for season in sub:
+			img = GetCategoryImage(season, '')
+			if img:
+				return img
+	return fallback
+
 def GetCategoriesList(iconimage):
 	categories = GetCategories() 
 	grids_arr = []
 	for category in categories:
 		name = common.GetLabelColor(category['Name'], keyColor="prColor", bold=True)
-		grids_arr.append((name, category['ID']))
+		icon = GetCategoryImage(category, iconimage)
+		grids_arr.append((name, category['ID'], icon))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
-	for name, id in grids_sorted:
-		common.addDir(name, id, 1, iconimage, infos={"title": name}, module=module)
+	for name, id, icon in grids_sorted:
+		common.addDir(name, id, 1, icon, infos={"title": name}, module=module)
 
 def GetCategory(id, categories):
 	if not isinstance(categories, list) and 'Category' in categories:
@@ -61,22 +86,26 @@ def GetSeasonList(id, iconimage):
 	ids = id.split(';')
 	for i in range(len(ids)):
 		category = GetCategory(ids[i], category)
+	icon = GetCategoryImage(category, iconimage) or iconimage
 	if 'Category' in category:
 		catName = common.GetLabelColor(category['Name'], keyColor="prColor", bold=True)
 		if not isinstance(category['Category'], list):
 			name = '{0} - {1}'.format(catName, common.GetLabelColor(category['Category']['Name'], keyColor="timesColor", bold=True))
-			common.addDir(name, '{0};{1}'.format(id, category['Category']['ID']), 1, iconimage, infos={"title": name}, module=module)
+			seasonIcon = GetCategoryImage(category['Category'], icon)
+			common.addDir(name, '{0};{1}'.format(id, category['Category']['ID']), 1, seasonIcon, infos={"title": name}, module=module)
 		else:
 			for season in category['Category']:
 				name = '{0} - {1}'.format(catName, common.GetLabelColor(season['Name'], keyColor="timesColor", bold=True))
-				common.addDir(name, '{0};{1}'.format(id, season['ID']), 1, iconimage, infos={"title": name}, module=module)
+				seasonIcon = GetCategoryImage(season, icon)
+				common.addDir(name, '{0};{1}'.format(id, season['ID']), 1, seasonIcon, infos={"title": name}, module=module)
 	if len(ids) > 1:
 		category = GetSubCategory(category['ID'])
 	if 'Items' in category:
 		for item in category['Items']['Item']:
 			name = common.GetLabelColor(item['title'], keyColor="chColor", bold=True)
 			link = item['stream_url'] if 'http' in item['stream_url'] else item['stream_url_bak']
-			common.addDir(name, link, 4, item['img_upload'], infos={"title": name, "plot": item['abstract']}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(item['img_upload']), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(item['img_upload']), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
+			itemIcon = item.get('img_upload') or icon
+			common.addDir(name, link, 4, itemIcon, infos={"title": name, "plot": item['abstract']}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(itemIcon), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_{4}_res&module={4})'.format(sys.argv[0], common.quote_plus(link), name, common.quote_plus(itemIcon), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
 
 def Play(name, url, iconimage, quality='best'):
 	link = referer = url
@@ -169,7 +198,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 0:		
 		GetCategoriesList(moduleIcon)
 	elif mode == 1:
-		GetSeasonList(url, moduleIcon)					
+		GetSeasonList(url, iconimage if iconimage else moduleIcon)
 	elif mode == 4:
 		Play(name, url, iconimage, moreData)
 	elif mode == 6:

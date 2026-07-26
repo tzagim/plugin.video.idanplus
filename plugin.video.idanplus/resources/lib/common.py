@@ -269,7 +269,6 @@ def OpenURL(url, headers={}, user_data=None, session=None, cookies=None, retries
 			if responseMethod == 'text':
 				if int(response.status_code) > 400:
 					xbmc.log('{0}  -  response {1}.'.format(url, response.status_code), xbmc.LOGERROR)
-					xbmc.log(response.text, xbmc.LOGERROR)
 					continue
 				link = response.text
 			elif responseMethod == 'content':
@@ -294,12 +293,15 @@ def GetRedirect(url, headers={}):
 		xbmc.log(str(ex), xbmc.LOGERROR)
 	return url
 
-def addDir(name, url, mode, iconimage='DefaultFolder.png', infos=None, contextMenu=None, module='', moreData='', totalItems=None, isFolder=True, isPlayable=False, addFav=True, urlParamsData={}):
+def addDir(name, url, mode, iconimage='DefaultFolder.png', infos=None, contextMenu=None, module='', moreData='', totalItems=None, isFolder=True, isPlayable=False, addFav=True, urlParamsData={}, arts=None):
 	urlParams = {'name': name.replace('?', '|||'), 'url': quote_plus(url), 'mode': mode, 'iconimage': quote_plus(iconimage), 'module': module, 'moredata': quote_plus(moreData)}
 	u = '{0}?{1}'.format(sys.argv[0], urlencode(urlParams))
 	try:
 		listitem = xbmcgui.ListItem(name)
-		listitem.setArt({'thumb' : iconimage, 'fanart': iconimage, 'icon': iconimage})
+		art = {'thumb': iconimage, 'fanart': iconimage, 'icon': iconimage}
+		if arts:
+			art.update(arts)
+		listitem.setArt(art)
 	except:
 		listitem = xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
 	if infos is not None:
@@ -784,16 +786,63 @@ def GetYouTube(url):
 	if '?' in video_id:
 		video_id = video_id[:video_id.find('?')]
 	return '{0}/play/?video_id={1}'.format(youtubePlugin, video_id)
-													   
-def GetCF(url, ua=None, retries=10, responseMethod='text'):
+
+_cfSession = {'scraper': None, 'time': 0, 'home': ''}
+
+def ResetCFSession():
+	global _cfSession
+	_cfSession = {'scraper': None, 'time': 0, 'home': ''}
+
+def _warmCfSession(scraper, home, reqHeaders, browseReferer=None):
+	try:
+		scraper.get(home, headers=reqHeaders, timeout=15)
+	except Exception:
+		pass
+	if browseReferer and browseReferer.rstrip('/') != home.rstrip('/'):
+		try:
+			stepHeaders = dict(reqHeaders)
+			stepHeaders['Referer'] = home
+			scraper.get(browseReferer, headers=stepHeaders, timeout=15)
+		except Exception:
+			pass
+
+def _newCfSession(home, reqHeaders, browseReferer=None):
 	import resources.lib.cloudscraper as cloudscraper
+	scraper = cloudscraper.create_scraper(interpreter='native')
+	_warmCfSession(scraper, home, reqHeaders, browseReferer)
+	return scraper
+													   
+def GetCF(url, ua=None, retries=8, responseMethod='text', referer=None):
+	import resources.lib.cloudscraper as cloudscraper
+	global _cfSession
+	ua = ua or userAgent
+	home = 'https://www.kankids.org.il/' if 'kankids' in url else 'https://www.kan.org.il/'
+	browseReferer = referer or home
+	reqHeaders = {
+		'User-Agent': ua,
+		'Referer': browseReferer,
+		'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+		'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+		'Sec-Fetch-Dest': 'document',
+		'Sec-Fetch-Mode': 'navigate',
+		'Sec-Fetch-Site': 'same-origin' if browseReferer.startswith(home.rstrip('/')) else 'none',
+		'Upgrade-Insecure-Requests': '1',
+	}
+	if _cfSession['scraper'] is None or (time.time() - _cfSession['time']) > 300 or _cfSession['home'] != home:
+		_cfSession = {'scraper': _newCfSession(home, reqHeaders, browseReferer), 'time': time.time(), 'home': home}
+	scraper = _cfSession['scraper']
 	for i in range(retries):
 		try:
-			scraper = cloudscraper.create_scraper(interpreter = 'native')
-			response = scraper.request('get', url)
+			fetchHeaders = dict(reqHeaders)
+			fetchHeaders['Referer'] = browseReferer
+			response = scraper.request('get', url, headers=fetchHeaders, timeout=20)
 			if response.status_code == 403:
-				xbmc.sleep(1000)
+				xbmc.sleep(400 if i < 2 else 800)
 				xbmc.log('CF - {0}  -  response {1}.'.format(url, response.status_code), xbmc.LOGINFO)
+				if i >= 1:
+					ResetCFSession()
+					scraper = _newCfSession(home, reqHeaders, browseReferer)
+					_cfSession = {'scraper': scraper, 'time': time.time(), 'home': home}
 				continue
 			if responseMethod == 'json':
 				return response.json()
@@ -803,8 +852,15 @@ def GetCF(url, ua=None, retries=10, responseMethod='text'):
 				return response.text
 		except Exception as ex:
 			xbmc.log(str(ex), xbmc.LOGERROR)
-			return None
-	return ''
+			xbmc.sleep(300)
+	if responseMethod == 'full':
+		return None
+	fallbackHeaders = dict(reqHeaders)
+	fallbackHeaders['Referer'] = browseReferer
+	fallback = OpenURL(url, headers=fallbackHeaders, retries=2, responseMethod=responseMethod if responseMethod in ('text', 'json') else 'text')
+	if not fallback:
+		ResetCFSession()
+	return fallback if fallback else ''
 
 def GetCFheaders(url, ua=None, retries=10):
 	import resources.lib.cloudscraper as cloudscraper

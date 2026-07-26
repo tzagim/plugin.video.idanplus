@@ -23,6 +23,87 @@ logosDir = os.path.join(common.profileDir, 'logos', 'kan')
 if not os.path.exists(logosDir):
     os.makedirs(logosDir)
 
+mobProgramApi = 'https://mobapi.kan.org.il/api/mobile/program'
+
+def _extractKanIds(url):
+    match = re.search(r'/p-(\d+)(?:/s(\d+))?(?:/(\d+))?', url)
+    if match:
+        return match.group(1), match.group(2), match.group(3)
+    return None, None, None
+
+def _fetchMobProgram(url):
+    result = common.OpenURL(url, headers=headers, responseMethod='json')
+    return result if result else {}
+
+def GetMobProgram(programId):
+    url = '{0}?id={1}'.format(mobProgramApi, programId)
+    result = cache.get(_fetchMobProgram, 24, url, table='mobapi')
+    if not result:
+        result = cache.get(_fetchMobProgram, 0, url, table='mobapi')
+    return result or {}
+
+def _mobEpisodeImage(entry):
+    image = _pick_image_from_media_group(entry)
+    if image:
+        return image.split('|', 1)[0].split('?', 1)[0]
+    return moduleIcon
+
+def _mobEpisodeSeason(entry):
+    season = entry.get('extensions', {}).get('analyticsCustomProperties', {}).get('season')
+    try:
+        return int(season)
+    except (TypeError, ValueError):
+        return None
+
+def _mobStreamFromEntry(entry):
+    content = entry.get('content') or {}
+    ctype = content.get('type', '')
+    src = (content.get('src') or '').strip()
+    if ctype == 'youtube-id' and src:
+        return 'youtube', 'https://www.youtube.com/watch?v={0}'.format(src)
+    if src.startswith('http'):
+        return 'stream', src
+    return None, None
+
+def _mobFindEntry(entries, episode_id=None, url=''):
+    if episode_id:
+        for entry in entries:
+            if str(entry.get('id')) == str(episode_id):
+                return entry
+    if url:
+        clean = url.split('?')[0].rstrip('/')
+        for entry in entries:
+            href = entry.get('link', {}).get('href', '').replace('?app=true', '').rstrip('/')
+            if href == clean or clean.endswith('/{0}'.format(entry.get('id'))):
+                return entry
+    return None
+
+def _mobSeasonLinks(base_url, entries):
+    seasons = {}
+    for entry in entries:
+        season = _mobEpisodeSeason(entry)
+        if season and season > 0:
+            seasons[season] = common.GetLabelColor('עונה {0}'.format(season), keyColor="prColor")
+    if len(seasons) <= 1:
+        return None
+    base = re.sub(r'/s\d+/?.*$', '/', base_url.rstrip('/') + '/')
+    return [(num, name, '{0}s{1}/'.format(base, num)) for num, name in sorted(seasons.items())]
+
+def _addMobEpisodes(entries, iconimage, moreData, season_filter=None):
+    md = moreData.split('|||')
+    catName = '' if len(md) < 2 else md[1]
+    season_filter = int(season_filter) if season_filter else None
+    for entry in entries:
+        if season_filter and _mobEpisodeSeason(entry) != season_filter:
+            continue
+        name = common.GetLabelColor(common.UnEscapeXML(entry.get('title', '').strip()), keyColor="chColor")
+        description = common.UnEscapeXML((entry.get('description') or entry.get('summary') or '').strip())
+        image = _mobEpisodeImage(entry)
+        link = entry.get('link', {}).get('href', '').replace('?app=true', '')
+        if not link:
+            continue
+        common.addDir(name, link, 3, image, infos={"title": name, "plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
+
 
 def GetImageLink(imageUrl, imageName):
     i = imageUrl.find('?')
@@ -284,10 +365,28 @@ def GetSeasonsList(data, iconimage, moreData=''):
     if site == 'youtube':
         xbmc.executebuiltin('container.Update({0}/playlist/{1}/)'.format(common.youtubePlugin, catId))
         return
+
+    programId, _, _ = _extractKanIds(data)
+    if programId:
+        prog = GetMobProgram(programId)
+        entries = prog.get('entry') or []
+        if entries:
+            seasonLinks = _mobSeasonLinks(data, entries)
+            if seasonLinks:
+                for _, name, link in seasonLinks:
+                    if not link.startswith('http'):
+                        link = '{0}{1}'.format(domain, link)
+                    common.addDir(name, link, 2, iconimage, infos={"title": name, "plot": name}, module=module, urlParamsData={'catName': catName})
+                return
+            GetEpisodesList(data, iconimage, moreData)
+            return
+
     #text = common.GetCF(data)
     text = cache.get(common.GetCF, 24, data, table='pages')
     if text==[]:
         text = cache.get(common.GetCF, 0, data, table='pages')
+    if not text:
+        return
     seasons = re.compile('<div class="dropdown">(.*?)</div>', re.S).findall(text)
     if len(seasons) == 0:
         GetEpisodesList(data, iconimage, moreData)
@@ -306,12 +405,25 @@ def GetEpisodesList(url, iconimage, moreData=''):
     md = moreData.split('|||')
     site = md[0]
     catName = '' if len(md) < 2 else md[1]
+
+    programId, seasonFilter, _ = _extractKanIds(url)
+    if programId:
+        prog = GetMobProgram(programId)
+        entries = prog.get('entry') or []
+        if entries:
+            _addMobEpisodes(entries, iconimage, moreData, seasonFilter)
+            return
+
     #text = common.GetCF(url)
     text = cache.get(common.GetCF, 24, url, table='pages')
     if text==[]:
         text = cache.get(common.GetCF, 0, url, table='pages')
+    if not text:
+        return
     #text = common.OpenURL(url)
     body = re.compile('<main id="main"(.*?)</main>', re.S).findall(text)
+    if len(body) < 1:
+        return
     if 'kankids' in url:
         matches = re.compile('class="seasons"(.*?)<script', re.S).findall(body[0])
         domain = baseKidsUrl
@@ -503,7 +615,60 @@ def Play(url, name='', iconimage='', quality='best'):
         final = GetPlayerKanUrl(url, headers=headers, quality=quality)  
     common.PlayStream(final, quality, name, iconimage, adaptive=True)
 
+def _mobKalturaEntryId(entry):
+    content = entry.get('content') or {}
+    src = (content.get('src') or '').strip()
+    if src:
+        match = re.search(r'entryId/([^/?&]+)', src)
+        if match:
+            return match.group(1)
+    return None
+
+def _kanShowReferer(page_url):
+    clean = page_url.split('?')[0].rstrip('/')
+    if re.search(r'/\d+/?$', clean):
+        return clean.rsplit('/', 1)[0] + '/'
+    return baseKidsUrl if 'kankids' in page_url else baseUrl
+
+def _kanStreamReferer(page_url):
+    ref = page_url.split('?')[0]
+    return ref if ref.endswith('/') else ref + '/'
+
+def _kanStreamHeaders(stream_url, page_url, ua):
+    ref = _kanStreamReferer(page_url)
+    origin = baseKidsUrl.rstrip('/') if 'kankids' in page_url else baseUrl.rstrip('/')
+    if stream_url.startswith('//'):
+        stream_url = 'https:' + stream_url
+    return "{0}|User-Agent={1}&Referer={2}&Origin={3}&Accept=*/*".format(
+        stream_url, quote(ua), quote(ref), quote(origin))
+
+def _fetchKanPage(url, ua):
+    text = common.GetCF(url, ua, referer=_kanShowReferer(url))
+    if not text:
+        return None
+    return text
+
+def _getKanPage(url, fresh=False):
+    if fresh:
+        return _fetchKanPage(url, userAgent) or ''
+    text = cache.get(_fetchKanPage, 24, url, userAgent, table='pages')
+    if not text:
+        text = cache.get(_fetchKanPage, 0, url, userAgent, table='pages')
+    return text or ''
+
 def GetPlayerKanUrl(url, headers={}, quality='best'):
+    last_ex = None
+    for attempt in range(3):
+        try:
+            return _resolvePlayerKanUrl(url, headers, quality)
+        except Exception as ex:
+            last_ex = ex
+            common.ResetCFSession()
+            if attempt < 2:
+                xbmc.sleep(600)
+    raise last_ex
+
+def _resolvePlayerKanUrl(url, headers={}, quality='best'):
     from urllib.parse import urlsplit, urlunsplit, quote
 
     def _normalize_master(u):
@@ -514,15 +679,34 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
         base = urlunsplit((parts.scheme, parts.netloc, parts.path, '', ''))
         return base, u
 
-    def _pipe_headers(u, ua, ref):
-        return "{}|User-Agent={}&Referer={}&Accept=*/*".format(u, quote(ua), quote(ref))
-
-    # אין להמיר ל־http או לחתוך URL
-    text = cache.get(common.GetCF, 24, url, userAgent, table='pages')
-    if text == []:
-        text = cache.get(common.GetCF, 0, url, userAgent, table='pages')
+    def _pipe_headers(u, ua, page_url):
+        return _kanStreamHeaders(u, page_url, ua)
 
     ref = baseKidsUrl if 'kankids' in url else baseUrl
+    programId, _, episodeId = _extractKanIds(url)
+    mobEntry = None
+
+    text = _getKanPage(url, fresh=True)
+    if text:
+        hls_match = re.search(r'data-hls-url="([^"]+)"', text)
+        dash_match = re.search(r'data-dash-url="([^"]+)"', text)
+        if hls_match or dash_match:
+            master_raw = (hls_match.group(1) if hls_match else dash_match.group(1)).strip()
+            _, master_with_query = _normalize_master(master_raw)
+            return _pipe_headers(master_with_query, userAgent, url)
+
+    if programId:
+        prog = GetMobProgram(programId)
+        mobEntry = _mobFindEntry(prog.get('entry') or [], episodeId, url)
+        if mobEntry:
+            streamType, streamUrl = _mobStreamFromEntry(mobEntry)
+            if streamType == 'youtube':
+                return common.GetYouTube(streamUrl)
+            if streamType == 'stream' and 'redge' in streamUrl:
+                return _pipe_headers(streamUrl, userAgent, url)
+
+    if not text:
+        raise Exception('Unable to resolve playable URL from page')
 
     # DailyMotion player
     if 'kanPlayers' in url:
@@ -542,33 +726,22 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
                 link = link.replace('https', 'http', 1)
             if 'api.bynetcdn.com/Redirector' not in link:
                 link = common.GetStreams(link, headers=headers, quality=quality)
-            return _pipe_headers(link, userAgent, ref)
+            return _pipe_headers(link, userAgent, url)
 
-    # Redge CDN (data-hls-url / data-dash-url)
+    # Redge CDN (data-hls-url / data-dash-url) - fallback if early check missed
     hls_match = re.search(r'data-hls-url="([^"]+)"', text)
     dash_match = re.search(r'data-dash-url="([^"]+)"', text)
     if hls_match or dash_match:
         master_raw = (hls_match.group(1) if hls_match else dash_match.group(1)).strip()
-        #if master_raw.startswith('//'):
-        #    master_raw = 'https:' + master_raw
-        #return master_raw
-        master_base, master_with_query = _normalize_master(master_raw)
-        # החזר את ה-master המקורי (למשל עם ?fmp4) כדי למנוע כפילות פרמטרים
-        return _pipe_headers(master_with_query, userAgent, ref)
-
-        # אם תרצה לבחור איכות ספציפית דרך GetStreams, השתמש בזה במקום ה-return שמעל:
-        # try:
-        #     stream = common.GetStreams(master_base, headers=headers, quality=quality)
-        #     return _pipe_headers(stream, userAgent, ref)
-        # except Exception:
-        #     return _pipe_headers(master_base, userAgent, ref)
+        _, master_with_query = _normalize_master(master_raw)
+        return _pipe_headers(master_with_query, userAgent, url)
 
     # ישנים: media.(ma)kan.org.il עם hls:"..."
     if re.search(r'media\.(ma)?kan\.org\.il', url):
         match = re.compile(r'hls:\s*?"(.*?)"').findall(text)
         if match:
             link = common.GetStreams(match[0], headers=headers, quality=quality)
-            return _pipe_headers(link, userAgent, ref)
+            return _pipe_headers(link, userAgent, url)
 
     # Kaltura ישיר
     if 'kaltura' in url:
@@ -581,18 +754,25 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
             link = result['entryResult']['meta'].get('hlsStreamUrl') or ''
             if link:
                 link = common.GetStreams(link, headers=headers, quality=quality)
-                return _pipe_headers(link, userAgent, ref)
+                return _pipe_headers(link, userAgent, url)
 
     # entryId → Kaltura / YouTube
     match = re.compile(r'<div id="video_item".*?data-entryId="(.*?)"', re.S).findall(text)
     if match:
         domain = baseKidsUrl if 'kankids' in url else baseUrl
         link = common.GetKaltura(match[0], 2717431, domain, userAgent, quality=quality)
-        return _pipe_headers(link, userAgent, ref)
+        return _pipe_headers(link, userAgent, url)
 
     yt = re.compile(r'data-video-src="(.*?)"').findall(text)
     if yt:
         return common.GetYouTube(yt[0].replace('/embed', ''))
+
+    if mobEntry:
+        entryId = _mobKalturaEntryId(mobEntry)
+        if entryId:
+            link = common.GetKaltura(entryId, 2717431, ref, userAgent, quality=quality)
+            if link:
+                return _pipe_headers(link, userAgent, url)
 
     raise Exception('Unable to resolve playable URL from page')
 
@@ -602,7 +782,10 @@ def WatchLive(channelID, name='', iconimage='', quality='best', type='video'):
     isAdaptive = common.GetChannelAdaptive(channel)
     linkDetails = channel.get('linkDetails')
     link = linkDetails['link']
-    common.PlayStream(link, quality, name, iconimage, adaptive=isAdaptive)
+    if '.m3u8' in link and not isAdaptive:
+        isAdaptive = True
+    final = '{0}|User-Agent={1}&Referer={2}'.format(link, quote(userAgent), quote(baseUrl))
+    common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def GetPodcastsList(id=None):
     if id:

@@ -14,21 +14,48 @@ def GetMainList(iconimage):
 	name = common.GetLabelColor("כל התכניות", bold=True, color="none")
 	common.addDir(name, '', 0, iconimage, infos={"title": name, "plot": "צפיה בתכניות מאתר ספורט 1"}, module=module)
 
+def UpgradeSport1Image(url):
+	"""Prefer a larger Cloudinary crop than the site's tiny list thumbs."""
+	if not url:
+		return url
+	url = re.sub(r'w_\d+', 'w_1280', url)
+	url = re.sub(r'h_\d+', 'h_720', url)
+	return url
+
 def GetCategoriesList(iconimage):
 	url = '{0}/vod/'.format(baseUrl)
 	text = common.OpenURL(url)
-	matches = re.compile(u'<div class="vod-slider">(.*?)<div class="tab-content">', re.S).findall(text)
+	parts = re.split(u'<div class="vod-slider">', text)
 	grids_arr = []
-	for match in matches:
-		category = re.compile(u'<h2.*?>(.*?)</h2>.*?<a.*?href="(.*?)"', re.S).findall(match)
+	for part in parts[1:]:
+		category = re.compile(u'<h2.*?>(.*?)</h2>.*?<a.*?href="(.*?)"', re.S).findall(part)
 		if len(category) < 1:
 			continue
 		name, link = category[0]
+		if not link or link.startswith('#') or 'javascript' in link:
+			continue
+		imgs = re.compile(u'data-lazy="(.*?)"', re.S).findall(part)
+		if len(imgs) < 1:
+			imgs = re.compile(u'<img[^>]+src=["\'](.*?)["\']', re.S).findall(part)
+		# Prefer real video thumbs over theme/logo assets.
+		icon = iconimage
+		for img in imgs:
+			if '/themes/' in img or img.endswith('.png') and 'sport1images' not in img:
+				continue
+			if 'sport1images' in img or '/image/upload/' in img:
+				icon = UpgradeSport1Image(img)
+				break
+		else:
+			for img in imgs:
+				if '/themes/' in img:
+					continue
+				icon = UpgradeSport1Image(img)
+				break
 		name = common.GetLabelColor(name.strip(), keyColor="prColor", bold=True)
-		grids_arr.append((name, link))
+		grids_arr.append((name, link, icon))
 	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
-	for name, link in grids_sorted:
-		common.addDir(name, '{0}/vod/{1}'.format(baseUrl, link), 1, iconimage, infos={"title": name}, module=module)
+	for name, link, icon in grids_sorted:
+		common.addDir(name, '{0}/vod/{1}'.format(baseUrl, link), 1, icon, infos={"title": name}, module=module)
 
 def GetEpisodes(text):
 	#raw_unicode_escape = False
@@ -97,7 +124,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 0:		
 		GetCategoriesList(moduleIcon)
 	elif mode == 1:
-		GetEpisodesList(url, moduleIcon)					
+		GetEpisodesList(url, iconimage if iconimage else moduleIcon)
 	elif mode == 4:
 		Play(url, name, iconimage, moreData)
 	elif mode == 6:

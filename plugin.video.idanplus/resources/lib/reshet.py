@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcaddon
+import xbmc, xbmcaddon, xbmcplugin
 import sys, re, json, collections, time
 import resources.lib.common as common
 from resources.lib import cache as  cache
@@ -10,7 +10,16 @@ module = 'reshet'
 baseUrl = 'https://13tv.co.il'
 seriesUrl = 'https://13tv.co.il/_next/data/{0}/he/allshows/series/{1}.json?all=series&all={1}'
 seasonsUrl = 'https://13tv.co.il/_next/data/{0}/he/allshows/series/{1}/season/{2}.json?all=series&all={1}&all=season&all={2}'
-userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"
+# 13tv WAF blocks browser Chrome UAs on HTML/API (HTTP 403). curl-like UA + Referer works.
+pageHeaders = {
+	"User-Agent": "curl/8.7.1",
+	"Referer": "{0}/allshows/".format(baseUrl),
+	"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+	"Accept-Language": "he-IL,he;q=0.9",
+	"Accept-Encoding": "gzip, deflate",
+}
+# Client playback (Kaltura/Brightcove) still prefers a normal browser UA.
+userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 brvApi = 'https://edge.api.brightcove.com/playback/v1/accounts/1551111274001/videos/'
 brvPk = 'application/json;pk=BCpkADawqM30eqkItS5d08jYUtMkbTKu99oEBllbfUaFKeknXu4iYsh75cRm2huJ_b1-pXEPuvItI-733TqJN1zENi-DcHlt7b4Dv6gCT8T3BS-ampD0XMnORQLoLvjvxD14AseHxvk0esW3'
 cstApi = 'https://13tv-api.oplayer.io/api/getlink'
@@ -30,7 +39,7 @@ def GetCategoriesList(iconimage):
 def GetUrlJson(url, root=False):
 	result = {}
 	try:
-		html = common.OpenURL(url, headers={'User-Agent': userAgent, 'Accept-encoding': 'gzip, deflate, br'})
+		html = common.OpenURL(url, headers=pageHeaders)
 		props = re.compile('"application/json">(.*?)</script>').findall(html)
 		if len(props) == 0:
 			return {}
@@ -377,6 +386,75 @@ def GetNewsCategoriesList(iconimage):
 	for name, link, icon, infos in grids_sorted:
 		common.addDir(name, link, 21, icon, infos=infos, module=module)
 
+def UpgradeImageUrl(url, width, height, quality=90):
+	"""Kaltura returns 120x90 by default; request an explicit size for sharp art."""
+	if not url or 'GetImage' not in url:
+		return url
+	base = url.split('/width/')[0].rstrip('/')
+	return '{0}/width/{1}/height/{2}/quality/{3}'.format(base, width, height, quality)
+
+def FindImageUrl(images, preferredNames):
+	for name in preferredNames:
+		for img in images or []:
+			if img.get('imageTypeName') == name or img.get('ratio') == name:
+				return img.get('url')
+	if images:
+		return images[0].get('url')
+	return None
+
+def GetSeriesArt(images):
+	"""Build high-res art; use vertical poster as the main series image."""
+	if not images:
+		return moduleIcon, None
+	landscape = FindImageUrl(images, ('16x9', 'Landscape'))
+	portrait = FindImageUrl(images, ('2x3', 'Portrait_9_16', '9x16')) or landscape
+	poster = UpgradeImageUrl(portrait, 800, 1200) or moduleIcon
+	fanart = UpgradeImageUrl(landscape, 1920, 1080) or poster
+	# Prefer poster for thumb/icon so skins show vertical posters in the list.
+	return poster, {'thumb': poster, 'icon': poster, 'poster': poster, 'fanart': fanart}
+
+def GetEpisodeArt(images, fallback=''):
+	if not images:
+		return fallback or moduleIcon, None
+	url = FindImageUrl(images, ('16x9', 'Landscape')) or images[0].get('url')
+	thumb = UpgradeImageUrl(url, 1280, 720) or fallback or moduleIcon
+	return thumb, {'thumb': thumb, 'icon': thumb, 'fanart': thumb, 'poster': thumb}
+
+def CollectSeriesFromLeafs(leafs, series_map):
+	for leaf in leafs or []:
+		for serie in leaf.get('child') or []:
+			try:
+				metas = serie.get('metas') or {}
+				seriesID = str(metas.get('SeriesID') or '')
+				if seriesID == '' or seriesID == '0' or seriesID in series_map:
+					continue
+				mediaType = metas.get('MediaType') or serie.get('typeDescription') or ''
+				# Homepage rails mix series with episodes/articles; keep series only.
+				if mediaType != 'Series' and serie.get('type') != 1259:
+					continue
+				icon, arts = GetSeriesArt(serie.get('images') or [])
+				rawName = common.encode(serie.get('name', ''), 'utf-8')
+				name = common.GetLabelColor(rawName, keyColor="prColor", bold=True)
+				description = common.encode(serie.get('description') or '', 'utf-8')
+				createDate = int(serie.get('createDate') or 0)
+				infos = {"title": rawName, "plot": description, 'mediatype': 'tvshow'}
+				if createDate > 0:
+					infos['aired'] = time.strftime("%Y-%m-%d", time.localtime(createDate))
+				# (createDate, name, seriesID, icon, infos, arts)
+				series_map[seriesID] = (createDate, name, seriesID, icon, infos, arts)
+			except Exception as ex:
+				xbmc.log('SerieID: {0}\n{1}'.format(serie.get('metas', {}).get('SeriesID'), str(ex)), xbmc.LOGERROR)
+	return series_map
+
+def InsertSeriesByCreateDate(grids_arr, item):
+	"""Insert a series into the site-order list by createDate (newest first)."""
+	createDate = item[0] or 0
+	for i, existing in enumerate(grids_arr):
+		if (existing[0] or 0) < createDate:
+			grids_arr.insert(i, item)
+			return
+	grids_arr.append(item)
+
 def GetSeriesList(url, iconimage):
 	#result = GetUrlJson(url, root=True)
 	root = True
@@ -386,29 +464,41 @@ def GetSeriesList(url, iconimage):
 	if len(result) < 1:
 		return
 	common.SetAddonSetting("reshetSiteBuildID", result['buildId'])
-	grids_arr = []
-	grids = result['props']['pageProps']['leafs'][0]['child']
-	for serie in grids:
-		try:
-			name = common.encode(serie['name'], 'utf-8')
-			name = common.GetLabelColor(name, keyColor="prColor", bold=True)
-			grids_arr.append((name, serie['metas']['SeriesID'], serie['images'][0]['url'], {"title": name, "plot": common.encode(serie['description'], 'utf-8'),'mediatype': 'movie'}))
-		except Exception as ex:
-			xbmc.log('SerieID: {0}\n{1}'.format(serie['metas']['SeriesID'], str(ex)), xbmc.LOGERROR)
-	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr,key=lambda grids_arr: grids_arr[0])
-	for name, link, icon, infos in grids_sorted:
-		common.addDir(name, link, 1, str(icon), infos=infos, module=module)
+	primary = collections.OrderedDict() if common.NewerThanPyVer('2.6.99') else {}
+	# Primary catalog: "כל התוכניות" (curated site order)
+	CollectSeriesFromLeafs(result.get('props', {}).get('pageProps', {}).get('leafs'), primary)
+	grids_arr = list(primary.values()) if common.NewerThanPyVer('2.6.99') else [primary[k] for k in primary]
+	# Homepage rails include new shows (e.g. The Voice) before they appear in all-programs.
+	# Insert them by createDate so "כמו באתר" keeps new shows near the top.
+	homeUrl = '{0}/allshows/'.format(baseUrl)
+	home = cache.get(GetUrlJson, 72, homeUrl, root, table='pages')
+	if home == []:
+		home = cache.get(GetUrlJson, 0, homeUrl, root, table='pages')
+	if home:
+		extra = collections.OrderedDict() if common.NewerThanPyVer('2.6.99') else {}
+		CollectSeriesFromLeafs(home.get('props', {}).get('pageProps', {}).get('leafs'), extra)
+		for seriesID, item in (extra.items() if common.NewerThanPyVer('2.6.99') else [(k, extra[k]) for k in extra]):
+			if seriesID not in primary:
+				InsertSeriesByCreateDate(grids_arr, item)
+	grids_sorted = grids_arr if sortBy == 0 else sorted(grids_arr, key=lambda item: item[1])
+	for createDate, name, link, icon, infos, arts in grids_sorted:
+		common.addDir(name, link, 1, str(icon), infos=infos, module=module, arts=arts)
+	# Keep plugin order for "כמו באתר"; let Kodi sort by label for "לפי א-ב".
+	if sortBy == 0:
+		xbmcplugin.addSortMethod(common.GetHandle(), xbmcplugin.SORT_METHOD_UNSORTED)
+	else:
+		xbmcplugin.addSortMethod(common.GetHandle(), xbmcplugin.SORT_METHOD_LABEL)
 
 def GetPageJson(pageUrl, serieID, seasonNum=None):
 	buildId = common.GetAddonSetting("reshetSiteBuildID")
 	url = pageUrl.format(buildId, serieID) if seasonNum is None else pageUrl.format(buildId, serieID, seasonNum)
-	result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
+	result = common.OpenURL(url, headers=pageHeaders, responseMethod='json')
 	if result is None:
 		result = GetUrlJson('{0}/allshows/'.format(baseUrl), root=True)
 		buildId = result['buildId']
 		common.SetAddonSetting("reshetSiteBuildID", buildId)
 		url = pageUrl.format(buildId, serieID) if seasonNum is None else pageUrl.format(buildId, serieID, seasonNum)
-		result = common.OpenURL(url, headers={"User-Agent": userAgent}, responseMethod='json')
+		result = common.OpenURL(url, headers=pageHeaders, responseMethod='json')
 	return result['pageProps']['program']
 
 def GetSeasonList(serieID, iconimage):
@@ -430,12 +520,12 @@ def GetEpisodesList(serieID, iconimage, seasonNum):
 	for episode in episodes:
 		name = common.GetLabelColor(episode["name"], keyColor="chColor")
 		link = '--kaltura--{0}==='.format(episode['entryId'])
-		icon = episode["images"][0]["url"]
+		icon, arts = GetEpisodeArt(episode.get("images") or [], iconimage)
 		air_date = time.strftime("%d/%m/%Y", time.localtime(episode["createDate"]))
-		grids_arr.append((episode["createDate"], name, link, icon, {"title": name, "plot": episode["description"], "aired": air_date}))
+		grids_arr.append((episode["createDate"], name, link, icon, {"title": name, "plot": episode["description"], "aired": air_date}, arts))
 	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
-	for air_date, name, link, icon, infos in grids_sorted:
-		common.addDir(name, link, 3, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
+	for air_date, name, link, icon, infos, arts in grids_sorted:
+		common.addDir(name, link, 3, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True, arts=arts)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy, bitrate, programNameFormat
@@ -476,5 +566,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 22:
 		GetEpisodesListOld(url, iconimage)				# Episodes
 	
-	if mode != 0 and mode != 1:
+	if mode == 0:
+		common.SetViewMode('tvshows')
+	elif mode != 1:
 		common.SetViewMode('episodes')
