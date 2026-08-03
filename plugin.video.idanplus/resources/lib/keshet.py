@@ -283,14 +283,22 @@ def WatchLive(channelID, name='', iconimage='', quality='auto'):
 		"User-Agent": UA
 	}
 	url = linkDetails['link']
-	ticket = GetTicket('{0}?et=ngt&lp={1}&rv=AKAMAI'.format(entitlementsServices, url), headers)
-	pos = url.find('?');
-	if pos > 0:
-		url = url[:pos]
-	link = 'https://mako-streaming.akamaized.net{0}?{1}'.format(url, ticket)
+	host = linkDetails.get('host', 'https://mako-streaming.akamaized.net')
+	cdn = linkDetails.get('cdn', 'AKAMAI')
+	ticket = GetTicket('{0}?et=ngt&lp={1}&rv={2}'.format(entitlementsServices, url, cdn), headers)
+	if ticket is None:
+		xbmc.log('WatchLive: no ticket for channel {0} (cdn {1})'.format(channelID, cdn), xbmc.LOGERROR)
+		return None
+	#pos = url.find('?');
+	#if pos > 0:
+	#	url = url[:pos]
+	link = '{0}{1}&{2}'.format(host, url, ticket) if url.find('?') > 0 else '{0}{1}?{2}'.format(host, url, ticket)
+	xbmc.log(link,5)
 	if quality != 'auto':
 		link = common.GetStreams(link, headers=headers, quality=quality)
+	xbmc.log(link,5)
 	final = '{0}|User-Agent={1}'.format(link, UA)
+	xbmc.log(final,5)
 	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
@@ -333,8 +341,7 @@ def Play(url, name='', iconimage='', quality='auto', swichCdn=False):
 
 def GetLink(media, cdn, dv, headers, quality):
 	url = ''
-	media = sorted(media,key=lambda media: int(media["cdnLB"]), reverse=True)
-	#media = sorted(media,key=lambda media: int(media["cdnLB"]))
+	media = sorted(media, key=lambda media: int(media["cdnLB"]) if media.get("cdnLB") else 0, reverse=True)
 	for item in media:
 		if item['cdn'] == cdn.upper():
 			url = item['url']
@@ -444,6 +451,8 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 3:	#------------- Episodes: -----------------
 		GetEpisodesList(url, iconimage)
 	elif mode == 4:	#------------- Playing episode  -----------------
+		if moreData == '':
+			moreData = 'auto'
 		Play(url, name, iconimage, moreData)
 	elif mode == 5:	#------------- Playing item: -----------------
 		if moreData == '':
