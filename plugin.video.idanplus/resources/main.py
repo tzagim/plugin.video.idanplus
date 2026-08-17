@@ -12,7 +12,6 @@ if common.py2:
 Addon = xbmcaddon.Addon(common.AddonID)
 AddonName = Addon.getAddonInfo("name")
 icon = Addon.getAddonInfo('icon')
-imagesDir = common.imagesDir
 profileDir = common.profileDir
 favoritesFile = os.path.join(profileDir, 'favorites.json')
 if not os.path.isfile(favoritesFile):
@@ -109,6 +108,10 @@ def LiveChannel(name, url, mode, iconimage, module, contextMenu=None, choose=Tru
 			nextProgramTime = common.GetLabelColor("[{0}-{1}]".format(datetime.datetime.fromtimestamp(programs[1]["start"]).strftime('%H:%M'), datetime.datetime.fromtimestamp(programs[1]["end"]).strftime('%H:%M')), keyColor="timesColor")
 			description = GetDescription(description, nextProgramTime, nextProgramName, channelNameFormat)
 	contextMenu.insert(0, (common.GetLocaleString(32009), 'RunPlugin({0}?mode=19)'.format(sys.argv[0])))
+	contextMenu.append((common.GetLocaleString(30039), 'RunPlugin({0}?mode=23&url={1})'.format(sys.argv[0], url)))
+	contextMenu.append((common.GetLocaleString(30045), 'RunPlugin({0}?mode=24&url={1})'.format(sys.argv[0], url)))
+	contextMenu.append((common.GetLocaleString(30048), 'RunPlugin({0}?mode=26&url={1})'.format(sys.argv[0], url)))
+	contextMenu.append((common.GetLocaleString(30046), 'RunPlugin({0}?mode=25&url={1})'.format(sys.argv[0], url)))
 	urlParamsData = {'name': common.GetLabelColor(name, keyColor="chColor", bold=True), 'tvgID': tvgID} if addFav else {}
 	common.addDir(displayName, url, mode, iconimage, infos={"title": displayName, "plot": description,'mediatype': 'movie'}, contextMenu=contextMenu, moreData=bitrate, module=module, isFolder=False, isPlayable=True, addFav=addFav, urlParamsData=urlParamsData)
 
@@ -227,27 +230,27 @@ def GetDescription(description, nextProgramTime, nextProgramName, channelNameFor
 
 def VODs():
 	name = common.GetLabelColor(common.GetLocaleString(30602), bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath("kan.jpg"), infos={"title": name}, module='kan')
+	common.addDir(name, '', 0, common.iconKan, infos={"title": name}, module='kan')
 	name = common.GetLabelColor(common.GetLocaleString(30603), bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath("mako.png"), infos={"title": name}, module='keshet')
+	common.addDir(name, '', 0, common.iconKeshet, infos={"title": name}, module='keshet')
 	name = common.GetLabelColor(common.GetLocaleString(30604), bold=True, color="none")
-	common.addDir(name, '', -1, common.GetIconFullPath("13.jpg"), infos={"title": name}, module='reshet')
+	common.addDir(name, '', -1, common.iconReshet, infos={"title": name}, module='reshet')
 	name = common.GetLabelColor(common.GetLocaleString(30606), bold=True, color="none")
-	common.addDir(name, '', -1, common.GetIconFullPath("14tv.png"), infos={"title": name}, module='14tv')
+	common.addDir(name, '', -1, common.icon14tv, infos={"title": name}, module='14tv')
 	name = common.GetLabelColor(common.GetLocaleString(30607), bold=True, color="none")
-	common.addDir(name, 'https://www.kankids.org.il', 5, common.GetIconFullPath("23tv.jpg"), infos={"title": name}, module='kan')
+	common.addDir(name, 'https://www.kankids.org.il', 5, common.iconKan23, infos={"title": name}, module='kan')
 	name = common.GetLabelColor("כאן - ארכיון", bold=True, color="none")
-	common.addDir(name, 'https://www.kan.org.il/lobby/archive/', 41,  common.GetIconFullPath("kan.jpg"), infos={"title": name}, module='kan')
+	common.addDir(name, 'https://www.kan.org.il/lobby/archive/', 41,  common.iconKan, infos={"title": name}, module='kan')
 	name = common.GetLabelColor(common.GetLocaleString(30608), bold=True, color="none")
-	common.addDir(name, 'https://www.mako.co.il/mako-vod-index?filter=provider&vcmId=3377c13070733210VgnVCM2000002a0c10acRCRD', 1, common.GetIconFullPath("24telad.png"), infos={"title": name}, module='keshet')
+	common.addDir(name, 'https://www.mako.co.il/mako-vod-index?filter=provider&vcmId=3377c13070733210VgnVCM2000002a0c10acRCRD', 1, common.icon24tv, infos={"title": name}, module='keshet')
 	name = common.GetLabelColor(common.GetLocaleString(30643), bold=True, color="none")
-	common.addDir(name, '', -1, common.GetIconFullPath("i24news.png"), infos={"title": name}, module='i24news')
+	common.addDir(name, '', -1, common.iconI24news, infos={"title": name}, module='i24news')
 	name = common.GetLabelColor(common.GetLocaleString(30630), bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath("9tv.png"), infos={"title": name}, module='9tv')
+	common.addDir(name, '', 0, common.icon9tv, infos={"title": name}, module='9tv')
 	name = common.GetLabelColor(common.GetLocaleString(30900), bold=True, color="none")
-	common.addDir(name, '', -1, common.GetIconFullPath("Sport5.png"), infos={"title": name}, module='sport5')
+	common.addDir(name, '', -1, common.iconSport5, infos={"title": name}, module='sport5')
 	name = common.GetLabelColor(common.GetLocaleString(31000), bold=True, color="none")
-	common.addDir(name, '', -1, common.GetIconFullPath("sport1.jpg"), infos={"title": name}, module='sport1')
+	common.addDir(name, '', -1, common.iconSport1, infos={"title": name}, module='sport1')
 
 def Radios():
 	if common.GetAddonSetting("radioShortcut") == 'true':
@@ -263,29 +266,29 @@ def Radios():
 
 def RadioVODs():
 	name = common.GetLabelColor("תכניות רדיו - כאן", bold=True, color="none")
-	common.addDir(name, '', 21, common.GetIconFullPath('kan.jpg'), infos={"title": name}, module='kan')
+	common.addDir(name, '', 21, common.iconKan, infos={"title": name}, module='kan')
 	name = common.GetLabelColor("תכניות רדיו ספורט 5", bold=True, color="none")
-	common.addDir(name, '', 20, common.GetIconFullPath('Sport5.png'), infos={"title": name}, module='sport5')
+	common.addDir(name, '', 20, common.iconSport5, infos={"title": name}, module='sport5')
 	name = common.GetLabelColor("תכניות רדיו - 89.1fm", bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath('891fm.png'), infos={"title": name}, module='891fm')
+	common.addDir(name, '', 0, common.icon891fm, infos={"title": name}, module='891fm')
 	name = common.GetLabelColor("תכניות רדיו - 106.4fm", bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath('1064fm.jpg'), infos={"title": name}, module='1064fm')
+	common.addDir(name, '', 0, common.icon1064fm, infos={"title": name}, module='1064fm')
 	
 def Musics():
 	name = common.GetLabelColor("מוזיקה - גלגל\"צ", bold=True, color="none")
-	common.addDir(name, 'rd_glglz', 1, common.GetIconFullPath('glglz.jpg'), infos={"title": name}, module='glz')
+	common.addDir(name, 'rd_glglz', 1, common.iconGlglz, infos={"title": name}, module='glz')
 	name = common.GetLabelColor("מוזיקה - eco99fm", bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath('99fm.png'), infos={"title": name}, module='99fm')
+	common.addDir(name, '', 0, common.icon99fm, infos={"title": name}, module='99fm')
 	name = common.GetLabelColor("מוזיקה - 100fm", bold=True, color="none")
-	common.addDir(name, '', 0, common.GetIconFullPath('100fm.jpg'), infos={"title": name}, module='100fm')
+	common.addDir(name, '', 0, common.icon100fm, infos={"title": name}, module='100fm')
 
 def Podcasts():
 	name = common.GetLabelColor("פודקאסטים - כאן", bold=True, color="none")
-	common.addDir(name, '4451', 31, common.GetIconFullPath('kan.jpg'), infos={"title": name}, module='kan')
+	common.addDir(name, '4451', 31, common.iconKan, infos={"title": name}, module='kan')
 	name = common.GetLabelColor("פודקאסטים לילדים - כאן", bold=True, color="none")
-	common.addDir(name, '', 33, common.GetIconFullPath('kan.jpg'), infos={"title": name}, module='kan')
+	common.addDir(name, '', 33, common.iconKan23, infos={"title": name}, module='kan')
 	name = common.GetLabelColor("פודקאסטים ספורט 5", bold=True, color="none")
-	common.addDir(name, '', 20, common.GetIconFullPath('Sport5.png'), infos={"title": name}, module='sport5')
+	common.addDir(name, '', 20, common.iconSport5, infos={"title": name}, module='sport5')
 
 def MakeIPTVfiles():
 	iptv.MakeIPTVlist(GetUserChannels(type='tv') + GetUserChannels(type='radio'))

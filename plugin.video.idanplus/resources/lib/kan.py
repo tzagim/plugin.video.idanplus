@@ -6,7 +6,8 @@ import resources.lib.common as common
 from resources.lib import cache as cache
 
 module = 'kan'
-moduleIcon = common.GetIconFullPath("kan.jpg")
+moduleIcon = common.iconKan
+module23Icon = common.iconKan23
 baseUrl = 'https://www.kan.org.il'
 baseKidsUrl = 'https://www.kankids.org.il'
 archiveUrl = 'https://archive.kan.org.il'
@@ -16,7 +17,7 @@ mobapi = 'https://mobapi.kan.org.il/api/mobile/subClass'
 userAgent = common.GetUserAgent()
 headers={"User-Agent": userAgent}
 kanSeriesFile = os.path.join(common.profileDir, 'kanSeries.json')
-kanSeriesURL = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/kanSeries.json.zip'
+kanSeriesURL = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/kanSeries.json.zip'
 
 saveKanImages = common.Addon.getSettingBool('saveKanImages')
 logosDir = os.path.join(common.profileDir, 'logos', 'kan')
@@ -130,7 +131,7 @@ def GetCategoriesList(iconimage):
     name = common.GetLabelColor("דיגיטל", bold=True, color="none")
     common.addDir(name, '{0}/lobby/digital-lobby'.format(baseUrl), 1, iconimage, infos={"title": name}, module=module, moreData='{0}__4464'.format(common.GetLocaleString(30602)))
     name = common.GetLabelColor(common.GetLocaleString(30607), bold=True, color="none")
-    common.addDir(name, baseKidsUrl, 5, common.GetIconFullPath("23tv.jpg"), infos={"title": name}, module=module, moreData=common.GetLocaleString(30607))
+    common.addDir(name, baseKidsUrl, 5, module23Icon, infos={"title": name}, module=module, moreData=common.GetLocaleString(30607))
     name = common.GetLabelColor("כאן - ארכיון", bold=True, color="none")
     common.addDir(name, '{0}/lobby/archive/'.format(baseUrl), 41, iconimage, infos={"title": name}, module=module, moreData="כאן ארכיון")
     name = common.GetLabelColor("תכניות רדיו", bold=True, color="none")
@@ -138,7 +139,7 @@ def GetCategoriesList(iconimage):
     name = common.GetLabelColor("פודקאסטים", bold=True, color="none")
     common.addDir(name, '4451', 31, iconimage, infos={"title": name}, module=module)
     name = common.GetLabelColor("פודקאסטים לילדים", bold=True, color="none")
-    common.addDir(name, '{0}/lobby-kids/podcasts-kids/'.format(baseKidsUrl), 33, common.GetIconFullPath("23tv.jpg"), infos={"title": name}, module=module)
+    common.addDir(name, '{0}/lobby-kids/podcasts-kids/'.format(baseKidsUrl), 33, module23Icon, infos={"title": name}, module=module)
 
 UA = userAgent  # אם יש לך משתנה קיים ל-UA
 REF = 'https://www.kan.org.il/'
@@ -505,19 +506,19 @@ def GetKidsEpisodesList(data, iconimage, moreData=''):
         
 def GetRadioCategoriesList(iconimage):
     name = common.GetLabelColor("כאן ב", bold=True, color="none")
-    common.addDir(name, 'kan-b', 22, common.GetIconFullPath("bet.png"), infos={"title": name}, module=module, moreData='4483')
+    common.addDir(name, 'kan-b', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/bet.png', infos={"title": name}, module=module, moreData='4483')
     name = common.GetLabelColor("כאן גימל", bold=True, color="none")
-    common.addDir(name, 'kan-gimel', 22, common.GetIconFullPath("gimel.png"), infos={"title": name}, module=module, moreData='4490')
+    common.addDir(name, 'kan-gimel', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/gimel.png', infos={"title": name}, module=module, moreData='4490')
     name = common.GetLabelColor("כאן 88", bold=True, color="none")
-    common.addDir(name, 'kan-88', 22, common.GetIconFullPath("88.png"), infos={"title": name}, module=module, moreData='4504')
+    common.addDir(name, 'kan-88', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/88fm.png', infos={"title": name}, module=module, moreData='4504')
     name = common.GetLabelColor("כאן תרבות", bold=True, color="none")
-    common.addDir(name, 'kan-tarbut', 22, common.GetIconFullPath("culture.png"), infos={"title": name}, module=module, moreData='4497')
+    common.addDir(name, 'kan-tarbut', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/culture.png', infos={"title": name}, module=module, moreData='4497')
     name = common.GetLabelColor("כאן קול המוסיקה", bold=True, color="none")
-    common.addDir(name, 'kan-music', 22, common.GetIconFullPath( "music.png"), infos={"title": name}, module=module, moreData='4518')
+    common.addDir(name, 'kan-music', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/music.png', infos={"title": name}, module=module, moreData='4518')
     name = common.GetLabelColor("כאן מורשת", bold=True, color="none")
-    common.addDir(name, 'kan-moreshet', 22, common.GetIconFullPath("moreshet.png"), infos={"title": name}, module=module, moreData='4511')
+    common.addDir(name, 'kan-moreshet', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/moreshet.png', infos={"title": name}, module=module, moreData='4511')
     name = common.GetLabelColor("כאן Reka", bold=True, color="none")
-    common.addDir(name, 'kan-reka', 22, common.GetIconFullPath("reka.png"), infos={"title": name}, module=module, moreData='4525')
+    common.addDir(name, 'kan-reka', 22, 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/reka.png', infos={"title": name}, module=module, moreData='4525')
 
 def GetRadioSeriesList(url, catName, id=None):
     if id:

@@ -5,7 +5,7 @@ import resources.lib.common as common
 
 module = 'sport1'
 baseUrl = 'https://sport1.maariv.co.il'
-moduleIcon = common.GetIconFullPath("sport1.jpg")
+moduleIcon = common.iconSport1
 
 def GetMainList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)

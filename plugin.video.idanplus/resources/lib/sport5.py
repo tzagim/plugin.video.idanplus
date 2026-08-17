@@ -9,7 +9,7 @@ radioUrl = 'https://radio.sport5.co.il'
 radioIcon = 'images/photo_cover.png'
 userAgent = common.GetUserAgent()
 headers = {"User-Agent": userAgent}
-moduleIcon = common.GetIconFullPath("Sport5.png")
+moduleIcon = common.iconSport5
 
 def GetMainList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)

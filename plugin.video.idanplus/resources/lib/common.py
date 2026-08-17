@@ -42,10 +42,25 @@ profileDir = decode(translatePath(Addon.getAddonInfo("profile")), "utf-8")
 if not os.path.exists(profileDir):
 	os.makedirs(profileDir)
 
-imagesDir = os.path.join(resourcesDir, 'images')
+iconKan = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/kan.jpg'
+iconKan23 = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/23tv.jpg'
+iconKeshet = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/mako.png'
+iconReshet = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/13tv.jpg'
+icon14tv = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/14tv.png'
+icon24tv = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/24tv.jpg'
+iconI24news = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/i24news.png'
+icon9tv = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/9tv.png'
+iconSport5 = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/Sport5.png'
+icon99fm = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/99fm.png'
+iconGlglz = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/glglz.jpg'
+icon100fm = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/100fm.jpg'
+icon891fm = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/891fm.png'
+icon1064fm = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/1064fm.jpg'
+iconSport1 = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/images/sport1.jpg'
+
 epgFile = os.path.join(profileDir, 'epg.json')
 seriesFile = os.path.join(profileDir, 'series.json')
-seriesUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/series.json.zip'
+seriesUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/series.json.zip'
 youtubePlugin = 'plugin://plugin.video.youtube'
 displayChannelsFile = os.path.join(profileDir, 'displayChannels.json')
 channelsLogosDir = os.path.join(profileDir, 'logos', 'channels')
@@ -176,9 +191,6 @@ def GetHandle():
 	except:
 		handle = -1
 	return handle
-
-def GetIconFullPath(icon):
-	return os.path.join(imagesDir, icon)
 
 def GetKodiVer():
 	return float(re.split(' |\-',xbmc.getInfoLabel('System.BuildVersion'))[0])
@@ -547,7 +559,7 @@ def GetChannels(type=None, downloadOnly=False):
 	if downloadOnly or isFileOld(displayChannelsFile, deltaInSec=deltaInSec):
 		fileName = 'channels.json'
 		channelsFile = os.path.join(profileDir, fileName)
-		channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/zips/plugin.video.idanplus/{0}'.format(fileName)
+		channelsUrl = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/{0}'.format(fileName)
 		channels = GetUpdatedList(channelsFile, channelsUrl, deltaInSec=deltaInSec)
 		if len(channels) == 0:
 			channels = ReadList(os.path.join(resourcesDir, fileName))
@@ -637,7 +649,7 @@ def SaveLogo(logoSource, logoDir, filename, isFromUrl):
 
 def GetChannelIconFullPath(channel):
 	if channel.get('my_image', '') == '':
-		return os.path.join(imagesDir, channel['image'])
+		return channel['image']
 	else:
 		return os.path.join(channelsLogosDir, channel['my_image'])
 

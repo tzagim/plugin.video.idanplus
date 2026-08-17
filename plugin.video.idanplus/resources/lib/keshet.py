@@ -5,7 +5,7 @@ import resources.lib.common as common
 from resources.lib import cache as cache
 
 module = 'keshet'
-moduleIcon = common.GetIconFullPath("mako.png")
+moduleIcon = common.iconKeshet
 baseUrl = 'https://www.mako.co.il'
 endings = 'platform=responsive'
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'

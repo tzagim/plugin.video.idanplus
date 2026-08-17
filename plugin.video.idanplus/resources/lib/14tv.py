@@ -5,7 +5,7 @@ import resources.lib.common as common
 from resources.lib import cache as  cache
 
 module = '14tv'
-moduleIcon = common.GetIconFullPath("14tv.png")
+moduleIcon = common.icon14tv
 userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
 baseUrl = 'https://www.now14.co.il'
 apiUrl = 'https://insight-api-shared.univtec.com/interface/' # pages/66d85aaa6e9a9c00237dec06'

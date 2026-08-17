@@ -24,6 +24,7 @@ import resources.lib.common as common
 # ============================================================================
 
 module = 'i24news'
+moduleIcon = common.iconI24news
 API_BASE = 'https://api.i24news.wiztivi.io'
 UNIVTEC_API_BASE = 'https://insight-api-shared.univtec.com/interface'
 UNIVTEC_TENANT_ID = 'i24israel'
@@ -214,7 +215,7 @@ def ParseDurationSeconds(duration):
 def GetUnivtecImage(item, default_icon=None):
     """Pick the best image field from a Univtec item."""
     if default_icon is None:
-        default_icon = common.GetIconFullPath('i24news.png')
+        default_icon = moduleIcon
     return item.get('optimizedImage') or item.get('optimizedPoster') or item.get('image') or item.get('poster') or default_icon
 
 
@@ -233,7 +234,7 @@ def ShowCatalogUnivtec(language='he'):
         xbmc.log("i24news: Univtec catalog is empty", xbmc.LOGERROR)
         return False
 
-    iconimage = common.GetIconFullPath('i24news.png')
+    iconimage = moduleIcon
     for show in items:
         show_id = show.get('id', '')
         show_name = show.get('title') or show.get('name') or 'Unknown'
@@ -288,7 +289,7 @@ def ShowSeasonsUnivtec(series_id, show_name=''):
         xbmcgui.Dialog().notification('i24NEWS', 'No episodes found', xbmcgui.NOTIFICATION_WARNING, 3000)
         return
 
-    iconimage = common.GetIconFullPath('i24news.png')
+    iconimage = moduleIcon
     if len(seasons) == 1:
         ShowEpisodesUnivtec(series_id, show_name, seasons[0].get('title', ''))
         return
@@ -340,7 +341,7 @@ def ShowEpisodesUnivtec(series_id, show_name='', season_title=''):
     except:
         pass
 
-    iconimage = common.GetIconFullPath('i24news.png')
+    iconimage = moduleIcon
     for episode in episodes:
         video_url = episode.get('videoUrl') or episode.get('contentUrl') or ''
         title = episode.get('title') or episode.get('name') or 'Unknown'
@@ -378,7 +379,7 @@ def PlayUnivtec(video_url, video_name):
         stream_url = '{0}|Referer=https://video.i24news.tv/&User-Agent=Mozilla/5.0'.format(stream_url)
 
     xbmc.log("i24news: Playing Univtec stream: {0}".format(video_url[:100]), xbmc.LOGINFO)
-    common.PlayStream(stream_url, 'best', video_name, common.GetIconFullPath('i24news.png'))
+    common.PlayStream(stream_url, 'best', video_name, moduleIcon)
 
 
 # ============================================================================
@@ -392,7 +393,7 @@ def ShowLanguages():
     for lang_code, lang_info in LANGUAGES.items():
         name = lang_info['name']
         url = 'action=catalog&language={0}'.format(lang_code)
-        iconimage = common.GetIconFullPath('i24news.png')
+        iconimage = moduleIcon
         
         common.addDir(
             name=common.GetLabelColor(name, bold=True, color="none"),
@@ -434,7 +435,7 @@ def ShowCatalog(language):
         return
     
     # Display shows
-    iconimage = common.GetIconFullPath('i24news.png')
+    iconimage = moduleIcon
     for show in data['categories']:
         show_name = show.get('name', 'Unknown')
         show_desc = show.get('description', '')
@@ -493,7 +494,7 @@ def ShowEpisodes(show_name, contents_url, start=0):
             return
         
         # Display episodes
-        iconimage = common.GetIconFullPath('i24news.png')
+        iconimage = moduleIcon
         for video in episodes:
             video_id = video.get('id', '')
             video_name = video.get('name', 'Unknown')
@@ -597,7 +598,7 @@ def PlayVideo(video_id, video_name):
         return
     
     xbmc.log("i24news: Playing stream: {0}".format(stream_url[:100]), xbmc.LOGINFO)
-    common.PlayStream(stream_url, 'best', video_name, common.GetIconFullPath('i24news.png'))
+    common.PlayStream(stream_url, 'best', video_name, moduleIcon)
 
 def WatchLive(channelID, name='', iconimage='', quality='best'):
     channel = common.GetChannel(channelID)

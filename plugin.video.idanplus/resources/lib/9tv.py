@@ -6,7 +6,7 @@ import resources.lib.common as common
 from resources.lib import cache as cache
 
 module = '9tv'
-moduleIcon = common.GetIconFullPath("9tv.png")
+moduleIcon = common.icon9tv
 baseUrl = 'https://stream.9tv.co.il'
 apiUrl = 'https://insight-api-shared.univtec.com/interface/'
 pageId = '686d1a07d9a706e5318b5e45'

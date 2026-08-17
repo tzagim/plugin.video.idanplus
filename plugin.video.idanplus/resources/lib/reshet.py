@@ -32,7 +32,7 @@ brvApi = 'https://edge.api.brightcove.com/playback/v1/accounts/1551111274001/vid
 brvPk = 'application/json;pk=BCpkADawqM30eqkItS5d08jYUtMkbTKu99oEBllbfUaFKeknXu4iYsh75cRm2huJ_b1-pXEPuvItI-733TqJN1zENi-DcHlt7b4Dv6gCT8T3BS-ampD0XMnORQLoLvjvxD14AseHxvk0esW3'
 cstApi = 'https://13tv-api.oplayer.io/api/getlink'
 cstUserId = '45E4A9FB-FCE8-88BF-93CC-3650C39DDF28'
-moduleIcon = common.GetIconFullPath("13.jpg")
+moduleIcon = common.iconReshet
 
 def GetCategoriesList(iconimage):
 	name = "{0}: {1}".format(common.GetLocaleString(30001), common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003))
