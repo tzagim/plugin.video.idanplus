@@ -1,0 +1,25 @@
+name: Auto merge bots
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge:
+    if: >
+      github.event.review.state == 'approved' &&
+      contains(
+        fromJSON('["dependabot[bot]","renovate[bot]","github-actions[bot]"]'),
+        github.event.pull_request.user.login
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --squash --auto "$PR_URL"
