@@ -26,3 +26,7 @@ if channelID != u'ללא' and channels is not None:
 refreshCommand = 'RunPlugin(plugin://plugin.video.idanplus/?mode=7)'
 xbmc.executebuiltin(refreshCommand)
 xbmc.executebuiltin('AlarmClock(idanplus,{0},12:00:00,silent,loop)'.format(refreshCommand))
+
+# follow the watch history of episodes played from the lists (event-driven; see watch_tracker)
+import watch_tracker
+watch_tracker.run(common.profileDir, common.Addon.getAddonInfo('path'), common.AddonID, lambda module: common.GetAddonSetting('{0}_res'.format(module)), read_setting=common.GetAddonSetting)

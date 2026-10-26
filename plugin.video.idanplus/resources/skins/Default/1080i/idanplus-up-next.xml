@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  "Next episode" card: bottom-right corner over the playing video. An "Up next" card with two buttons (play now, close) and a countdown bar;
+  self-contained (idanplus needs no other addon for it).
+  Every string and image arrives as a window property set by resources/lib/watch_next.py, so this file has no text of its own.
+  Textures come from this add-on's own media folder (white.png), not the user's skin, so it looks the same on every skin.
+  Control ids are the contract with the Python side:  3011 Close (stay on this episode)   3012 Play now   3014 countdown bar
+-->
+<window>
+    <onload>Dialog.Close(fullscreeninfo,true)</onload>
+    <onload>Dialog.Close(videoosd,true)</onload>
+    <animation type="WindowOpen" reversible="false">
+        <effect type="slide" start="0,300" end="0,0" time="300" tween="sine" easing="out" />
+        <effect type="fade" start="0" end="100" time="300" />
+    </animation>
+    <animation type="WindowClose" reversible="false">
+        <effect type="slide" start="0,0" end="0,300" time="200" tween="sine" easing="in" />
+        <effect type="fade" start="100" end="0" time="200" />
+    </animation>
+    <controls>
+        <control type="group">
+            <left>1170</left>
+            <top>690</top>
+            <width>700</width>
+            <height>320</height>
+            <control type="image">
+                <description>card background</description>
+                <width>700</width>
+                <height>320</height>
+                <texture colordiffuse="F2101418">white.png</texture>
+            </control>
+            <control type="image">
+                <description>still of the next episode</description>
+                <left>16</left>
+                <top>16</top>
+                <width>300</width>
+                <height>169</height>
+                <aspectratio>scale</aspectratio>
+                <texture>$INFO[Window.Property(thumb)]</texture>
+            </control>
+            <control type="label">
+                <description>"Next episode"</description>
+                <left>336</left>
+                <top>14</top>
+                <width>350</width>
+                <height>30</height>
+                <font>font10</font>
+                <textcolor>FF9AA0A6</textcolor>
+                <label>$INFO[Window.Property(heading)]</label>
+            </control>
+            <control type="label">
+                <description>show title</description>
+                <left>336</left>
+                <top>44</top>
+                <width>350</width>
+                <height>36</height>
+                <font>font13</font>
+                <textcolor>FFFFFFFF</textcolor>
+                <label>[B]$INFO[Window.Property(show_name)][/B]</label>
+            </control>
+            <control type="textbox">
+                <description>episode number and name</description>
+                <left>336</left>
+                <top>84</top>
+                <width>350</width>
+                <height>96</height>
+                <font>font12</font>
+                <textcolor>FFE3E6EA</textcolor>
+                <autoscroll time="3000" delay="3000" repeat="5000">true</autoscroll>
+                <label>$INFO[Window.Property(season_episode)]  $INFO[Window.Property(ep_title)]</label>
+            </control>
+            <control type="label">
+                <description>seconds left</description>
+                <left>16</left>
+                <top>196</top>
+                <width>668</width>
+                <height>28</height>
+                <font>font10</font>
+                <textcolor>FF9AA0A6</textcolor>
+                <label>$INFO[Window.Property(countdown)]</label>
+            </control>
+            <control type="progress" id="3014">
+                <description>time left before the next episode starts (hidden when autoplay is off)</description>
+                <visible>String.IsEmpty(Window.Property(hide_progress))</visible>
+                <left>16</left>
+                <top>228</top>
+                <width>668</width>
+                <height>6</height>
+                <texturebg colordiffuse="33FFFFFF">white.png</texturebg>
+                <midtexture colordiffuse="FF12A0C7">white.png</midtexture>
+            </control>
+            <control type="grouplist">
+                <left>16</left>
+                <top>254</top>
+                <width>668</width>
+                <height>52</height>
+                <orientation>horizontal</orientation>
+                <itemgap>14</itemgap>
+                <usecontrolcoords>true</usecontrolcoords>
+                <control type="button" id="3012">
+                    <description>Play now</description>
+                    <width>327</width>
+                    <height>52</height>
+                    <onleft>3011</onleft>
+                    <onright>3011</onright>
+                    <label>$INFO[Window.Property(btn_play)]</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <textcolor>FFE3E6EA</textcolor>
+                    <focusedcolor>FF101418</focusedcolor>
+                    <texturefocus colordiffuse="FFE3E6EA">white.png</texturefocus>
+                    <texturenofocus colordiffuse="FF3A4048">white.png</texturenofocus>
+                </control>
+                <control type="button" id="3011">
+                    <description>Close</description>
+                    <width>327</width>
+                    <height>52</height>
+                    <onleft>3012</onleft>
+                    <onright>3012</onright>
+                    <label>$INFO[Window.Property(btn_close)]</label>
+                    <font>font10</font>
+                    <align>center</align>
+                    <textcolor>FFE3E6EA</textcolor>
+                    <focusedcolor>FF101418</focusedcolor>
+                    <texturefocus colordiffuse="FFE3E6EA">white.png</texturefocus>
+                    <texturenofocus colordiffuse="FF3A4048">white.png</texturenofocus>
+                </control>
+            </control>
+        </control>
+    </controls>
+</window>

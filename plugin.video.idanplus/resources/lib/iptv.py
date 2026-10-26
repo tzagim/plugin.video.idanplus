@@ -19,10 +19,11 @@ def MakeIPTVlist(channels):
 				continue
 			tvg_id = channel["tvgID"]
 			view_name = common.GetChannelName(channel)
-			if channel.get('my_image', '') == '':
-				tvg_logo = 'special://home/addons/{0}/resources/images/{1}'.format(common.AddonID, channel['image'])
-			else:
-				tvg_logo = 'special://home/userdata/addon_data/{0}/logos/channels/{1}'.format(common.AddonID, channel['my_image'])
+			#if channel.get('my_image', '') == '':
+			#	tvg_logo = 'special://home/addons/{0}/resources/images/{1}'.format(common.AddonID, channel['image'])
+			#else:
+			#	tvg_logo = 'special://home/userdata/addon_data/{0}/logos/channels/{1}'.format(common.AddonID, channel['my_image'])
+			tvg_logo = common.GetChannelIconFullPath(channel)
 			if type == 'radio':
 				radio = ' radio="true"'
 				group = ' group-title="Radio"'

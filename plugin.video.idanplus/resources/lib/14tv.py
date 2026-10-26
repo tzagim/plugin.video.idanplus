@@ -1,8 +1,9 @@
 ﻿# -*- coding: utf-8 -*-
-import xbmc
-import sys, re, json, datetime
+import xbmc, xbmcgui, xbmcplugin
+import sys, re, json, datetime, hashlib
 import resources.lib.common as common
 from resources.lib import cache as  cache
+from resources.lib import watch_store, watch_ui
 
 module = '14tv'
 moduleIcon = common.icon14tv
@@ -29,6 +30,74 @@ apiHeaders = {
 	"x-device-type" : "web",
 	"x-tenant-id" : "channel14"
 }
+
+
+def _14WatchKey(video_url):
+	"""מפתח היסטוריית הצפייה של פרק 14 (14tv:<hash של ה-videoUrl>), עקבי בין הרשימה לניגון."""
+	if not video_url:
+		return ''
+	return watch_store.episode_key(module, hashlib.md5(video_url.encode('utf-8')).hexdigest()[:16])
+
+
+def _14AiredISO(ms):
+	"""תאריך שידור כ-YYYY-MM-DD מתוך חותמת זמן במילישניות, או ''."""
+	try:
+		return datetime.datetime.fromtimestamp(ms * 0.001).strftime('%Y-%m-%d')
+	except Exception:
+		return ''
+
+
+def _14RememberSeason(url, series_title, season_title, episodes):
+	"""שומר את העונה שהוצגה ב-watch_store כדי שתופיע ב'המשך צפייה'. כשל כאן לעולם לא ישבור רשימה."""
+	try:
+		listed = []
+		for index, episode in enumerate(episodes or []):
+			vurl = episode.get('videoUrl')
+			key = _14WatchKey(vurl)
+			if not key:
+				continue
+			stamp = episode.get('date') if isinstance(episode.get('date'), (int, float)) else 0
+			listed.append((stamp, -index, {'key': key, 'name': common.UnEscapeXML(episode.get('title') or ''),
+						   'icon': episode.get('image', ''), 'number': None, 'url': vurl,
+						   'aired': _14AiredISO(episode.get('date')), 'play_mode': 2}))
+		# the site lists newest first; the history keeps OLDEST first, the order "next episode" follows
+		listed = [item[2] for item in sorted(listed, key=lambda item: item[:2])]
+		if not listed:
+			return
+		m = re.search(r'/series/([^/?]+)', url)
+		series_key = 'now14/{0}'.format(m.group(1)) if m else 'now14/{0}'.format(series_title)
+		folder = watch_store.watch_folder(common.profileDir)
+		watch_store.SeasonIndex(folder).remember_season(
+			'now14/{0}/{1}'.format(m.group(1) if m else series_title, season_title), series_key,
+			series_title, season_title, listed, open_season=[1, url, season_title], open_series=[5, url, ''])
+		meta = watch_store.EpisodeMeta(folder)
+		for episode in episodes or []:
+			key = _14WatchKey(episode.get('videoUrl'))
+			if not key:
+				continue
+			meta.remember(key, plot=common.UnEscapeXML(episode.get('keywords') or ''), aired=_14AiredISO(episode.get('date')))
+	except Exception as ex:
+		xbmc.log('14tv RememberSeason: {0}'.format(ex), xbmc.LOGERROR)
+
+
+def _14EpisodeDetails(key):
+	"""מידע וידאו של הפרק המתנגן מהעונה השמורה (ללא בקשת רשת)."""
+	try:
+		folder = watch_store.watch_folder(common.profileDir)
+		entry = watch_store.episode_entry(watch_store.SeasonIndex(folder).load(), key)
+		if entry is None:
+			return {}
+		facts = watch_store.EpisodeMeta(folder).load().get(key) or {}
+		details = {'mediatype': 'episode'}
+		if entry.get('series_title'):
+			details['tvshowtitle'] = entry['series_title']
+		if facts.get('plot'):
+			details['plot'] = facts['plot']
+		if facts.get('aired'):
+			details['aired'] = facts['aired']
+		return details
+	except Exception:
+		return {}
 
 
 def GetCategoriesList(iconimage):
@@ -59,7 +128,9 @@ def GetSeasonsList(url, image):
 def GetEpisodesList(url, image, seasonName):
 	bitrate = common.GetAddonSetting('{0}_res'.format(module))
 	text = cache.get(common.OpenURL, 24, url, apiHeaders, table='pages')
-	seasons = json.loads(text).get("seasons", [])
+	data = json.loads(text)
+	seriesTitle = data.get("title", "")
+	seasons = data.get("seasons", [])
 	for season in seasons:
 		if season["title"] != seasonName:
 			continue
@@ -71,12 +142,22 @@ def GetEpisodesList(url, image, seasonName):
 			name = common.GetLabelColor('{0}{1}'.format(episode["title"], ' - {0}'.format(aired) if aired != None else ""), keyColor="chColor")
 			image = episode["image"]
 			common.addDir(name, episode["videoUrl"], 2, image, infos={"title": name, "plot": episode.get("keywords", ""), "Aired": aired}, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=2&iconimage={3}&moredata=set_14tv_res&module={4})'.format(sys.argv[0], common.quote_plus(episode["videoUrl"]), name, common.quote_plus(image), module))], module=module, moreData=bitrate, isFolder=False, isPlayable=True)
+		_14RememberSeason(url, seriesTitle, seasonName, episodes)
 		break
 
-def Play(name, url, iconimage, quality='best', isAdaptive=False):
+def Play(name, url, iconimage, quality='best', isAdaptive=False, key=''):
+	resume = None
+	if key:
+		proceed, resume = watch_ui.ChooseResume(key, name, iconimage)
+		if not proceed:
+			if common.GetHandle() >= 0:   # run as a script (handle -1) nothing waits for an answer: cancelling is quiet
+				xbmcplugin.setResolvedUrl(common.GetHandle(), False, xbmcgui.ListItem())
+			return
 	link = common.GetStreams(url, headers={"referer": "https://vod.c14.co.il/", "User-Agent": userAgent}, quality=quality)
 	final = '{0}|Referer=https://vod.c14.co.il/&User-Agent={1}'.format(link, userAgent)
-	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
+	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive,
+					  props={'idanplus_key': key} if key else None, resume=resume,
+					  details=_14EpisodeDetails(key) if key else None)
 
 def Watch(channelID, name, iconimage, quality='best'):
 	channel = common.GetChannel(channelID)
@@ -103,7 +184,7 @@ def Run(name, url, mode, iconimage='', moreData=''):
 	elif mode == 1:		#------------- Episodes: -----------------
 		GetEpisodesList(url, iconimage, moreData)
 	elif mode == 2:		#------------- Playing episode  ----------
-		Play(name, url, iconimage, moreData)
+		Play(name, url, iconimage, moreData, key=_14WatchKey(url))
 	elif mode == 3:		#--- Move to a specific episodes' page  --
 		url, pages = url.split('?pages=')
 		page = common.GetIndexFromUser(name, pages)

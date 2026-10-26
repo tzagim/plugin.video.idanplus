@@ -66,4 +66,10 @@
 		<setting id="sport1SortBy" type="enum" label="30001" lvalues="30002|30003" default="0" />
 		<setting id="sport1_res" type="text" label="30023" default="" />
 	</category>
+	<category label="32100">
+		<setting id="watch_card" type="bool" label="32101" default="true" />
+		<setting id="watch_autoplay" type="bool" label="32102" default="false" />
+		<setting id="watch_chooser" type="bool" label="32103" default="true" />
+		<setting id="watch_resume" type="enum" label="32106" lvalues="32104|32105" default="0" />
+	</category>
 </settings>

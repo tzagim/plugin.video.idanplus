@@ -14,9 +14,12 @@ Features:
 """
 
 import time
+import hashlib
 import xbmc
 import xbmcgui
+import xbmcplugin
 import resources.lib.common as common
+from resources.lib import watch_store, watch_ui
 
 
 # ============================================================================
@@ -312,6 +315,82 @@ def ShowSeasonsUnivtec(series_id, show_name=''):
         )
 
 
+def _i24WatchKey(video_url):
+    """מפתח היסטוריית צפייה של פרק i24 (i24news:<hash של ה-videoUrl>), עקבי בין רשימה לניגון."""
+    if not video_url:
+        return ''
+    return watch_store.episode_key(module, hashlib.md5(video_url.encode('utf-8')).hexdigest()[:16])
+
+
+def _i24AiredISO(date_val):
+    """תאריך שידור כ-YYYY-MM-DD מתוך חותמת זמן (שניות או מילישניות), או ''."""
+    try:
+        ts = float(date_val)
+        if ts > 1e12:
+            ts = ts / 1000.0
+        return time.strftime('%Y-%m-%d', time.localtime(ts))
+    except Exception:
+        return ''
+
+
+def _i24RememberSeason(series_id, show_name, season_title, episodes):
+    """שומר את העונה שהוצגה ב-watch_store כדי שתופיע ב'המשך צפייה'. כשל כאן לעולם לא ישבור רשימה."""
+    try:
+        listed = []
+        for index, episode in enumerate(episodes or []):
+            vurl = episode.get('videoUrl') or episode.get('contentUrl') or ''
+            key = _i24WatchKey(vurl)
+            if not key:
+                continue
+            stamp = episode.get('date') if isinstance(episode.get('date'), (int, float)) else 0
+            listed.append((stamp, -index, {'key': key, 'name': common.UnEscapeXML(episode.get('title') or episode.get('name') or ''),
+                           'icon': GetUnivtecImage(episode, moduleIcon), 'number': None, 'url': vurl,
+                           'aired': _i24AiredISO(episode.get('date')), 'play_mode': UNIVTEC_PLAY_MODE}))
+        # the listing is newest first; the history keeps OLDEST first, the order "next episode" follows
+        listed = [item[2] for item in sorted(listed, key=lambda item: item[:2])]
+        if not listed:
+            return
+        folder = watch_store.watch_folder(common.profileDir)
+        watch_store.SeasonIndex(folder).remember_season(
+            'i24news/{0}/{1}'.format(series_id, season_title or ''), 'i24news/{0}'.format(series_id),
+            show_name or '', season_title or '', listed,
+            open_season=[-1, 'action=episodes_univtec&series_id={0}&show_name={1}&season_title={2}'.format(
+                series_id, common.quote_plus(show_name or ''), common.quote_plus(season_title or '')), ''],
+            open_series=[-1, 'action=seasons_univtec&series_id={0}&show_name={1}'.format(series_id, common.quote_plus(show_name or '')), ''])
+        meta = watch_store.EpisodeMeta(folder)
+        for episode in episodes or []:
+            vurl = episode.get('videoUrl') or episode.get('contentUrl') or ''
+            key = _i24WatchKey(vurl)
+            if not key:
+                continue
+            meta.remember(key, plot=common.UnEscapeXML(episode.get('description') or ''),
+                          aired=_i24AiredISO(episode.get('date')), duration=ParseDurationSeconds(episode.get('duration')))
+    except Exception as ex:
+        xbmc.log('i24news RememberSeason: {0}'.format(ex), xbmc.LOGERROR)
+
+
+def _i24EpisodeDetails(key):
+    """מידע וידאו של הפרק המתנגן מהעונה השמורה (ללא בקשת רשת)."""
+    try:
+        folder = watch_store.watch_folder(common.profileDir)
+        entry = watch_store.episode_entry(watch_store.SeasonIndex(folder).load(), key)
+        if entry is None:
+            return {}
+        facts = watch_store.EpisodeMeta(folder).load().get(key) or {}
+        details = {'mediatype': 'episode'}
+        if entry.get('series_title'):
+            details['tvshowtitle'] = entry['series_title']
+        if facts.get('plot'):
+            details['plot'] = facts['plot']
+        if facts.get('aired'):
+            details['aired'] = facts['aired']
+        if facts.get('duration'):
+            details['duration'] = facts['duration']
+        return details
+    except Exception:
+        return {}
+
+
 def ShowEpisodesUnivtec(series_id, show_name='', season_title=''):
     """Display episodes for a Univtec series id."""
     xbmc.log("i24news: Loading Univtec episodes for '{0}'".format(show_name or series_id), xbmc.LOGINFO)
@@ -367,19 +446,31 @@ def ShowEpisodesUnivtec(series_id, show_name='', season_title=''):
             isPlayable=True
         )
 
+    _i24RememberSeason(series_id, show_name, season_title, episodes)
 
-def PlayUnivtec(video_url, video_name):
+
+def PlayUnivtec(video_url, video_name, key=''):
     """Play a Univtec HLS URL directly."""
     if not video_url:
         xbmcgui.Dialog().notification('i24NEWS', 'Failed to get video stream', xbmcgui.NOTIFICATION_ERROR, 3000)
         return
+
+    resume = None
+    if key:
+        proceed, resume = watch_ui.ChooseResume(key, video_name, moduleIcon)
+        if not proceed:
+            if common.GetHandle() >= 0:   # run as a script (handle -1) nothing waits for an answer: cancelling is quiet
+                xbmcplugin.setResolvedUrl(common.GetHandle(), False, xbmcgui.ListItem())
+            return
 
     stream_url = video_url
     if '|' not in stream_url:
         stream_url = '{0}|Referer=https://video.i24news.tv/&User-Agent=Mozilla/5.0'.format(stream_url)
 
     xbmc.log("i24news: Playing Univtec stream: {0}".format(video_url[:100]), xbmc.LOGINFO)
-    common.PlayStream(stream_url, 'best', video_name, moduleIcon)
+    common.PlayStream(stream_url, 'best', video_name, moduleIcon,
+                      props={'idanplus_key': key} if key else None, resume=resume,
+                      details=_i24EpisodeDetails(key) if key else None)
 
 
 # ============================================================================
@@ -671,7 +762,8 @@ def Run(name='', url='', mode=-1, iconimage='', moreData=''):
     elif action == 'play_univtec':
         PlayUnivtec(
             params.get('video_url', ''),
-            params.get('video_name', '')
+            params.get('video_name', ''),
+            key=_i24WatchKey(params.get('video_url', ''))
         )
     elif action == 'episodes':
         ShowEpisodes(
@@ -684,7 +776,7 @@ def Run(name='', url='', mode=-1, iconimage='', moreData=''):
     elif mode == 10:
         WatchLive(url, name, iconimage, moreData)
     elif mode == UNIVTEC_PLAY_MODE:
-        PlayUnivtec(url, name)
+        PlayUnivtec(url, name, key=_i24WatchKey(url))
     else:
         # Default to language menu (main entry point)
         ShowLanguages()

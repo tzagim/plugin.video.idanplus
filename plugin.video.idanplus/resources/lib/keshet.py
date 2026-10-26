@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcplugin
-import sys, uuid, re, json, time
+import xbmc, xbmcgui, xbmcplugin
+import sys, uuid, re, json, time, datetime
 import resources.lib.common as common
 from resources.lib import cache as cache
+from resources.lib import watch_store, watch_ui
 
 module = 'keshet'
 moduleIcon = common.iconKeshet
@@ -11,6 +12,51 @@ endings = 'platform=responsive'
 entitlementsServices = 'https://mass.mako.co.il/ClicksStatistics/entitlementsServicesV2.jsp'
 da = '6gkr2ks9-4610-392g-f4s8-d743gg4623k2'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+# Header sets of a real Chrome 155 on Windows (copied from a browser's own request to this site; no cookies, no account data): a request that
+# carries only some of the headers a real browser sends, or a mix of versions, is what mako's bot filter (Radware) picks on. Reshet 13 uses
+# the same kind of set. `browserHeaders` is for the JSON requests, `pageHeaders` for the HTML pages.
+UA155 = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'
+chromeHints = {
+	'Sec-Ch-Ua': '"Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24"',
+	'Sec-Ch-Ua-Mobile': '?0',
+	'Sec-Ch-Ua-Platform': '"Windows"',
+	'User-Agent': UA155,
+	'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+	'Accept-encoding': 'gzip, deflate, br',
+	'Cache-Control': 'no-cache',
+	'Pragma': 'no-cache',
+	'DNT': '1',
+}
+browserHeaders = dict(chromeHints, **{
+	'Accept': 'application/json, text/plain, */*',
+	'Referer': 'https://www.mako.co.il/',
+	'Sec-Fetch-Dest': 'empty',
+	'Sec-Fetch-Mode': 'cors',
+	'Sec-Fetch-Site': 'same-origin',
+})
+pageHeaders = dict(chromeHints, **{
+	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+	'Priority': 'u=0, i',
+	'Upgrade-Insecure-Requests': '1',
+	'Sec-Fetch-Dest': 'document',
+	'Sec-Fetch-Mode': 'navigate',
+	'Sec-Fetch-Site': 'none',
+	'Sec-Fetch-User': '?1',
+})
+
+def ReadJson(url, headers):
+	"""The JSON answer of `url`, or None. What a failed answer looked like is written to the log (it used to be thrown away, so an
+	empty list could not be explained): mako answers a blocked request with an HTML page, or with nothing."""
+	text = common.OpenURL(url, headers=headers)
+	if not text:
+		xbmc.log("keshet GetJson: no answer from {0}".format(url), xbmc.LOGERROR)
+		return None
+	try:
+		return json.loads(text)
+	except ValueError:
+		xbmc.log("keshet GetJson: not JSON from {0}: {1}".format(url, " ".join(text[:120].split())), xbmc.LOGERROR)
+		return None
 
 def GetJson(url):
 	headers = {
@@ -25,7 +71,11 @@ def GetJson(url):
 		"Sec-Fetch-Mode": "cors",
 		"Sec-Fetch-Site": "same-origin"
 	}
-	resultJSON = common.OpenURL(url, headers=headers, responseMethod='json')
+	# the full browser set first: with the partial set above mako answered 503 on 2026-10-23 (PC log 15:20:52) and only the full set got through
+	resultJSON = ReadJson(url, dict(browserHeaders))
+	if resultJSON is None:
+		time.sleep(2)
+		resultJSON = ReadJson(url, headers)
 	if resultJSON is None or len(resultJSON) < 1:
 		return None
 	if "root" in resultJSON:
@@ -34,22 +84,28 @@ def GetJson(url):
 		return resultJSON
 
 def GetJsonSection(url):
+	"""The JSON block embedded in the HTML page `url`, or None. The Chrome 155 page headers go first; when that answer holds no JSON
+	(mako's bot filter answers with a block page) the old header set is tried once more after 2 s."""
+	oldHeaders = {
+		"User-Agent": UA,
+		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+		"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Referer": "https://www.mako.co.il/",
+		"Connection": "keep-alive",
+		"Upgrade-Insecure-Requests": "1",
+		"Sec-Fetch-Dest": "document",
+		"Sec-Fetch-Mode": "navigate",
+		"Sec-Fetch-Site": "same-origin"
+	}
+	section = ReadSection(url, dict(pageHeaders))
+	if section is None:
+		time.sleep(2)
+		section = ReadSection(url, oldHeaders)
+	return section
+
+def ReadSection(url, headers):
 	try:
-		# Add small delay to avoid being blocked
-		# time.sleep(0.5)
-		
-		headers = {
-			"User-Agent": UA,
-			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-			"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
-			"Accept-Encoding": "gzip, deflate, br",
-			"Referer": "https://www.mako.co.il/",
-			"Connection": "keep-alive",
-			"Upgrade-Insecure-Requests": "1",
-			"Sec-Fetch-Dest": "document",
-			"Sec-Fetch-Mode": "navigate",
-			"Sec-Fetch-Site": "same-origin"
-		}
 		html = common.OpenURL(url, headers=headers)
 		if html is None or html == "":
 			xbmc.log("GetJsonSection: No HTML content received from URL: {0}".format(url), xbmc.LOGERROR)
@@ -88,16 +144,40 @@ def GetApiVer(url):
 		return None
 	return resultJSON.get("buildId")
 
+# The VOD categories as mako listed them on 2026-10-23 (title, page): shown only when mako's page cannot be read and nothing is saved, so the
+# list is never empty. They are site ids that change rarely; a fresh or saved copy of the real list always replaces them.
+defaultMenuItems = [
+	{"title": "כל התכניות", "url": "/mako-vod-index"},
+	{"title": "ריאליטי", "url": "/mako-vod-index?filter=genre&vcmId=4f9dbac980653210VgnVCM2000002a0c10acRCRD"},
+	{"title": "דוקומנטרי", "url": "/mako-vod-index?filter=genre&vcmId=8e8abac980653210VgnVCM2000002a0c10acRCRD"},
+	{"title": "דרמה", "url": "/mako-vod-index?filter=genre&vcmId=05fcbac980653210VgnVCM2000002a0c10acRCRD"},
+	{"title": "קומדיה", "url": "/mako-vod-index?filter=genre&vcmId=fe2dbac980653210VgnVCM2000002a0c10acRCRD"},
+	{"title": "בישול", "url": "/mako-vod-index?filter=genre&vcmId=5d738481c9674210VgnVCM2000002a0c10acRCRD"},
+	{"title": "החדשות", "url": "/mako-vod-index?filter=provider&vcmId=ee06c13070733210VgnVCM2000002a0c10acRCRD"},
+	{"title": "פודקאסטים", "url": "/mako-vod-index?filter=provider&vcmId=d5aae64655ea0810VgnVCM100000700a10acRCRD"},
+	{"title": "ערוץ 24", "url": "/mako-vod-index?filter=provider&vcmId=3377c13070733210VgnVCM2000002a0c10acRCRD"},
+	{"title": "תכניות לפי א'-ב'", "url": "/mako-vod-index?filter=ABC_Programs_Slider"},
+	{"title": "פלייליסטים", "url": "/mako-vod-index?filter=playlists"},
+]
+
+def GetMenuItems(url):
+	"""The VOD menu entries of the page `url` (a few hundred bytes), or None when the page could not be read: only this small
+	list is cached, not the page's whole JSON."""
+	resultJSON = GetJsonSection(url)
+	if resultJSON is None or len(resultJSON) < 1:
+		return None
+	return resultJSON.get("props", {}).get("pageProps", {}).get("menuPrograms", {}).get("menuItems", []) or None
+
 def GetCategoriesList(iconimage):
 	sortString = common.GetLocaleString(30002) if sortBy == 0 else common.GetLocaleString(30003)
 	name = "{0}: {1}".format(common.GetLocaleString(30001), sortString)
 	common.addDir(name, "toggleSortingMethod", 7, iconimage, infos={"Title": name, "Plot": "{0}[CR]{1}[CR]{2} / {3}".format(name, common.GetLocaleString(30004), common.GetLocaleString(30002), common.GetLocaleString(30003))}, module=module, isFolder=False)
 	#name = "חיפוש"
 	#common.addDir(name, "{0}/autocomplete/vodAutocompletion.ashx?query={{0}}&max=60&id=query".format(baseUrl), 6, common.GetIconFullPath('search.jpg'), infos={"Title": name, "Plot": "חיפוש"}, module=module)
-	resultJSON = GetJsonSection("{0}/mako-vod-index".format(baseUrl))
-	if resultJSON is None or len(resultJSON) < 1:
-		return	
-	for menuItem in resultJSON.get("props", {}).get("pageProps", {}).get("menuPrograms", {}).get("menuItems", []):
+	# mako's bot filter (Radware) blocks an address after a few requests and answers with a page that has no JSON: the list
+	# is cached like the series lists below, so it is asked for once a day and the last good copy is shown while blocked
+	menuItems = cache.get(GetMenuItems, 24, "{0}/mako-vod-index".format(baseUrl), table='pages') or defaultMenuItems
+	for menuItem in menuItems:
 		name = common.GetLabelColor(menuItem["title"], bold=True, color="none")
 		common.addDir(name, "{0}{1}".format(baseUrl, menuItem["url"]), 1, iconimage, infos={"Title": name}, module=module)
 
@@ -214,6 +294,7 @@ def GetEpisodesList(url, icon, data=None):
 		data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
 	videoChannelId = data["channelId"]
 	isEpisodes = False
+	watchEpisodes = []
 	for menu in data["menu"]:
 		if menu is None or "vods" not in menu:
 			continue
@@ -236,9 +317,12 @@ def GetEpisodesList(url, icon, data=None):
 				url = "{0}/VodPlaylist?vcmid={1}&videoChannelId={2}".format(baseUrl, vcmid, videoChannelId)
 				iconimage = vod["pics"][0]["picUrl"]
 				infos = {"Title": name, "Plot": name}
-				common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
+				watchEpisodes.append(WatchEpisode(vcmid, title, vod.get("extraInfo", ""), iconimage, url))
+				common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True, noResume=True)
 			except Exception as ex:
 				xbmc.log(str(ex), xbmc.LOGERROR)
+	if isEpisodes:
+		RememberSeason(data, watchEpisodes)
 	if isEpisodes == False:
 		vod = data.get("vod") 
 		if vod != None:
@@ -249,7 +333,113 @@ def GetEpisodesList(url, icon, data=None):
 			url = "{0}/VodPlaylist?vcmid={1}&videoChannelId={2}".format(baseUrl, vcmid, videoChannelId)
 			iconimage = data["seo"]["image"]
 			infos = {"Title": name, "Plot": name}
-			common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True)
+			common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True, noResume=True)
+
+def Aired(extraInfo):
+	"""The air date `YYYY-MM-DD` of a listing row's "פרק 41@13.05.26" (two- or four-digit year), or '' when there is none or it is not a real date."""
+	found = re.search(r'@(\d{1,2})\.(\d{1,2})\.(\d{2,4})', extraInfo or '')
+	if not found:
+		return ''
+	day, month, year = (int(x) for x in found.groups())
+	try:
+		return datetime.date(year + 2000 if year < 100 else year, month, day).isoformat()
+	except ValueError:
+		return ''
+
+def WatchEpisode(vcmid, title, extraInfo, iconimage, url):
+	"""One episode as the watch history stores it: stable id, plain title, the number from "פרק 41@13.05.26" (None when absent), the air date, picture and play url."""
+	found = re.search(r'פרק\s*(\d+)', extraInfo or '')
+	return {'key': watch_store.episode_key(module, vcmid), 'name': title, 'icon': iconimage, 'number': int(found.group(1)) if found else None, 'url': url, 'aired': Aired(extraInfo)}
+
+def EpisodeFacts(playlist, dv):
+	"""`{episode key: facts}` from the playlist answer of episode `dv`: its own description, air date and length (`videoDetails`) and the description of the next
+	episode (Mako's `nextEpisode.externalTitle`, the same text that episode's own answer carries; checked against the real server). Only what is present."""
+	facts = {}
+	infos = EpisodeInfos(playlist)
+	own = {name: infos[source] for name, source in (('plot', 'plot'), ('aired', 'aired'), ('duration', 'duration')) if infos.get(source)}
+	if own:
+		facts[watch_store.episode_key(module, dv)] = own
+	nxt = playlist.get('nextEpisode') if isinstance(playlist, dict) else None
+	if isinstance(nxt, dict) and nxt.get('vcmId') and isinstance(nxt.get('externalTitle'), str) and nxt['externalTitle'].strip():
+		facts[watch_store.episode_key(module, nxt['vcmId'])] = {'plot': nxt['externalTitle'].strip()}
+	return facts
+
+def RememberFacts(dv, playlist):
+	"""Save `EpisodeFacts` for the chooser. Local file work only; a failure here must never stop a play."""
+	try:
+		meta = watch_store.EpisodeMeta(watch_store.watch_folder(common.profileDir))
+		for key, facts in EpisodeFacts(playlist, dv).items():
+			meta.remember(key, **facts)
+	except Exception as ex:
+		xbmc.log("keshet RememberFacts: {0}".format(ex), xbmc.LOGERROR)
+
+def RememberSeason(data, episodes):
+	"""Save this season's ordered episodes in the watch history (only writes when they changed). A failure here must never break a listing."""
+	try:
+		seasonUrl = data.get("pageUrl", "")
+		seriesKey = re.sub(r'-s\d+$', '', seasonUrl)
+		seriesTitle = data.get("seo", {}).get("title", "").split(" - ")[0].strip()
+		watch_store.SeasonIndex(watch_store.watch_folder(common.profileDir)).remember_season(seasonUrl, seriesKey, seriesTitle, data.get("channelName", ""), episodes)
+	except Exception as ex:
+		xbmc.log("keshet RememberSeason: {0}".format(ex), xbmc.LOGERROR)
+
+def EpisodeInfos(playlist):
+	"""Video info for the playing item from the `videoDetails` block of the playlist answer Play already fetched (no extra request): the real episode
+	title, show, season and episode numbers, plot, air date and length. Only what is present and sensible is returned; `{}` when the block is missing."""
+	details = playlist.get('videoDetails') if isinstance(playlist, dict) else None
+	if not isinstance(details, dict) or not details:
+		return {}
+	infos = {'mediatype': 'episode'}
+	for key, source in (('title', 'title'), ('tvshowtitle', 'programName'), ('plot', 'desc')):
+		text = (details.get(source) or '').strip()
+		if text:
+			infos[key] = text
+	for key, source in (('season', 'season'), ('episode', 'episodeNumber')):
+		found = re.search(r'\d+', str(details.get(source) or ''))
+		if found:
+			infos[key] = int(found.group())
+	try:
+		infos['aired'] = time.strftime('%Y-%m-%d', time.gmtime(int(details['programStartDate'])))
+	except (KeyError, ValueError, TypeError, OverflowError, OSError):
+		pass
+	try:
+		infos['duration'] = int(details['noAdsDuration'])
+	except (KeyError, ValueError, TypeError):
+		found = re.match(r'^(\d+):(\d\d):(\d\d)$', str(details.get('duration') or ''))
+		if found:
+			infos['duration'] = int(found.group(1)) * 3600 + int(found.group(2)) * 60 + int(found.group(3))
+	return infos
+
+def PromptProps(playlist):
+	"""The ListItem property `idanplus_prompt` for the next-episode card, from the same playlist answer: Mako's `creditsTime` (where the credits start)
+	with the episode length it refers to, and its `nextEpisode` as a ready entry. Every part is optional and checked; `{}` when nothing is usable
+	(the service then uses its own defaults: 30 s before the end, the next row of the saved season)."""
+	if not isinstance(playlist, dict):
+		return {}
+	data = {}
+	details = playlist.get('videoDetails') if isinstance(playlist.get('videoDetails'), dict) else {}
+	credits = playlist.get('creditsTime')
+	if isinstance(credits, (int, float)) and not isinstance(credits, bool) and credits > 0:
+		data['credits'] = credits
+		try:
+			data['total'] = int(details['noAdsDuration'])
+		except (KeyError, ValueError, TypeError):
+			pass
+	nxt = playlist.get('nextEpisode')
+	if isinstance(nxt, dict) and nxt.get('vcmId') and nxt.get('channelId'):
+		show, season = (details.get('programName') or '').strip(), (details.get('season') or '').strip()
+		title = (nxt.get('title') or '').strip()
+		prefix = '{0} {1} '.format(show, season)
+		name = title[len(prefix):].strip() if show and season and title.startswith(prefix) else title
+		if name:
+			data['next'] = {
+				'key': watch_store.episode_key(module, nxt['vcmId']), 'name': name, 'icon': nxt.get('PictureB') or '', 'number': None, 'series_title': show,
+				'url': '{0}/VodPlaylist?vcmid={1}&videoChannelId={2}'.format(baseUrl, nxt['vcmId'], nxt['channelId'])}
+	return {'idanplus_prompt': json.dumps(data, ensure_ascii=False)} if data else {}
+
+def ResumeProps(dv):
+	"""ListItem properties for playing episode `dv`: its watch-history key (the service reads it back from the playing item)."""
+	return {'idanplus_key': watch_store.episode_key(module, dv)}
 
 def GetChannels(url, iconimage):
 	headers = {
@@ -297,7 +487,7 @@ def WatchLive(channelID, name='', iconimage='', quality='auto'):
 	if quality != 'auto':
 		link = common.GetStreams(link, headers=headers, quality=quality)
 	xbmc.log(link,5)
-	final = '{0}|User-Agent={1}'.format(link, UA)
+	final = '{0}|User-Agent={1}'.format(link, UA155)   # the User-Agent the ticket was requested with (GetTicket): Akamai binds its token to it
 	xbmc.log(final,5)
 	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
@@ -313,7 +503,7 @@ def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
 
 def Play(url, name='', iconimage='', quality='auto', swichCdn=False):
 	common.DelCookies()
-	headers = {
+	oldHeaders = {
 		"User-Agent": UA,
 		"Accept": "application/json, text/plain, */*",
 		"Accept-Language": "he-IL,he;q=0.9,en;q=0.8",
@@ -325,19 +515,39 @@ def Play(url, name='', iconimage='', quality='auto', swichCdn=False):
 		"Sec-Fetch-Mode": "cors",
 		"Sec-Fetch-Site": "same-origin"
 	}
+	headers = dict(browserHeaders, Origin="https://www.mako.co.il")
 	dv = url[url.find('vcmid=')+6: url.find('&videoChannelId=')]
 	ch = url[url.find('&videoChannelId=')+16:]
-	media = common.OpenURL('{0}/AjaxPage?jspName=playlist.jsp&vcmid={1}&videoChannelId={2}&galleryChannelId={1}&isGallery=false&consumer=web_html5&encryption=no'.format(baseUrl, dv, ch), headers=headers, responseMethod='json')['media']
+	# the "resume or start over" question (setting watch_resume) comes first: cancelling it costs no request to the site
+	proceed, resume = watch_ui.ChooseResume(watch_store.episode_key(module, dv), name, iconimage)
+	if not proceed:
+		if common.GetHandle() >= 0:   # run as a script (handle -1) nothing waits for an answer: cancelling is quiet
+			xbmcplugin.setResolvedUrl(common.GetHandle(), False, xbmcgui.ListItem())
+		return None
+	playlistUrl = '{0}/AjaxPage?jspName=playlist.jsp&vcmid={1}&videoChannelId={2}&galleryChannelId={1}&isGallery=false&consumer=web_html5&encryption=no'.format(baseUrl, dv, ch)
+	playlist = ReadJson(playlistUrl, headers)
+	if playlist is None:
+		time.sleep(2)
+		playlist = ReadJson(playlistUrl, oldHeaders)
+	media = playlist.get('media') if isinstance(playlist, dict) else None
+	if not media:
+		xbmc.log("keshet Play: no playlist for {0}".format(dv), xbmc.LOGERROR)
+		return None
+	RememberFacts(dv, playlist)
 	cdns = ['AKAMAI', 'AWS'] if swichCdn else ['AWS', 'AKAMAI']
+	used = cdns[0]
 	link, cookie_jar = GetLink(media, cdns[0], dv, headers, quality)
 	if link is None:
+		used = cdns[1]
 		link, cookie_jar = GetLink(media, cdns[1], dv, headers, quality)
 		if link is None:
+			xbmc.log("keshet Play: no playable stream from {0} or {1} for {2}".format(cdns[0], cdns[1], dv), xbmc.LOGERROR)
 			return None
+	xbmc.log("keshet Play: {0} from {1}{2}".format(dv, used, "" if used == cdns[0] else " (the first CDN gave nothing)"), xbmc.LOGINFO)
 	#cookies = ";".join(['{0}'.format(common.quote('{0}={1}'.format(_cookie.name, _cookie.value))) for _cookie in cookie_jar])
 	#final = '{0}|User-Agent={1}&Cookie={2}'.format(link, UA, cookies)
-	final = '{0}|User-Agent={1}'.format(link, UA)
-	common.PlayStream(final, quality, name, iconimage)
+	final = '{0}|User-Agent={1}'.format(link, UA155)   # the User-Agent the ticket was requested with (GetTicket): Akamai binds its token to it
+	common.PlayStream(final, quality, name, iconimage, props=dict(ResumeProps(dv), **PromptProps(playlist)), resume=resume, details=EpisodeInfos(playlist))
 
 def GetLink(media, cdn, dv, headers, quality):
 	url = ''
@@ -357,29 +567,31 @@ def GetLink(media, cdn, dv, headers, quality):
 	else:
 		l = '{0}?et=gt&na=2.0&da{1}=&du={2}&dv={3}&rv={4}&lp={5}'.format(entitlementsServices, da, deviceID, dv, cdn, url)
 	ticket = GetTicket(l, headers)
+	if ticket is None:
+		return None, None
 	if url.startswith('//'):
 		url = 'https:{0}'.format(url) 
 	if quality == 'auto':
 		return '{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), None		   
 	session = common.GetSession()
-	link = common.GetStreams('{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), headers=headers, session=session, quality=quality)
+	# strict: a CDN that answers the playlist request with an empty body (seen for AWS on one episode, Akamai fine) is a failure, so Play tries the other one
+	link = common.GetStreams('{0}&{1}'.format(url, ticket) if '?' in url else '{0}?{1}'.format(url, ticket), headers=headers, session=session, quality=quality, strict=True)
 	return link, session.cookies
 
 def GetTicket(link, headers):
-	# Add additional headers for ticket request
-	ticket_headers = headers.copy()
-	ticket_headers.update({
-		"Accept": "application/json, text/plain, */*",
-		"Referer": "https://www.mako.co.il/",
-		"Origin": "https://www.mako.co.il"
-	})
-	text = common.OpenURL(link, headers=ticket_headers)
-	result = json.loads(text)
+	# The ticket service (mass.mako.co.il) is another origin of the same site: a browser sends the Chrome 155 set with sec-fetch-site same-site
+	ticket_headers = dict(browserHeaders, **{"Origin": "https://www.mako.co.il", "Sec-Fetch-Site": "same-site"})
+	result = ReadJson(link, ticket_headers)
+	if result is None:
+		time.sleep(2)
+		result = ReadJson(link, headers)
+	if not isinstance(result, dict) or 'caseId' not in result:
+		xbmc.log("keshet GetTicket: no ticket answer", xbmc.LOGERROR)
+		return
 	if result['caseId'] == '4':
 		result = Login()
-		text = common.OpenURL(link, headers=headers)
-		result = json.loads(text)
-		if result['caseId'] != '1':
+		result = ReadJson(link, ticket_headers)
+		if not isinstance(result, dict) or result.get('caseId') != '1':
 			xbmc.executebuiltin("Notification({0}, You need to pay if you want to watch this video., {1}, {2})".format(common.AddonName, 5000 ,common.icon))
 			return
 	elif result['caseId'] != '1':

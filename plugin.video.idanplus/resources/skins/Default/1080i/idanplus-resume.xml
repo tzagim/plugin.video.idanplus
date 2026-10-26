@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  idanplus resume question: "Resume from HH:MM:SS / Start from the beginning", asked before a part-watched episode plays when the setting "when playing a part-watched
+  episode" is on "ask". A small two-row question window; self-contained (idanplus needs no other addon for it). Contract (same as the chooser): list id 2000 with a label per row; window properties heading (what is about to play), fanart, poster (its still).
+  The first row (resume) is preselected so one OK answers it; Back closes the window, which cancels the play. Textures: the chooser's (beacon_*.png).
+-->
+<window>
+	<animation effect="fade" time="200">WindowOpen</animation>
+	<animation effect="fade" time="200">WindowClose</animation>
+	<controls>
+		<control type="group">
+			<control type="image">
+				<description>Background panel, under the dimmed picture</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>100%</width>
+				<height>100%</height>
+				<texture border="20">beacon_background.png</texture>
+			</control>
+			<control type="image">
+				<description>The show's picture, dimmed</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>100%</width>
+				<height>100%</height>
+				<colordiffuse>39999999</colordiffuse>
+				<texture>$INFO[Window.Property(fanart)]</texture>
+			</control>
+			<control type="image">
+				<description>What is about to play: the episode's still, else the poster</description>
+				<posx>330</posx>
+				<posy>300</posy>
+				<width>560</width>
+				<height>315</height>
+				<aspectratio>keep</aspectratio>
+				<texture>$INFO[Window.Property(poster)]</texture>
+			</control>
+			<control type="textbox">
+				<description>What is about to play</description>
+				<posx>930</posx>
+				<posy>300</posy>
+				<width>660</width>
+				<height>110</height>
+				<font>font321</font>
+				<textcolor>yellow</textcolor>
+				<label>$INFO[Window.Property(heading)]</label>
+			</control>
+			<control type="list" id="2000">
+				<description>Resume from ... / start over</description>
+				<posx>930</posx>
+				<posy>430</posy>
+				<width>660</width>
+				<height>190</height>
+				<onleft>3001</onleft>
+				<itemlayout width="660" height="95">
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>660</width>
+						<height>95</height>
+						<texture border="5">beacon_row.png</texture>
+					</control>
+					<control type="label">
+						<posx>20</posx>
+						<posy>0</posy>
+						<width>620</width>
+						<height>95</height>
+						<font>font321</font>
+						<textcolor>deepskyblue</textcolor>
+						<aligny>center</aligny>
+						<label>$INFO[ListItem.Label]</label>
+					</control>
+				</itemlayout>
+				<focusedlayout width="660" height="95">
+					<control type="image">
+						<visible>Control.HasFocus(2000)</visible>
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>660</width>
+						<height>95</height>
+						<texture border="5">beacon_row_selected.png</texture>
+					</control>
+					<control type="label">
+						<posx>20</posx>
+						<posy>0</posy>
+						<width>620</width>
+						<height>95</height>
+						<font>font321</font>
+						<textcolor>yellow</textcolor>
+						<aligny>center</aligny>
+						<label>$INFO[ListItem.Label]</label>
+					</control>
+				</focusedlayout>
+			</control>
+			<control type="button" id="3001">
+				<description>Close button, shown with a mouse</description>
+				<posx>1800</posx>
+				<posy>5</posy>
+				<width>80</width>
+				<height>50</height>
+				<label>-</label>
+				<font>-</font>
+				<onclick>PreviousMenu</onclick>
+				<texturefocus>beacon_close_focus.png</texturefocus>
+				<texturenofocus>beacon_close.png</texturenofocus>
+				<visible>system.getbool(input.enablemouse)</visible>
+				<onup>2000</onup>
+				<ondown>2000</ondown>
+				<onright>2000</onright>
+			</control>
+		</control>
+	</controls>
+</window>

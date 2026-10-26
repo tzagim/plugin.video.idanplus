@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcaddon, xbmcplugin
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 import sys, re, json, collections, time
 import resources.lib.common as common
 from resources.lib import cache as  cache
+from resources.lib import watch_store, watch_ui
 
 Addon = xbmcaddon.Addon(common.AddonID)
 module = 'reshet'
@@ -312,6 +313,15 @@ def Play(video, name='', iconimage='', quality='best'):
 				cst = vid.replace('--cst--', '')
 			elif '--brv--' in vid:
 				brv = vid.replace('--brv--', '')
+		# the watch history follows episodes played by their Kaltura id; the "resume or start over" question (setting watch_resume) comes before any request
+		key = watch_store.episode_key(module, kaltura) if kaltura != '' else ''
+		resume = None
+		if key:
+			proceed, resume = watch_ui.ChooseResume(key, name, iconimage)
+			if not proceed:
+				if common.GetHandle() >= 0:   # run as a script (handle -1) nothing waits for an answer: cancelling is quiet
+					xbmcplugin.setResolvedUrl(common.GetHandle(), False, xbmcgui.ListItem())
+				return
 		if kaltura != '':
 			link = common.GetKaltura(kaltura, 2748741, baseUrl, userAgent, quality=quality)
 		elif cst != '':
@@ -349,7 +359,7 @@ def Play(video, name='', iconimage='', quality='best'):
 				final = '{0}|User-Agent={1}'.format(link, userAgent)
 		
 		final = '{0}|User-Agent={1}'.format(link, userAgent)
-		common.PlayStream(final, quality, name, iconimage)
+		common.PlayStream(final, quality, name, iconimage, props={'idanplus_key': key} if key else None, resume=resume, details=EpisodeDetails(key) if key else None)
 	except Exception as ex:
 		xbmc.log(str(ex), xbmc.LOGERROR)
 
@@ -497,6 +507,95 @@ def GetSeriesList(url, iconimage):
 	else:
 		xbmcplugin.addSortMethod(common.GetHandle(), xbmcplugin.SORT_METHOD_LABEL)
 
+def ShortName(name):
+	"""The episode's own title out of the site's "show, season, פרק N: title" (the part after the number); the whole text when it has no number."""
+	text = (name or '').strip()
+	found = re.search(r'פרק\s*\d+\s*[:\-\u2013]\s*(.+)$', text)
+	return found.group(1).strip() if found else text
+
+def EpisodeNumber(episode):
+	"""The episode number viewers see: the one in the title ("פרק 3"). The site's `metas.EpisodeNumber` is off by one in some seasons (checked on the real
+	server: "פרק 1" had 2), so it is only the fallback; None when neither gives a positive number."""
+	found = re.search(r'פרק\s*(\d+)', episode.get('name') or '')
+	if found:
+		return int(found.group(1))
+	number = (episode.get('metas') or {}).get('EpisodeNumber')
+	return number if isinstance(number, int) and not isinstance(number, bool) and number > 0 else None
+
+def Aired(createDate):
+	"""`YYYY-MM-DD` (local date) of the site's `createDate`, or '' when it is not a usable time."""
+	try:
+		stamp = int(createDate)
+		return time.strftime('%Y-%m-%d', time.localtime(stamp)) if stamp > 0 else ''
+	except (TypeError, ValueError, OverflowError, OSError):
+		return ''
+
+def WatchEpisodes(episodes, iconimage):
+	"""The season's episodes as the watch history stores them, OLDEST FIRST (the site lists them that way; the screen shows them newest first): by the number in
+	the title, then the create date, then the site's order. An entry without an `entryId` is skipped."""
+	listed = []
+	for index, episode in enumerate(episodes or []):
+		entryId = episode.get('entryId')
+		if not entryId:
+			continue
+		icon, arts = GetEpisodeArt(episode.get('images') or [], iconimage)
+		number = EpisodeNumber(episode)
+		try:
+			created = int(episode.get('createDate') or 0)
+		except (TypeError, ValueError):
+			created = 0
+		listed.append((number if number is not None else 10 ** 6, created, index, {
+			'key': watch_store.episode_key(module, entryId), 'name': ShortName(episode.get('name')) or (episode.get('name') or ''), 'icon': icon, 'number': number,
+			'url': '--kaltura--{0}==='.format(entryId), 'aired': Aired(episode.get('createDate')), 'play_mode': 3}))
+	listed.sort(key=lambda item: item[:3])
+	return [item[3] for item in listed]
+
+def EpisodeFacts(episodes):
+	"""`{episode key: {plot, aired, duration}}` from the listing itself: Channel 13 gives every episode's description, length and date up front."""
+	facts = {}
+	for episode in episodes or []:
+		entryId = episode.get('entryId')
+		if not entryId:
+			continue
+		one = {}
+		description = episode.get('description')
+		if isinstance(description, str) and description.strip():
+			one['plot'] = description.strip()
+		if Aired(episode.get('createDate')):
+			one['aired'] = Aired(episode.get('createDate'))
+		files = episode.get('mediaFiles')
+		duration = files[0].get('duration') if isinstance(files, list) and files and isinstance(files[0], dict) else None
+		if isinstance(duration, int) and not isinstance(duration, bool) and duration > 0:
+			one['duration'] = duration
+		if one:
+			facts[watch_store.episode_key(module, entryId)] = one
+	return facts
+
+def RememberSeason(result, serieID, seasonNum, iconimage):
+	"""Save the season just listed (ids, numbers, dates, how to reopen it) and every episode's facts. A failure here must never break a listing."""
+	try:
+		episodes = result.get('episodes') or []
+		listed = WatchEpisodes(episodes, iconimage)
+		if not listed:
+			return
+		folder = watch_store.watch_folder(common.profileDir)
+		watch_store.SeasonIndex(folder).remember_season('reshet/{0}/{1}'.format(serieID, seasonNum), 'reshet/{0}'.format(serieID), result.get('seriesName') or '',
+			(result.get('season') or {}).get('name') or '', listed, open_season=[2, str(serieID), str(seasonNum)], open_series=[1, str(serieID), ''])
+		meta = watch_store.EpisodeMeta(folder)
+		for key, facts in EpisodeFacts(episodes).items():
+			meta.remember(key, **facts)
+	except Exception as ex:
+		xbmc.log("reshet RememberSeason: {0}".format(ex), xbmc.LOGERROR)
+
+def EpisodeDetails(key):
+	"""Video info of the playing episode (title, show, season, episode, plot, air date, length) from the saved season and facts: no request. `{}` when the episode
+	is in no saved season (the label stays the title)."""
+	try:
+		return watch_store.episode_details(watch_store.watch_folder(common.profileDir), key)
+	except Exception as ex:
+		xbmc.log("reshet EpisodeDetails: {0}".format(ex), xbmc.LOGERROR)
+		return {}
+
 def GetPageJson(pageUrl, serieID, seasonNum=None):
 	buildId = common.GetAddonSetting("reshetSiteBuildID")
 	url = pageUrl.format(buildId, serieID) if seasonNum is None else pageUrl.format(buildId, serieID, seasonNum)
@@ -524,6 +623,7 @@ def GetSeasonList(serieID, iconimage):
 def GetEpisodesList(serieID, iconimage, seasonNum):
 	result = GetPageJson(seasonsUrl, serieID, seasonNum)
 	episodes = result["episodes"]
+	RememberSeason(result, serieID, seasonNum, iconimage)
 	grids_arr = []
 	for episode in episodes:
 		name = common.GetLabelColor(episode["name"], keyColor="chColor")
@@ -533,7 +633,7 @@ def GetEpisodesList(serieID, iconimage, seasonNum):
 		grids_arr.append((episode["createDate"], name, link, icon, {"title": name, "plot": episode["description"], "aired": air_date}, arts))
 	grids_sorted = sorted(grids_arr,key=lambda grids_arr: grids_arr[0], reverse=True)
 	for air_date, name, link, icon, infos, arts in grids_sorted:
-		common.addDir(name, link, 3, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True, arts=arts)
+		common.addDir(name, link, 3, icon, infos=infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=choose&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon))), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=3&iconimage={3}&moredata=set_reshet_res&module=reshet)'.format(sys.argv[0], common.quote_plus(link), common.quote_plus(name), common.quote_plus(icon)))], moreData=bitrate, module=module, isFolder=False, isPlayable=True, arts=arts, noResume=True)
 
 def Run(name, url, mode, iconimage='', moreData=''):
 	global sortBy, bitrate, programNameFormat

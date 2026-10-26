@@ -1,9 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin
-import re, json, os
+import re, json, os, datetime
 from urllib.parse import quote
 import resources.lib.common as common
 from resources.lib import cache as cache
+from resources.lib import watch_store, watch_ui
 
 module = 'kan'
 moduleIcon = common.iconKan
@@ -14,7 +15,10 @@ archiveUrl = 'https://archive.kan.org.il'
 baseMobApiUrl = 'https://mobapi.kan.org.il'
 mobapi = 'https://mobapi.kan.org.il/api/mobile/subClass'
 
-userAgent = common.GetUserAgent()
+# One fixed, complete, current browser string. The add-on's random pick (`common.GetUserAgent()`) includes entries cut short ("... Safari/604.", "... Firefox/121.")
+# and Kan's Cloudflare answers those with 403 for every page, so on a start that drew one no Kan page could be read and nothing played (real log 2026-10-25,
+# reproduced with the add-on's own `GetCF`: cut strings give an empty page, this one the full page).
+userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'
 headers={"User-Agent": userAgent}
 kanSeriesFile = os.path.join(common.profileDir, 'kanSeries.json')
 kanSeriesURL = 'https://raw.githubusercontent.com/Fishenzon/repo/master/plugin.video.idanplus/kanSeries.json.zip'
@@ -25,6 +29,7 @@ if not os.path.exists(logosDir):
     os.makedirs(logosDir)
 
 mobProgramApi = 'https://mobapi.kan.org.il/api/mobile/program'
+WATCH_MIN_SECONDS = 300   # a shorter item (trailer, clip, song) is not an episode for the watch history
 
 def _extractKanIds(url):
     match = re.search(r'/p-(\d+)(?:/s(\d+))?(?:/(\d+))?', url)
@@ -32,9 +37,28 @@ def _extractKanIds(url):
         return match.group(1), match.group(2), match.group(3)
     return None, None, None
 
+MOB_PAGE_SIZE = 200   # the feed answers at most this many entries per request
+MOB_MAX_PAGES = 10    # a bound for the loop below (2,000 entries)
+
 def _fetchMobProgram(url):
+    """The program feed with ALL its entries: the feed holds at most `MOB_PAGE_SIZE` per answer, `&from=N` (1-based) gives the next ones, and a few entries repeat
+    at the seam (checked on the real server), so they are joined by id. It stops at a short page, at a page that adds nothing new (a server that ignored `from`
+    would otherwise be asked for ever), and after `MOB_MAX_PAGES` requests. A later page that fails keeps what was read."""
     result = common.OpenURL(url, headers=headers, responseMethod='json')
-    return result if result else {}
+    if not result:
+        return {}
+    entries = result.get('entry') or []
+    page = result
+    for _ in range(MOB_MAX_PAGES - 1):
+        if len(page.get('entry') or []) < MOB_PAGE_SIZE:
+            break
+        page = common.OpenURL('{0}&from={1}'.format(url, len(entries) + 1), headers=headers, responseMethod='json') or {}
+        known = {e.get('id') for e in entries}
+        added = [e for e in page.get('entry') or [] if e.get('id') not in known]
+        if not added:
+            break
+        entries = entries + added
+    return dict(result, entry=entries)
 
 def GetMobProgram(programId):
     url = '{0}?id={1}'.format(mobProgramApi, programId)
@@ -49,8 +73,28 @@ def _mobEpisodeImage(entry):
         return image.split('|', 1)[0].split('?', 1)[0]
     return moduleIcon
 
+def _mobProps(entry):
+    """The feed entry's `analyticsCustomProperties` (season, episode number, length, broadcast date ...); `{}` when it has none."""
+    props = (entry.get('extensions') or {}).get('analyticsCustomProperties')
+    return props if isinstance(props, dict) else {}
+
+def _mobHref(entry):
+    """The entry's page address without `?app=true`; '' when it has none (an announced episode comes with `href: null` and nothing to play)."""
+    link = entry.get('link')
+    href = link.get('href') if isinstance(link, dict) else None
+    return href.replace('?app=true', '') if isinstance(href, str) else ''
+
+def _mobProgramLink(serie):
+    """The address a show of the show lists opens by. A show whose link has a name instead of a program number
+    (".../kids/hinuchit-main/the_serials/", 24 of about 100 kids shows) gets the canonical ".../p-<id>/" form built from its own id: the feed answers `program?id=<id>`
+    for it (24 of 24 checked), so the season list, the history and the page fixes all work for it too."""
+    link = _mobHref(serie)
+    if link and serie.get('id') is not None and not re.search(r'/p-\d+', link):
+        link = re.sub(r'/[^/]+/$', '/p-{0}/'.format(serie['id']), link.rstrip('/') + '/')
+    return link
+
 def _mobEpisodeSeason(entry):
-    season = entry.get('extensions', {}).get('analyticsCustomProperties', {}).get('season')
+    season = _mobProps(entry).get('season')
     try:
         return int(season)
     except (TypeError, ValueError):
@@ -74,7 +118,7 @@ def _mobFindEntry(entries, episode_id=None, url=''):
     if url:
         clean = url.split('?')[0].rstrip('/')
         for entry in entries:
-            href = entry.get('link', {}).get('href', '').replace('?app=true', '').rstrip('/')
+            href = _mobHref(entry).rstrip('/')
             if href == clean or clean.endswith('/{0}'.format(entry.get('id'))):
                 return entry
     return None
@@ -90,7 +134,182 @@ def _mobSeasonLinks(base_url, entries):
     base = re.sub(r'/s\d+/?.*$', '/', base_url.rstrip('/') + '/')
     return [(num, name, '{0}s{1}/'.format(base, num)) for num, name in sorted(seasons.items())]
 
-def _addMobEpisodes(entries, iconimage, moreData, season_filter=None):
+def _mobSeconds(entry):
+    """The episode length in seconds from the feed's "HH:MM:SS"; 0 when it is missing or odd."""
+    try:
+        hours, minutes, seconds = (int(part) for part in _mobProps(entry).get('duration').split(':'))
+    except (AttributeError, ValueError):
+        return 0
+    return max(hours * 3600 + minutes * 60 + seconds, 0)
+
+def _mobNumber(entry):
+    """The episode number viewers see: the one in the title ("פרק 3 - ..."), else the feed's `episode_number`; None when neither is a positive number."""
+    found = re.search(r'פרק\s*(\d+)', entry.get('title') or '')
+    if found:
+        return int(found.group(1))
+    number = _mobProps(entry).get('episode_number')
+    return number if isinstance(number, int) and not isinstance(number, bool) and number > 0 else None
+
+def _mobAired(entry):
+    """`YYYY-MM-DD` of the BROADCAST date (`content_customDimension_7`, "12-11-2024"); '' when it is missing or not a real date. The entry's `published` is the
+    upload date and is not used: a whole imported season shares one (checked on the real feed: season 5 of קופה ראשית is "published" 2024-10-06 and aired
+    weekly from 12-11-2024)."""
+    found = re.match(r'^(\d{2})-(\d{2})-(\d{4})$', _mobProps(entry).get('content_customDimension_7') or '')
+    if not found:
+        return ''
+    try:
+        return datetime.date(int(found.group(3)), int(found.group(2)), int(found.group(1))).isoformat()
+    except ValueError:
+        return ''
+
+def ShortName(title):
+    """The episode's own title out of "פרק N - title" (the part after the number); the whole text when it has no number."""
+    text = (title or '').strip()
+    found = re.search(r'^פרק\s*\d+\s*[:\-\u2013]\s*(.+)$', text)
+    return found.group(1).strip() if found else text
+
+def _mobTracked(entry):
+    """Whether the watch history follows this entry: it has an id and a page to play and lasts at least `WATCH_MIN_SECONDS`. A `youtube-id` entry counts too: its
+    page names the site's own stream like any other (20 of 20 checked), which is what `Play` uses (see `PageStream`)."""
+    return entry.get('id') is not None and _mobHref(entry) != '' and _mobSeconds(entry) >= WATCH_MIN_SECONDS
+
+def _mobWatchGroup(entries, season_filter):
+    """`(season number, entries)` the history follows for one listing: the listed season when a season was asked for; for the whole-program listing (the program
+    has at most one numbered season) its single numbered season, else season 0 (a program of loose items). Several numbered seasons without a choice: nothing."""
+    if season_filter:
+        return season_filter, [e for e in entries if _mobEpisodeSeason(e) == season_filter]
+    numbered = {_mobEpisodeSeason(e) for e in entries if (_mobEpisodeSeason(e) or 0) > 0}
+    if len(numbered) > 1:
+        return None, []
+    season = numbered.pop() if numbered else 0
+    return season, [e for e in entries if (_mobEpisodeSeason(e) or 0) == season]
+
+def WatchEpisodes(entries):
+    """The tracked episodes of one season as the watch history stores them, OLDEST FIRST: by number, then broadcast date, then the feed's own order (the feed
+    lists them in no useful order). Trailers, clips, YouTube entries and entries without a page are left out."""
+    listed = []
+    for index, entry in enumerate(entries or []):
+        if not _mobTracked(entry):
+            continue
+        number = _mobNumber(entry)
+        aired = _mobAired(entry)
+        title = (entry.get('title') or '').strip()
+        listed.append((number if number is not None else 10 ** 6, aired, index, {
+            'key': watch_store.episode_key(module, entry['id']), 'name': ShortName(title) or title, 'icon': _mobEpisodeImage(entry), 'number': number,
+            'url': _mobHref(entry), 'aired': aired, 'play_mode': 3}))
+    listed.sort(key=lambda item: item[:3])
+    return [item[3] for item in listed]
+
+def EpisodeFacts(entries):
+    """`{episode key: {plot, aired, duration}}` from the listing itself: the feed gives every episode's description, broadcast date and length up front."""
+    facts = {}
+    for entry in entries or []:
+        if not _mobTracked(entry):
+            continue
+        one = {}
+        plot = common.UnEscapeXML((entry.get('description') or entry.get('summary') or '').strip())
+        if plot:
+            one['plot'] = plot
+        if _mobAired(entry):
+            one['aired'] = _mobAired(entry)
+        one['duration'] = _mobSeconds(entry)
+        facts[watch_store.episode_key(module, entry['id'])] = one
+    return facts
+
+def RememberSeason(programId, programTitle, entries, season_filter, url, moreData):
+    """Save the season just listed (ids, numbers, dates, how to reopen it) and every episode's facts; returns the set of tracked episode keys (empty when there is
+    nothing to track). A failure here must never break a listing."""
+    try:
+        season, group = _mobWatchGroup(entries, season_filter)
+        listed = WatchEpisodes(group)
+        if not listed:
+            return set()
+        md = moreData.split('|||')
+        catName = '' if len(md) < 2 else md[1]
+        programUrl = re.sub(r'/s\d+/?.*$', '/', url.split('?')[0].rstrip('/') + '/')
+        folder = watch_store.watch_folder(common.profileDir)
+        watch_store.SeasonIndex(folder).remember_season('kan/{0}/{1}'.format(programId, season), 'kan/{0}'.format(programId), common.UnEscapeXML((programTitle or '').strip()),
+            'עונה {0}'.format(season) if season > 0 else '', listed, open_season=[2, url, moreData], open_series=[7, programUrl, 'kan|||{0}'.format(catName)])
+        meta = watch_store.EpisodeMeta(folder)
+        for key, facts in EpisodeFacts(group).items():
+            meta.remember(key, **facts)
+        return {episode['key'] for episode in listed}
+    except Exception as ex:
+        xbmc.log("kan RememberSeason: {0}".format(ex), xbmc.LOGERROR)
+        return set()
+
+def EpisodeDetails(key):
+    """Video info of the playing episode (title, show, season, episode, plot, air date, length) from the saved season and facts: no request. `{}` when the episode
+    is in no saved season (the label stays the title)."""
+    try:
+        return watch_store.episode_details(watch_store.watch_folder(common.profileDir), key)
+    except Exception as ex:
+        xbmc.log("kan EpisodeDetails: {0}".format(ex), xbmc.LOGERROR)
+        return {}
+
+def _kanEpisodeId(url):
+    """The episode id of an episode page address: the number after `/p-<id>/s<n>/`, or the last number of a name-based address
+    (".../the_serials/s1/123/", ".../thats_joey/123/"): it equals the feed entry's id (285 of 285 checked). None for a season or programme address."""
+    episodeId = _extractKanIds(url)[2]
+    if episodeId:
+        return episodeId
+    found = re.search(r'/(\d+)/?$', url.split('?')[0])
+    return found.group(1) if found else None
+
+def WatchKey(url):
+    """The watch-history key of the episode page `url`, or '' when the history does not follow it: only an episode that is in a saved season (listed by this
+    add-on from the feed) is followed, the same rule as the other channels."""
+    try:
+        episodeId = _kanEpisodeId(url)
+        if not episodeId:
+            return ''
+        key = watch_store.episode_key(module, episodeId)
+        seasons = watch_store.SeasonIndex(watch_store.watch_folder(common.profileDir)).load()
+        return key if watch_store.episode_entry(seasons, key) is not None else ''
+    except Exception as ex:
+        xbmc.log("kan WatchKey: {0}".format(ex), xbmc.LOGERROR)
+        return ''
+
+def PageCredits(text):
+    """Seconds at which the credits start, from the player settings in the episode page (`"creditsStart":1431`); None when absent or not positive."""
+    found = re.search(r'"creditsStart"\s*:\s*(\d+)', text or '')
+    return int(found.group(1)) if found and int(found.group(1)) > 0 else None
+
+def PageStream(text):
+    """The site's own stream address from the player settings in the episode page (`"file":{"dash":..., "hls":...}`): the HLS one, else the DASH one; '' when
+    the page has none. Checked on the real server (2026-10-25): it needs no token and no particular user agent, plays (h264 + aac, four sizes), and is the
+    stream the site's own player uses; the Kaltura route answers "the specified partner is blocked" now."""
+    found = re.search(r'"file"\s*:\s*(\{[^{}]*\})', text or '')
+    try:
+        files = json.loads(found.group(1)) if found else {}
+    except ValueError:
+        return ''
+    for kind in ('hls', 'dash'):
+        link = files.get(kind) if isinstance(files, dict) else None
+        if isinstance(link, str) and link.startswith('//'):    # the YouTube-type and kids pages name it without a scheme ("//r.il.cdn-redge.media/...")
+            link = 'https:' + link
+        if isinstance(link, str) and link.startswith('http'):
+            return link
+    return ''
+
+def PromptProps(key, credits):
+    """The ListItem property `idanplus_prompt` for the next-episode card: where the credits start, with the length (from the saved facts) it refers to. The site
+    gives no next-episode hint that can be trusted (its `play_next_feed_url` is just the next entry in the feed's own order), so the card's next episode is
+    always the next row of the saved season. `{}` when there is no credits time (the card then opens at its default time)."""
+    if not credits:
+        return {}
+    data = {'credits': credits}
+    try:
+        total = watch_store.EpisodeMeta(watch_store.watch_folder(common.profileDir)).load().get(key, {}).get('duration')
+    except Exception as ex:
+        xbmc.log("kan PromptProps: {0}".format(ex), xbmc.LOGERROR)
+        total = None
+    if isinstance(total, int) and not isinstance(total, bool) and total > 0:
+        data['total'] = total
+    return {'idanplus_prompt': json.dumps(data)}
+
+def _addMobEpisodes(entries, iconimage, moreData, season_filter=None, tracked=()):
+    """List the feed's episodes (only `season_filter`'s when given). A row whose key is in `tracked` carries the zero resume point (see `common.addDir`)."""
     md = moreData.split('|||')
     catName = '' if len(md) < 2 else md[1]
     season_filter = int(season_filter) if season_filter else None
@@ -100,10 +319,11 @@ def _addMobEpisodes(entries, iconimage, moreData, season_filter=None):
         name = common.GetLabelColor(common.UnEscapeXML(entry.get('title', '').strip()), keyColor="chColor")
         description = common.UnEscapeXML((entry.get('description') or entry.get('summary') or '').strip())
         image = _mobEpisodeImage(entry)
-        link = entry.get('link', {}).get('href', '').replace('?app=true', '')
+        link = _mobHref(entry)
         if not link:
             continue
-        common.addDir(name, link, 3, image, infos={"title": name, "plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName})
+        isTracked = entry.get('id') is not None and watch_store.episode_key(module, entry['id']) in tracked
+        common.addDir(name, link, 3, image, infos={"title": name, "plot": description}, module=module, moreData=bitrate, isFolder=False, isPlayable=True, urlParamsData={'catName': catName}, noResume=isTracked)
 
 
 def GetImageLink(imageUrl, imageName):
@@ -194,9 +414,11 @@ def GetSeriesList(url, iconimage, catName):
             matches = common.OpenURL(url, responseMethod='json').get('entry')
             i = 0 if len(matches) < 200 else 200 + i
             for serie in matches:
-                name = common.GetLabelColor(serie['title'], keyColor="prColor", bold=True)
-                description = serie['description']
-                link = serie['link']['href'].replace('?app=true', '')
+                link = _mobProgramLink(serie)      # one entry without a link or a description (the feed has them) must not take the whole list down
+                if not link:
+                    continue
+                name = common.GetLabelColor(serie.get('title') or '', keyColor="prColor", bold=True)
+                description = serie.get('description') or ''
                 image = _pick_image_from_media_group(serie)
                 
                 common.addDir(name, link, 7, image[:image.find('?')], infos={"title": name, "plot": description}, module=module, moreData='kan|||{0}'.format(catName), urlParamsData={'catName': catName})
@@ -412,7 +634,8 @@ def GetEpisodesList(url, iconimage, moreData=''):
         prog = GetMobProgram(programId)
         entries = prog.get('entry') or []
         if entries:
-            _addMobEpisodes(entries, iconimage, moreData, seasonFilter)
+            tracked = RememberSeason(programId, prog.get('title'), entries, int(seasonFilter) if seasonFilter else None, url, moreData)
+            _addMobEpisodes(entries, iconimage, moreData, seasonFilter, tracked)
             return
 
     #text = common.GetCF(url)
@@ -528,9 +751,11 @@ def GetRadioSeriesList(url, catName, id=None):
             matches = common.OpenURL(url, responseMethod='json').get('entry')
             i = 0 if len(matches) < 200 else 200 + i
             for serie in matches:
-                name = common.GetLabelColor(serie['title'], keyColor="prColor", bold=True)
-                description = serie['description']
-                link = serie['link']['href'].replace('?app=true', '')
+                link = _mobHref(serie)      # one entry without a link or a description (the feed has them) must not take the whole list down
+                if not link:
+                    continue
+                name = common.GetLabelColor(serie.get('title') or '', keyColor="prColor", bold=True)
+                description = serie.get('description') or ''
                 image = serie['media_group'][0]['media_item'][2]['src']
                 common.addDir(name, link, 23, image[:image.find('?')], infos={"title": name, "plot": description}, module=module, moreData=catName, urlParamsData={'catName': catName})
         return
@@ -576,6 +801,7 @@ def GetRadioEpisodesList(data, iconimage, catName):
             break
 
 def Play(url, name='', iconimage='', quality='best'):
+    props, resume, details = None, None, None
     u = url.split('|||')
     url = u[0]
     if (common.GetAddonSetting("kanPreferYoutube") != "true") and (len(u) > 1) and ('youtube' in url or 'youtu.be' in url):
@@ -613,8 +839,21 @@ def Play(url, name='', iconimage='', quality='best'):
         link = common.GetKaltura(url.replace('kaltura:', ''), 2717431, baseUrl, userAgent, quality=quality)
         final = '{0}|User-Agent={1}'.format(link, userAgent)
     else:
-        final = GetPlayerKanUrl(url, headers=headers, quality=quality)  
-    common.PlayStream(final, quality, name, iconimage, adaptive=True)
+        # the watch history follows the episodes of a saved season; its "resume or start over" question (setting watch_resume) comes before any request
+        key = WatchKey(url)
+        if key:
+            proceed, resume = watch_ui.ChooseResume(key, name, iconimage)
+            if not proceed:
+                if common.GetHandle() >= 0:   # run as a script (handle -1) nothing waits for an answer: cancelling is quiet
+                    xbmcplugin.setResolvedUrl(common.GetHandle(), False, xbmcgui.ListItem())
+                return
+        page = {}
+        final = GetPlayerKanUrl(url, headers=headers, quality=quality, page=page)
+        if key:
+            props = {'idanplus_key': key}
+            props.update(PromptProps(key, page.get('credits')))
+            details = EpisodeDetails(key)
+    common.PlayStream(final, quality, name, iconimage, adaptive=True, props=props, resume=resume, details=details)
 
 def _mobKalturaEntryId(entry):
     content = entry.get('content') or {}
@@ -643,8 +882,20 @@ def _kanStreamHeaders(stream_url, page_url, ua):
     return "{0}|User-Agent={1}&Referer={2}&Origin={3}&Accept=*/*".format(
         stream_url, quote(ua), quote(ref), quote(origin))
 
+def KanPageAddress(url):
+    """Where to read the episode page `url` from. `www.kan.org.il` answers Kodi's own network stack with 403 (measured in a real Kodi 21 on 2026-10-25: Python
+    `requests` and `urllib` and Kodi's curl, every header set, while the same PC's other Python gets 200), but the mobile API host serves the very same page, and
+    its `?app=true` form is half the size with the same player settings (stream, credits time). The kids host is not blocked and is read as it is."""
+    clean = url.split('?')[0]
+    if clean.startswith(baseUrl + '/'):
+        return baseMobApiUrl + clean[len(baseUrl):] + '?app=true'
+    return clean
+
 def _fetchKanPage(url, ua):
-    text = common.GetCF(url, ua, referer=_kanShowReferer(url))
+    page = common.OpenURL(KanPageAddress(url), headers={'User-Agent': ua, 'Accept-Language': 'he-IL,he;q=0.9'}, responseMethod='text')
+    if page and 'Just a moment' not in page:
+        return page
+    text = common.GetCF(url, ua, referer=_kanShowReferer(url))    # the old route, for a page the first one could not give
     if not text:
         return None
     return text
@@ -657,11 +908,12 @@ def _getKanPage(url, fresh=False):
         text = cache.get(_fetchKanPage, 0, url, userAgent, table='pages')
     return text or ''
 
-def GetPlayerKanUrl(url, headers={}, quality='best'):
+def GetPlayerKanUrl(url, headers={}, quality='best', page=None):
+    """The playable address of the episode page `url`. `page`, when given, is a dict that receives what the page itself says about the episode (`credits`)."""
     last_ex = None
     for attempt in range(3):
         try:
-            return _resolvePlayerKanUrl(url, headers, quality)
+            return _resolvePlayerKanUrl(url, headers, quality, page)
         except Exception as ex:
             last_ex = ex
             common.ResetCFSession()
@@ -669,7 +921,7 @@ def GetPlayerKanUrl(url, headers={}, quality='best'):
                 xbmc.sleep(600)
     raise last_ex
 
-def _resolvePlayerKanUrl(url, headers={}, quality='best'):
+def _resolvePlayerKanUrl(url, headers={}, quality='best', page=None):
     from urllib.parse import urlsplit, urlunsplit, quote
 
     def _normalize_master(u):
@@ -688,6 +940,8 @@ def _resolvePlayerKanUrl(url, headers={}, quality='best'):
     mobEntry = None
 
     text = _getKanPage(url, fresh=True)
+    if page is not None and PageCredits(text):
+        page['credits'] = PageCredits(text)
     if text:
         hls_match = re.search(r'data-hls-url="([^"]+)"', text)
         dash_match = re.search(r'data-dash-url="([^"]+)"', text)
@@ -695,6 +949,9 @@ def _resolvePlayerKanUrl(url, headers={}, quality='best'):
             master_raw = (hls_match.group(1) if hls_match else dash_match.group(1)).strip()
             _, master_with_query = _normalize_master(master_raw)
             return _pipe_headers(master_with_query, userAgent, url)
+        # the site's own stream, named in the page's player settings: tried before the feed's YouTube / Redge / Kaltura addresses (a page without one falls to them)
+        if PageStream(text):
+            return _pipe_headers(PageStream(text), userAgent, url)
 
     if programId:
         prog = GetMobProgram(programId)
@@ -796,9 +1053,11 @@ def GetPodcastsList(id=None):
             matches = common.OpenURL(url, responseMethod='json').get('entry')
             i = 0 if len(matches) < 200 else 200 + i
             for serie in matches:
-                name = common.GetLabelColor(serie['title'], keyColor="prColor", bold=True)
-                description = serie['description']
-                link = serie['link']['href'].replace('?app=true', '')
+                link = _mobHref(serie)      # one entry without a link or a description (the feed has them) must not take the whole list down
+                if not link:
+                    continue
+                name = common.GetLabelColor(serie.get('title') or '', keyColor="prColor", bold=True)
+                description = serie.get('description') or ''
                 image = serie['media_group'][0]['media_item'][2]['src']
                 common.addDir(name, link, 32, image[:image.find('?')], infos={"title": name, "plot": description}, module=module, urlParamsData={'catName': 'כאן פודקאסטים'})
         return

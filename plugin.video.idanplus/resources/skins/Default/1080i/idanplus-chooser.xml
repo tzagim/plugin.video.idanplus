@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  idanplus chooser: what a click on a Continue-watching row opens. A "Series Tracker" style window on a small contract. Self-contained: idanplus needs no other addon for it.
+  Required: list id 2000. Row: ListItem.Label (first line, yellow), ListItem.Label2 (second line), properties plot and thumb. Window properties: heading
+  (the show), fanart, poster (background). The panel on the left follows the focused row through Container(2000).ListItem, so no code follows the selection.
+  The list order is set by watch_choose.py (next episode, this one, previous, the season's episodes, the seasons); it opens on this episode.
+  Fonts are font321 and fontContextMenu (the names of the window this one was adapted from): the running skin lacks them and Kodi falls back to font13.
+  Textures: beacon_background.png, beacon_row.png, beacon_row_selected.png, beacon_close.png, beacon_close_focus.png (the media folder beside this folder).
+-->
+<window>
+	<animation effect="fade" time="250">WindowOpen</animation>
+	<animation effect="fade" time="250">WindowClose</animation>
+	<controls>
+		<control type="group">
+			<control type="image">
+				<description>Background panel (beacon_background.png, as the scrape and results windows have), under the dimmed picture</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>100%</width>
+				<height>100%</height>
+				<texture border="20">beacon_background.png</texture>
+			</control>
+			<control type="image">
+				<description>Background: the show's picture, dimmed</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>100%</width>
+				<height>100%</height>
+				<colordiffuse>39999999</colordiffuse>
+				<texture>$INFO[Window.Property(fanart)]</texture>
+			</control>
+			<control type="image">
+				<description>Focused row's still</description>
+				<left>0</left>
+				<top>180</top>
+				<width>600</width>
+				<height>400</height>
+				<texture>$INFO[Container(2000).ListItem.Property(thumb)]</texture>
+			</control>
+			<control type="textbox">
+				<description>Focused row's plot</description>
+				<left>0</left>
+				<top>600</top>
+				<width>590</width>
+				<height>650</height>
+				<font>font321</font>
+				<textcolor>white</textcolor>
+				<scrolltime>200</scrolltime>
+				<autoscroll delay="3000" time="1000" repeat="10000">true</autoscroll>
+				<label>$INFO[Container(2000).ListItem.Property(plot)]</label>
+				<align>right</align>
+			</control>
+			<control type="label">
+				<description>Header, first line of the focused row</description>
+				<posx>590</posx>
+				<posy>40</posy>
+				<width>950</width>
+				<height>40</height>
+				<font>font321</font>
+				<textcolor>coral</textcolor>
+				<label>$INFO[Container(2000).ListItem.Label]</label>
+				<align>right</align>
+				<aligny>center</aligny>
+				<rotation>90</rotation>
+			</control>
+			<control type="label">
+				<description>Header, second line of the focused row</description>
+				<posx>590</posx>
+				<posy>90</posy>
+				<width>950</width>
+				<height>40</height>
+				<font>font321</font>
+				<textcolor>deepskyblue</textcolor>
+				<label>$INFO[Container(2000).ListItem.Label2]</label>
+				<align>right</align>
+				<aligny>center</aligny>
+			</control>
+			<control type="list" id="2000">
+				<description>Choices</description>
+				<posx>600</posx>
+				<posy>50</posy>
+				<width>1300</width>
+				<height>1128</height>
+				<onleft>3001</onleft>
+				<itemlayout width="1300" height="255">
+					<control type="image">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1300</width>
+						<height>255</height>
+						<texture border="5">beacon_row.png</texture>
+					</control>
+					<control type="image">
+						<posx>990</posx>
+						<posy>50</posy>
+						<width>350</width>
+						<height>180</height>
+						<texture>$INFO[ListItem.Property(thumb)]</texture>
+					</control>
+					<control type="label">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1280</width>
+						<height>38</height>
+						<font>font321</font>
+						<textcolor>yellow</textcolor>
+						<aligny>center</aligny>
+						<align>right</align>
+						<label>$INFO[ListItem.Label]</label>
+					</control>
+					<control type="label">
+						<posx>-330</posx>
+						<posy>38</posy>
+						<width>1280</width>
+						<height>38</height>
+						<font>font321</font>
+						<textcolor>deepskyblue</textcolor>
+						<aligny>center</aligny>
+						<align>right</align>
+						<label>$INFO[ListItem.Label2]</label>
+					</control>
+					<control type="textbox">
+						<left>0</left>
+						<top>74</top>
+						<width>950</width>
+						<height>170</height>
+						<font>font321</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<scrolltime>200</scrolltime>
+						<label>$INFO[ListItem.Property(plot)]</label>
+						<align>right</align>
+					</control>
+				</itemlayout>
+				<focusedlayout width="1300" height="255">
+					<control type="image">
+						<visible>Control.HasFocus(2000)</visible>
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1300</width>
+						<height>255</height>
+						<texture border="5">beacon_row_selected.png</texture>
+					</control>
+					<control type="image">
+						<posx>990</posx>
+						<posy>50</posy>
+						<width>350</width>
+						<height>180</height>
+						<texture>$INFO[ListItem.Property(thumb)]</texture>
+					</control>
+					<control type="label">
+						<posx>0</posx>
+						<posy>0</posy>
+						<width>1280</width>
+						<height>38</height>
+						<font>font321</font>
+						<textcolor>yellow</textcolor>
+						<aligny>center</aligny>
+						<align>right</align>
+						<label>$INFO[ListItem.Label]</label>
+					</control>
+					<control type="label">
+						<posx>-330</posx>
+						<posy>38</posy>
+						<width>1280</width>
+						<height>38</height>
+						<font>font321</font>
+						<textcolor>deepskyblue</textcolor>
+						<aligny>center</aligny>
+						<align>right</align>
+						<label>$INFO[ListItem.Label2]</label>
+					</control>
+					<control type="textbox">
+						<left>0</left>
+						<top>74</top>
+						<width>950</width>
+						<height>170</height>
+						<font>font321</font>
+						<textcolor>FFFFFFFF</textcolor>
+						<scrolltime>200</scrolltime>
+						<label>$INFO[ListItem.Property(plot)]</label>
+						<align>right</align>
+					</control>
+				</focusedlayout>
+			</control>
+			<control type="button" id="3001">
+				<description>Close button, shown with a mouse</description>
+				<posx>1800</posx>
+				<posy>5</posy>
+				<width>80</width>
+				<height>50</height>
+				<label>-</label>
+				<font>-</font>
+				<onclick>PreviousMenu</onclick>
+				<texturefocus>beacon_close_focus.png</texturefocus>
+				<texturenofocus>beacon_close.png</texturenofocus>
+				<visible>system.getbool(input.enablemouse)</visible>
+				<onup>2000</onup>
+				<ondown>2000</ondown>
+				<onright>2000</onright>
+			</control>
+		</control>
+	</controls>
+</window>
