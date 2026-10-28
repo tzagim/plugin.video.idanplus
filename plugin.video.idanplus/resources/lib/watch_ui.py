@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """The "Continue watching" screen: one row per series, built from the watch history files only (no network)."""
+import sys
 import xbmc
 import xbmcgui
+from urllib.parse import quote_plus
 import resources.lib.common as common
 from resources.lib import watch_choose, watch_store
 
+
+
+REMOVE_LABEL = 'הסר מהמשך צפייה'
 
 
 def RowTexts(row):
@@ -37,7 +42,7 @@ def ShowContinue(iconimage):
 	folder = watch_store.watch_folder(common.profileDir)
 	# stamp the version this list is built from BEFORE reading the files: if they change meanwhile the list is marked older than they are and gets refreshed
 	xbmcgui.Window(10000).setProperty(watch_store.LIST_VERSION_PROPERTY, watch_store.progress_version(folder))
-	rows = watch_store.continue_rows(watch_store.SeasonIndex(folder).load(), watch_store.read_progress(folder))
+	rows = watch_store.continue_rows(watch_store.SeasonIndex(folder).load(), watch_store.read_progress(folder), watch_store.read_hidden(folder))
 	chooser = ChooserOn()
 	meta = watch_store.EpisodeMeta(folder).load()
 	for row in rows:
@@ -47,14 +52,23 @@ def ShowContinue(iconimage):
 		if isinstance(description, str) and description.strip():
 			plot = '\n'.join(line for line in (description.strip(), plot if plot != row['name'] else '') if line)
 		infos = {"title": label, "plot": plot}
+		remove = [(REMOVE_LABEL, 'RunPlugin({0}?mode=29&url={1})'.format(sys.argv[0], quote_plus(row['series'])))]
 		if chooser:
-			common.addDir(label, row['key'], 28, row['icon'] or iconimage, infos=infos, isFolder=False, addFav=False)
+			common.addDir(label, row['key'], 28, row['icon'] or iconimage, infos=infos, isFolder=False, addFav=False, contextMenu=remove)
 		elif row['kind'] == 'season_end' and watch_store.season_descriptor(row.get('open'), module, row['season_url']):
 			mode, url, more = watch_store.season_descriptor(row.get('open'), module, row['season_url'])
-			common.addDir(label, url, mode, row['icon'] or iconimage, infos=infos, module=module, moreData=more, addFav=False)
+			common.addDir(label, url, mode, row['icon'] or iconimage, infos=infos, module=module, moreData=more, addFav=False, contextMenu=remove)
 		else:
 			common.addDir(label, row['url'], row.get('play_mode', 4), row['icon'] or iconimage, infos=infos, module=module,
-				moreData=common.GetAddonSetting('{0}_res'.format(module)), isFolder=False, isPlayable=True, addFav=False, noResume=True)
+				moreData=common.GetAddonSetting('{0}_res'.format(module)), isFolder=False, isPlayable=True, addFav=False, noResume=True, contextMenu=remove)
+
+
+def HideContinue(series):
+	"""The context-menu action of a Continue row: remove its series from the list (the watch records stay) and redraw the open list."""
+	if not series:
+		return
+	watch_store.hide_series(watch_store.watch_folder(common.profileDir), series)
+	xbmc.executebuiltin('Container.Refresh')
 
 
 def ShowChooser(key):

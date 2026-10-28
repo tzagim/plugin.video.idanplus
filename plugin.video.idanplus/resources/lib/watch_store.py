@@ -27,6 +27,7 @@ ASK_START_OVER, ASK_RESUME, ASK_CANCEL = 0, 1, -1   # the answers to the questio
 BASE_URLS = {'keshet': 'https://www.mako.co.il'}   # module -> site, to turn a saved season / program path into a url the module can open
 PROGRESS_FILE = 'progress.json'
 EPISODES_FILE = 'episodes.json'
+HIDDEN_FILE = 'hidden.json'   # series key -> when the owner removed it from Continue watching; written by the plugin only (progress.json belongs to the service)
 LIST_VERSION_PROPERTY = 'idanplus_continue_version'   # Home window property: the progress version the open Continue list was built from
 
 RESUME_MIN_SECONDS = 60       # less than this watched: start from the beginning
@@ -185,6 +186,20 @@ def read_progress(folder):
 	return _read(os.path.join(folder, PROGRESS_FILE))
 
 
+def read_hidden(folder):
+	"""The series removed from Continue watching: `{series key: time it was removed}` (empty when none)."""
+	return _read(os.path.join(folder, HIDDEN_FILE))
+
+
+def hide_series(folder, series, now=None):
+	"""Remove `series` from the Continue watching list without touching its watch records (resume points and watched marks stay).
+
+	The row comes back by itself when the series is watched again after `now` (see `continue_rows`)."""
+	hidden = read_hidden(folder)
+	hidden[series] = int(time.time() if now is None else now)
+	_write(os.path.join(folder, HIDDEN_FILE), hidden)
+
+
 def resume_point(progress, key):
 	"""Seconds to resume `key` from, or 0 (never watched, finished, or too little watched to matter)."""
 	rec = progress.get(key)
@@ -315,8 +330,10 @@ def series_descriptor(descriptor, module, series_key):
 	return (2, base + series_key, '') if base and series_key else None
 
 
-def continue_rows(seasons, progress):
+def continue_rows(seasons, progress, hidden=None):
 	"""One row per series, newest activity first, built only from the two files (no network).
+
+	`hidden` (`read_hidden`) lists series the owner removed: such a series has no row unless it was watched after it was removed.
 
 	A row is a dict: `kind`, `series`, `series_title`, `season_url`, `key`, `name`, `icon`, `number`, `url`, `play_mode`, `open` (the season's reopen descriptor), `position`, `total`.
 	`kind` is `resume` (part-watched episode), `next` (the episode after a finished one), `season_end` (finished the last
@@ -335,6 +352,8 @@ def continue_rows(seasons, progress):
 			latest[series] = (rec.get('t', 0), key)
 	rows = []
 	for series, (when, key) in latest.items():
+		if (hidden or {}).get(series, -1) >= when:
+			continue
 		season_url, season = where[key]
 		rec = progress[key]
 		target, kind = key, 'play'

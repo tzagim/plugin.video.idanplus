@@ -527,6 +527,10 @@ def route(query):
 			from resources.lib import watch_ui
 			watch_ui.ShowChooser(url)
 			sys.exit()
+		elif mode == 29:   # the context-menu action of a Continue row: remove its series from the list (an action, not a listing)
+			from resources.lib import watch_ui
+			watch_ui.HideContinue(url)
+			sys.exit()
 		if mode == 1 or mode == 3 or mode == 10:
 			common.SetViewMode('episodes')
 	else:

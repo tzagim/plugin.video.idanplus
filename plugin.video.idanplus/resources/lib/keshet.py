@@ -483,12 +483,9 @@ def WatchLive(channelID, name='', iconimage='', quality='auto'):
 	#if pos > 0:
 	#	url = url[:pos]
 	link = '{0}{1}&{2}'.format(host, url, ticket) if url.find('?') > 0 else '{0}{1}?{2}'.format(host, url, ticket)
-	xbmc.log(link,5)
 	if quality != 'auto':
 		link = common.GetStreams(link, headers=headers, quality=quality)
-	xbmc.log(link,5)
-	final = '{0}|User-Agent={1}'.format(link, UA155)   # the User-Agent the ticket was requested with (GetTicket): Akamai binds its token to it
-	xbmc.log(final,5)
+	final = '{0}|User-Agent={1}'.format(link, UA)
 	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
