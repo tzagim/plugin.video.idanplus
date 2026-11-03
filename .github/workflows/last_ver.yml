@@ -1,6 +1,7 @@
 name: Fetch and Unzip Latest Plugin
 
 on:
+  workflow_dispatch:
   push:
     branches: [ 'main' ]
     paths-ignore:
