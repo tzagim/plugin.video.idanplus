@@ -83,6 +83,9 @@ class SeasonIndex(object):
 		now = time.time() if now is None else now
 		data = _read(self._path)
 		seasons = data.setdefault('seasons', {})
+		numbers = [e.get('number') for e in episodes]
+		if all(isinstance(n, int) for n in numbers) and len(set(numbers)) == len(numbers):
+			episodes = sorted(episodes, key=lambda e: e['number'])
 		entry = {
 			'series': series_key, 'series_title': series_title, 'title': season_title, 'open': open_season, 'series_open': open_series,
 			'order': [e['key'] for e in episodes],

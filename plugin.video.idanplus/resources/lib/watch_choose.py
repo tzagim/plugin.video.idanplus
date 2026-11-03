@@ -97,11 +97,13 @@ def choices(key, seasons, progress, addon_id, quality_for, meta=None):
 	opened = watch_store.season_descriptor(season.get('open'), module, here['season_url'])
 	if opened:
 		season_url = watch_store.plugin_url(addon_id, opened[0], module, opened[1], season.get('title', ''), here.get('icon', ''), opened[2])
-		result.append(Choice(LABEL_SEASON, '', '', here.get('icon', ''), 'Container.Update({0})'.format(season_url), False))
+		#result.append(Choice(LABEL_SEASON, '', '', here.get('icon', ''), 'Container.Update({0})'.format(season_url), False))
+		result.append(Choice(LABEL_SEASON, '', '', here.get('icon', ''), 'ActivateWindow(Videos,{0},return)'.format(season_url), False))
 	listed = watch_store.series_descriptor(season.get('series_open'), module, season.get('series'))
 	if opened and listed:
 		seasons_url = watch_store.plugin_url(addon_id, listed[0], module, listed[1], season.get('series_title', ''), here.get('icon', ''), listed[2])
-		result.append(Choice(LABEL_SEASONS, '', '', here.get('icon', ''), 'Container.Update({0})'.format(seasons_url), False))
+		#result.append(Choice(LABEL_SEASONS, '', '', here.get('icon', ''), 'Container.Update({0})'.format(seasons_url), False))
+		result.append(Choice(LABEL_SEASONS, '', '', here.get('icon', ''), 'ActivateWindow(Videos,{0},return)'.format(seasons_url), False))
 	return result
 
 
