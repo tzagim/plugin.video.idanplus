@@ -50,7 +50,12 @@ class _Window(xbmcgui.WindowXMLDialog):
 		for name, value in self._window_props.items():
 			self.setProperty(name, value)
 		listing.reset()
-		listing.addItems(_listitems(self._rows))
+		try:
+			listing.addItems(_listitems(self._rows))
+		except TypeError as error:
+			self.error = str(error)
+			self.close()
+			return
 		if 0 < self._start_on < len(self._rows):
 			listing.selectItem(self._start_on)
 		self.setFocusId(LIST_ID)

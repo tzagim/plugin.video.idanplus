@@ -349,6 +349,11 @@ def PlayStream(url, quality='best', name='', iconimage='', adaptive=False, props
 	mediatype) that replaces the defaults taken from the list row."""
 	if 'dailymotion' in url:
 		url = GetDailymotion(url)
+	if adaptive:
+		if "|" in url:
+			url, headers_str = url.split("|", 1)
+		else:
+			headers_str = ""
 	try:
 		listitem = xbmcgui.ListItem(name, path=url)
 		listitem.setArt({'thumb' : iconimage, 'fanart': iconimage, 'icon': iconimage})
@@ -363,6 +368,8 @@ def PlayStream(url, quality='best', name='', iconimage='', adaptive=False, props
 	setInfo(listitem, infos)
 	if adaptive:
 		listitem.setProperty('inputstream', 'inputstream.adaptive')
+		listitem.setProperty('inputstream.adaptive.manifest_headers', headers_str)
+		listitem.setProperty('inputstream.adaptive.stream_headers', headers_str)
 	for propKey, propValue in (props or {}).items():
 		listitem.setProperty(propKey, propValue)
 	if resume:

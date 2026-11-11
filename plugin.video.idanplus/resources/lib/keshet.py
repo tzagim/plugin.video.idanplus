@@ -45,6 +45,48 @@ pageHeaders = dict(chromeHints, **{
 	'Sec-Fetch-User': '?1',
 })
 
+# How the official 12+ Android app (com.keshet.mako.VOD 43.0) asks for its pages: the same www.mako.co.il pages, as JSON, with
+# `platform=mobileApp` (mainConfig.json: "baseUrl": "https://www.mako.co.il%PAGE_URL%&platform=mobileApp", the first '&' becoming '?'
+# when the page has no query) and nothing but OkHttp's own default headers (the app adds none: Retrofit + OkHttp 5.3.2).
+# These answers are plain JSON - no Next.js buildId, no HTML to cut the data out of.
+appPlatform = 'platform=mobileApp'
+appHeaders = {
+	'User-Agent': 'okhttp/5.3.2',
+	'Accept-Encoding': 'gzip',
+	'Connection': 'Keep-Alive',
+}
+appPages = {
+	'hp': '/mako-vod',
+	'indexMenu': '/mako-vod-index?filter=menu',
+	'playlistIndexMenu': '/mako-vod-index?filter=menu_playlists',
+	'search': '/AjaxPage?jspName=vodSolrSearch.jsp&q={0}&ac=true',
+}
+
+def AppUrl(url):
+	"""`url` (a full mako address or a path like /mako-vod-keshet/x) as the app asks for it: absolute, other `platform=` removed, `platform=mobileApp` added."""
+	if url.startswith(baseUrl):
+		url = url[len(baseUrl):]
+	elif url.startswith('//') or url.startswith('http'):
+		url = re.sub(r'^(https?:)?//[^/]+', '', url)
+	url = re.sub(r'([?&])platform=[^&]*&?', r'\1', url).rstrip('?&')
+	return '{0}{1}{2}{3}'.format(baseUrl, url, '&' if '?' in url else '?', appPlatform)
+
+def GetAppJson(url):
+	"""The JSON of the mako page `url` as the app gets it, or None (the reason is in the log). A `root` wrapper is removed."""
+	resultJSON = ReadJson(AppUrl(url), dict(appHeaders))
+	if not resultJSON:
+		return None
+	return resultJSON.get("root", resultJSON) if isinstance(resultJSON, dict) else resultJSON
+
+def GetPageJson(url):
+	"""A mako page's JSON: the app's way first, then (only when that gave nothing) the website's `platform=responsive` with browser headers."""
+	resultJSON = GetAppJson(url)
+	if resultJSON is None:
+		xbmc.log("keshet GetPageJson: app request gave nothing, trying the website way for {0}".format(url), xbmc.LOGWARNING)
+		page = AppUrl(url).replace(appPlatform, endings)
+		resultJSON = GetJson(page)
+	return resultJSON
+
 def ReadJson(url, headers):
 	"""The JSON answer of `url`, or None. What a failed answer looked like is written to the log (it used to be thrown away, so an
 	empty list could not be explained): mako answers a blocked request with an HTML page, or with nothing."""
@@ -161,8 +203,16 @@ defaultMenuItems = [
 ]
 
 def GetMenuItems(url):
-	"""The VOD menu entries of the page `url` (a few hundred bytes), or None when the page could not be read: only this small
-	list is cached, not the page's whole JSON."""
+	"""The VOD menu entries (a few hundred bytes), or None when they could not be read: only this small list is cached, not the
+	page's whole JSON. The app's menu page (`indexMenu`) first; the website's HTML page `url` only when that gave nothing."""
+	resultJSON = GetAppJson(appPages['indexMenu'])
+	items = []
+	if isinstance(resultJSON, dict):
+		for item in resultJSON.get("menuItems", []) or []:
+			if isinstance(item, dict) and item.get("title") and (item.get("url") or item.get("pageUrl")):
+				items.append({"title": item["title"], "url": item.get("url") or item.get("pageUrl")})
+	if items:
+		return items
 	resultJSON = GetJsonSection(url)
 	if resultJSON is None or len(resultJSON) < 1:
 		return None
@@ -179,25 +229,26 @@ def GetCategoriesList(iconimage):
 	menuItems = cache.get(GetMenuItems, 24, "{0}/mako-vod-index".format(baseUrl), table='pages') or defaultMenuItems
 	for menuItem in menuItems:
 		name = common.GetLabelColor(menuItem["title"], bold=True, color="none")
-		common.addDir(name, "{0}{1}".format(baseUrl, menuItem["url"]), 1, iconimage, infos={"Title": name}, module=module)
+		menuUrl = menuItem["url"] if menuItem["url"].startswith("http") else "{0}{1}".format(baseUrl, menuItem["url"])
+		common.addDir(name, menuUrl, 1, iconimage, infos={"Title": name}, module=module)
 
 #'''
 def GetSeriesList(url, iconimage):
-	url = "{0}&{1}".format(url, endings) if "?" in url else "{0}?{1}".format(url, endings)
-	#prms = GetJson(url)
-	prms = cache.get(GetJson, 72, url, table='pages')
-	if prms==[]:
-		prms = cache.get(GetJson, 0, url, table='pages')
-	if prms is None:
-		"Cannot get list for url {0}".format(url)
+	url = AppUrl(url)
+	prms = cache.get(GetPageJson, 72, url, table='pages')
+	if not prms:
+		prms = cache.get(GetPageJson, 0, url, table='pages')
+	if not isinstance(prms, dict):
+		xbmc.log("keshet GetSeriesList: cannot get list for url {0}".format(url), xbmc.LOGERROR)
 		return
-	series = prms.get('items', {})
+	series = prms.get('items', [])
 	seriesCount = len(series)
 	for serie in series:
 		try:
 			title = common.GetLabelColor(common.encode(serie.get("title", "").strip(), "utf-8"), keyColor="prColor", bold=True)
-			url = "{0}{1}".format(baseUrl, serie.get("pageUrl", ""))
-			icon = serie.get("pic", "")
+			pageUrl = serie.get("pageUrl") or serie.get("url") or ""
+			url = pageUrl if pageUrl.startswith("http") else "{0}{1}".format(baseUrl, pageUrl)
+			icon = serie.get("pic") or serie.get("picUrl") or ""
 			infos = {"Title": title, "Plot": title, 'mediatype': 'movie'}
 			common.addDir(title, url, 2, icon, infos, module=module, totalItems=seriesCount)
 		except Exception as ex:
@@ -240,26 +291,36 @@ def GetProgramUrl(url):
 		xbmc.log("GetProgramUrl: Exception occurred: {0}".format(str(ex)), xbmc.LOGERROR)
 		return None
 
+def ProgramData(url, cacheHours=24):
+	"""The data of a program or season page `url` (seasons, menu with vods, vod, channelId...): the app's JSON first, the website's
+	Next.js `_next/data` JSON (`pageProps.data`) only when the app's answer has none of it. A missing `seo` block is filled from `hero`
+	so the code below reads one shape. None when neither way worked."""
+	appUrl = AppUrl(url)
+	data = cache.get(GetAppJson, cacheHours, appUrl, table='pages')
+	if not (isinstance(data, dict) and any(k in data for k in ("seasons", "menu", "vod"))):
+		data = None
+		programUrl = GetProgramUrl(url)
+		if programUrl is not None:
+			webData = cache.get(GetJson, cacheHours, programUrl, table='pages') or cache.get(GetJson, 0, programUrl, table='pages')
+			if isinstance(webData, dict):
+				data = webData.get("pageProps", {}).get("data")
+		if not isinstance(data, dict):
+			xbmc.log("keshet ProgramData: no data for {0}".format(url), xbmc.LOGERROR)
+			return None
+	if not isinstance(data.get("seo"), dict) or not data["seo"]:
+		hero = data.get("hero") if isinstance(data.get("hero"), dict) else {}
+		historyObject = data.get("historyObject") if isinstance(data.get("historyObject"), dict) else {}
+		historyHero = historyObject.get("hero") if isinstance(historyObject.get("hero"), dict) else {}
+		pics = hero.get("pics") if isinstance(hero.get("pics"), list) else []
+		image = hero.get("picUrl") or hero.get("pic") or (pics[0].get("picUrl", "") if pics and isinstance(pics[0], dict) else "")
+		data["seo"] = {"title": hero.get("title", "") or historyHero.get("title", "") or data.get("channelName", ""), "description": hero.get("description", "") or hero.get("extraInfo", ""), "image": image}
+	return data
+
 def GetSeasonsList(url, iconimage):
 	try:
-		#data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
-		programUrl = GetProgramUrl(url)
-		if programUrl is None:
-			xbmc.log("GetSeasonsList: Failed to get program URL for: {0}".format(url), xbmc.LOGERROR)
+		data = ProgramData(url)
+		if data is None:
 			return
-			
-		cached_data = cache.get(GetJson, 24, programUrl, table='pages')
-		if cached_data is None or cached_data == []:
-			cached_data = cache.get(GetJson, 0, programUrl, table='pages')
-			if cached_data is None:
-				xbmc.log("GetSeasonsList: Failed to get data from cache for URL: {0}".format(programUrl), xbmc.LOGERROR)
-				return
-		
-		if "pageProps" not in cached_data or "data" not in cached_data["pageProps"]:
-			xbmc.log("GetSeasonsList: Invalid data structure for URL: {0}".format(programUrl), xbmc.LOGERROR)
-			return
-			
-		data = cached_data["pageProps"]["data"]
 		
 		#if iconimage == common.GetIconFullPath('search.jpg'):
 		if "seo" in data and "image" in data["seo"]:
@@ -275,7 +336,8 @@ def GetSeasonsList(url, iconimage):
 		for season in seasons:
 			try:
 				name = common.GetLabelColor(common.encode(season.get('seasonTitle', ''), "utf-8"), keyColor="timesColor", bold=True)
-				url = "{0}{1}".format(baseUrl, season["pageUrl"])
+				seasonUrl = season.get("pageUrl") or season.get("page_url") or season.get("url")
+				url = seasonUrl if seasonUrl.startswith("http") else "{0}{1}".format(baseUrl, seasonUrl)
 				grids_arr.append((index, name, url))
 				index += 1
 			except Exception as ex:
@@ -290,20 +352,21 @@ def GetSeasonsList(url, iconimage):
 
 def GetEpisodesList(url, icon, data=None):
 	if data is None:
-		# data = cache.get(GetJson, 24, GetProgramUrl(url), table='pages')["pageProps"]["data"]
-		data = GetJson(GetProgramUrl(url))["pageProps"]["data"]
+		data = ProgramData(url, cacheHours=0)
+		if data is None:
+			return
 	videoChannelId = data["channelId"]
 	isEpisodes = False
 	watchEpisodes = []
-	for menu in data["menu"]:
-		if menu is None or "vods" not in menu:
+	for menu in data.get("menu") or []:
+		if not isinstance(menu, dict) or "vods" not in menu:
 			continue
-		buttonText = common.encode(menu["buttonText"], "utf-8")
+		buttonText = common.encode(menu.get("buttonText", ""), "utf-8")
 		common.addDir('------- {0} -------'.format(common.GetLabelColor(buttonText, keyColor="timesColor", bold=True)), buttonText, 99, icon, isFolder=False)
 		grids_arr = []
 		for vod in menu["vods"]:
 			try:
-				if vod["componentLayout"] != "vod":
+				if vod.get("componentLayout", "vod") != "vod":
 					continue
 				isEpisodes = True
 				vcmid = vod["itemVcmId"]
@@ -315,9 +378,10 @@ def GetEpisodesList(url, icon, data=None):
 				else:
 					name = common.getDisplayName(common.encode(subtitle, "utf-8"), common.encode(title, "utf-8"), programNameFormat) if makoShowShortSubtitle else common.GetLabelColor(common.encode(subtitle, "utf-8"), keyColor="prColor", bold=False)
 				url = "{0}/VodPlaylist?vcmid={1}&videoChannelId={2}".format(baseUrl, vcmid, videoChannelId)
-				iconimage = vod["pics"][0]["picUrl"]
+				iconimage = vod["pics"][0]["picUrl"] if vod.get("pics") else (vod.get("picUrl") or vod.get("pic") or icon)
 				infos = {"Title": name, "Plot": name}
-				watchEpisodes.append(WatchEpisode(vcmid, title, vod.get("extraInfo", ""), iconimage, url))
+				if buttonText == 'פרקים':
+					watchEpisodes.append(WatchEpisode(vcmid, title, vod.get("extraInfo", ""), iconimage, url))
 				common.addDir(name, url, 4, iconimage, infos, contextMenu=[(common.GetLocaleString(30005), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=choose&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module)), (common.GetLocaleString(30023), 'RunPlugin({0}?url={1}&name={2}&mode=4&iconimage={3}&moredata=set_mako_res&module={4})'.format(sys.argv[0], common.quote_plus(url), common.quote_plus(name), common.quote_plus(iconimage), module))], moreData=bitrate, module=module, isFolder=False, isPlayable=True, noResume=True)
 			except Exception as ex:
 				xbmc.log(str(ex), xbmc.LOGERROR)
@@ -489,10 +553,11 @@ def WatchLive(channelID, name='', iconimage='', quality='auto'):
 	common.PlayStream(final, quality, name, iconimage, adaptive=isAdaptive)
 
 def PlayItem(url, name='', iconimage='', quality='auto', swichCdn=False):
-	prms = GetJson("{0}?{1}".format(url, endings))
-	if prms is None or len(prms) < 1:
+	prms = GetPageJson(url)
+	if not isinstance(prms, dict) or not isinstance(prms.get("vod"), dict):
+		xbmc.log("keshet PlayItem: no vod in page {0}".format(url), xbmc.LOGERROR)
 		return None
-	iconimage = prms["seo"]["image"]
+	iconimage = (prms.get("seo") or {}).get("image") or iconimage
 	videoChannelId=prms["vod"]["channelId"]
 	vcmid = prms["vod"]["itemVcmId"]
 	url = "vcmid={0}&videoChannelId={1}".format(vcmid,videoChannelId)
