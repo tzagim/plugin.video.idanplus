@@ -6,9 +6,11 @@ on:
     branches: [ 'main' ]
     paths-ignore:
       - '.github/**'
-
   schedule:
     - cron: '0 */2 * * *'
+
+permissions:
+  contents: write
 
 jobs:
   fetch_and_unzip:
@@ -66,32 +68,49 @@ jobs:
       if: env.BUILD_STATUS != 'none'
       run: |
         if [ -n "$LATEST_URL" ]; then
-          curl -L -o plugin.video.idanplus.zip "$LATEST_URL"
+          curl -fL -o plugin.video.idanplus.zip "$LATEST_URL"
         else
           echo "LATEST_URL is not set. Exiting."
           exit 1
         fi
 
-    - name: Unzip file if new
+    - name: Unzip and sync (update, add, delete)
       if: env.BUILD_STATUS != 'none'
       run: |
-        if [ -f plugin.video.idanplus.zip ]; then
-          unzip -o plugin.video.idanplus.zip -d .
-          ls -la
-        else
+        set -e
+        if [ ! -f plugin.video.idanplus.zip ]; then
           echo "plugin.video.idanplus.zip does not exist. Exiting."
           exit 1
         fi
+
+        tmp=$(mktemp -d)
+        unzip -q plugin.video.idanplus.zip -d "$tmp"
+
+        if [ ! -d "$tmp/plugin.video.idanplus" ]; then
+          echo "ZIP does not contain plugin.video.idanplus/ at its root:"
+          ls -la "$tmp"
+          exit 1
+        fi
+
+        mkdir -p plugin.video.idanplus
+        rsync -a --delete --checksum "$tmp/plugin.video.idanplus/" plugin.video.idanplus/
+        rm -rf "$tmp"
+
+        git status --short
 
     - name: Clean up temporary files
       run: |
         rm -f plugin.video.idanplus.zip
 
-    - name: Commit and push unzipped files
+    - name: Commit and push changes
       if: env.BUILD_STATUS != 'none' && github.ref == 'refs/heads/main'
       run: |
-        git config --global user.name 'tzagim'
-        git config --global user.email 'tzagim@users.noreply.github.com'
-        git add .
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git add -A
+        if git diff --cached --quiet; then
+          echo "Nothing changed."
+          exit 0
+        fi
         git commit -m "${{ env.LATEST_VERSION }}"
         git push
